@@ -20,7 +20,7 @@ function App() {
                                 </svg>
                                 <div>
                                     <h1 className="text-2xl font-bold">Chess League Tracker</h1>
-                                    <p className="text-sm text-gray-300">1-day-per-move-club</p>
+                                    <p className="text-sm text-gray-300">1 Day Per Move Club</p>
                                 </div>
                             </Link>
                             <nav className="flex space-x-4">
@@ -70,7 +70,7 @@ function App() {
                             <p>Data from <a href="https://www.chess.com" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">Chess.com</a> API</p>
                             <p className="mt-2">Updated daily</p>
                             <p className="mt-4 text-xs text-gray-400">
-                                © {new Date().getFullYear()} Helke Labs. Released under the <a href="https://github.com/your-username/chess-league-tracker/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">MIT License</a>.
+                                © {new Date().getFullYear()} <a href="https://helkelabs.com" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">Helke Labs</a>. Released under the <a href="https://github.com/mhelke/chess-league-tracker/blob/master/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">MIT License</a>.
                             </p>
                         </div>
                     </div>

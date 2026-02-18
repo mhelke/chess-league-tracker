@@ -176,7 +176,7 @@ Players are sorted by:
 ### Username
 # JSON Schema for League Data
 
-This document describes the actual structure of `leagueData.json` produced by `scripts/fetch_league_data.py` and consumed by the React UI. It includes fields for match metadata, results, registration information, and board-level rating data.
+This document describes the actual structure of `leagueData.json` produced by `scripts/fetch_league_data.py` and consumed by the React UI. It includes fields for match metadata, results (including forfeit detection), registration information, and board-level rating data.
 
 ## Root Object
 
@@ -228,7 +228,7 @@ This document describes the actual structure of `leagueData.json` produced by `s
   matchResult: {
     ourScore: number,
     opponentScore: number,
-    result: "win" | "lose" | "draw" | "unknown"
+    result: "win" | "lose" | "draw" | "forfeit" | "double forfeit" | "win by forfeit" | "unknown"
   },
   playerStats: {
     [username: string]: {
@@ -258,7 +258,7 @@ This document describes the actual structure of `leagueData.json` produced by `s
   }[],
 
   registeredPlayers?: { our: number, opponent: number },
-  minTeamPlayers?: number
+  minTeamPlayers?: number  // Present for all matches, extracted from match settings
 }
 ```
 
@@ -280,8 +280,18 @@ This document describes the actual structure of `leagueData.json` produced by `s
 - `matchId` and `matchUrl` are often full API URLs (e.g. `https://api.chess.com/pub/match/1895389`). `matchWebUrl` is provided for convenient linking to the chess.com UI.
 - `round` may be parsed from the match title (e.g. `R1`) or auto-assigned by the script when the title looks like a team matchup (e.g. `Team A vs Team B`). Auto-numbered rounds are set to `R{n}`.
 - `registrationData` is present for `open` matches; if boards are not assigned it provides sorted rosters for strategic planning. If boards are assigned `boardsData` will be an array with ratings per board.
-- `registeredPlayers` provides simple counts used by the UI to show registration progress; `minTeamPlayers` (if present) is used to detect forfeit risk.
+- `registeredPlayers` provides simple counts used by the UI to show registration progress.
+- `minTeamPlayers` is extracted from match settings and available for all matches (not just registration). Used for forfeit detection.
 - `playerStats` contains only stats aggregated from matches where our club's players participated (the script filters to our club when building per-player stats).
+
+### Forfeit Detection
+
+For **finished** matches with a 0-0 score, the script automatically detects forfeits based on player counts vs. `minTeamPlayers`:
+- **"forfeit"**: We failed to meet minimum players (we lose)
+- **"double forfeit"**: Both teams failed to meet minimum (we lose)
+- **"win by forfeit"**: Opponent failed to meet minimum (we win)
+
+This only applies to completed matches and does not affect registration warnings for open matches.
 
 ## Examples
 

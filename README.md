@@ -18,6 +18,7 @@ Chess League Tracker is a static website that automatically tracks and displays 
 - 📊 **Rating Analysis** - See board-by-board rating matchups and identify weak spots
 - ⚠️ **Smart Warnings** - Visual alerts for forfeit risks, player deficits, and rating disadvantages
 - 🏆 **Leaderboards** - Track player performance across all leagues
+- ⚖️ **Forfeit Detection** - Automatically identifies completed matches won/lost by forfeit
 
 **Match Intelligence:**
 - 📈 **Cohort Analysis** - See how your team stacks up by rating ranges (e.g., 1400-1500, 1500-1600)

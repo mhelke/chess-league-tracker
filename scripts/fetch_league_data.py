@@ -267,26 +267,46 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
     opponent_score = opponent_team_data.get("score", 0) if opponent_team_data else 0
     our_result = our_team_data.get("result", "unknown")
     
+    # Get minimum required players from match settings (for all matches)
+    settings = match_data.get("settings", {})
+    min_team_players = settings.get("min_team_players") if isinstance(settings, dict) else None
+    
+    # Get player lists for both teams (for all matches)
+    opponent_players = opponent_team_data.get("players", []) if opponent_team_data else []
+    our_player_count = len(players)
+    opponent_player_count = len(opponent_players)
+    
+    # Detect forfeit scenarios for finished matches with 0-0 score
+    if status == "finished" and our_score == 0 and opponent_score == 0 and min_team_players is not None:
+        our_below_min = our_player_count < min_team_players
+        opp_below_min = opponent_player_count < min_team_players
+        
+        if our_below_min and opp_below_min:
+            # Double forfeit - we lose
+            our_result = "double forfeit"
+            print(f"  Detected double forfeit: our={our_player_count}, opp={opponent_player_count}, min={min_team_players}")
+        elif our_below_min:
+            # Only we forfeited
+            our_result = "forfeit"
+            print(f"  Detected our forfeit: our={our_player_count}, min={min_team_players}")
+        elif opp_below_min:
+            # Only opponent forfeited - we win
+            our_result = "win by forfeit"
+            print(f"  Detected opponent forfeit: opp={opponent_player_count}, min={min_team_players}")
+    
     match_result = {
         "ourScore": our_score,
         "opponentScore": opponent_score,
-        "result": our_result  # "win", "lose", "draw"
+        "result": our_result  # "win", "lose", "draw", "forfeit", "double forfeit", "win by forfeit"
     }
     
     # Extract board-level rating data for registration matches only
     boards_data = []
     our_boards = {}
     opponent_boards = {}
-    min_team_players = None
     
     if status == "open":  # Only for registration status
         print(f"  Extracting board ratings for registration match...")
-        
-        # Get minimum required players from match settings
-        min_team_players = match_data.get("min_team_players")
-        
-        # Get opponent players
-        opponent_players = opponent_team_data.get("players", []) if opponent_team_data else []
         
         # Check if players have board assignments (for matches in registration,
         # boards may not be assigned yet)
@@ -376,6 +396,10 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
         "playerStats": dict(player_stats)
     }
     
+    # Add minTeamPlayers for all matches (not just registration)
+    if min_team_players is not None:
+        result["minTeamPlayers"] = min_team_players
+    
     # Add registration data if available (only for registration matches)
     if boards_data:
         if isinstance(boards_data, dict) and boards_data.get("type") == "roster":
@@ -385,9 +409,6 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
                 "our": len(boards_data.get("ourRoster", [])),
                 "opponent": len(boards_data.get("oppRoster", []))
             }
-            # Add minimum required players for registration matches
-            if min_team_players is not None:
-                result["minTeamPlayers"] = min_team_players
         elif isinstance(boards_data, list) and len(boards_data) > 0:
             # Board-specific format (boards assigned)
             result["boardsData"] = boards_data
@@ -395,9 +416,6 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
                 "our": len(our_boards),
                 "opponent": len(opponent_boards)
             }
-            # Add minimum required players for registration matches
-            if min_team_players is not None:
-                result["minTeamPlayers"] = min_team_players
     
     return result
 

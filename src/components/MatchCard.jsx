@@ -18,27 +18,33 @@ function MatchCard({ round }) {
                 <p className="text-sm text-gray-600 mb-3 line-clamp-2">{round.name}</p>
             )}
 
-            {round.matchResult && round.matchResult.result && round.matchResult.result !== 'unknown' && round.status === 'finished' && (
-                <div className={`mb-3 p-2 rounded-md text-sm font-medium ${round.matchResult.result === 'win'
-                    ? 'bg-green-50 text-green-700 border border-green-200'
-                    : round.matchResult.result === 'lose'
-                        ? 'bg-red-50 text-red-700 border border-red-200'
-                        : round.matchResult.result === 'draw'
-                            ? 'bg-gray-50 text-gray-700 border border-gray-200'
-                            : ''
-                    }`}>
-                    <div className="flex justify-between items-center">
-                        <span className="font-semibold">
-                            {round.matchResult.result === 'win' ? '✓ Won' :
-                                round.matchResult.result === 'lose' ? '✗ Lost' :
-                                    '= Draw'}
-                        </span>
-                        <span>
-                            {round.matchResult.ourScore} - {round.matchResult.opponentScore}
-                        </span>
+            {round.matchResult && round.matchResult.result && round.matchResult.result !== 'unknown' && round.status === 'finished' && (() => {
+                const result = round.matchResult.result
+                const isWin = result === 'win' || result === 'win by forfeit'
+                const isLoss = result === 'lose' || result === 'forfeit' || result === 'double forfeit'
+                const isDraw = result === 'draw'
+
+                return (
+                    <div className={`mb-3 p-2 rounded-md text-sm font-medium ${isWin ? 'bg-green-50 text-green-700 border border-green-200' :
+                            isLoss ? 'bg-red-50 text-red-700 border border-red-200' :
+                                isDraw ? 'bg-gray-50 text-gray-700 border border-gray-200' : ''
+                        }`}>
+                        <div className="flex justify-between items-center">
+                            <span className="font-semibold">
+                                {result === 'win' ? '✓ Won' :
+                                    result === 'win by forfeit' ? '✓ Won by Forfeit' :
+                                        result === 'lose' ? '✗ Lost' :
+                                            result === 'forfeit' ? '✗ Lost by Forfeit' :
+                                                result === 'double forfeit' ? '✗ Lost (Double Forfeit)' :
+                                                    '= Draw'}
+                            </span>
+                            <span>
+                                {round.matchResult.ourScore} - {round.matchResult.opponentScore}
+                            </span>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            })()}
 
             {round.status === 'in_progress' && round.matchResult && (
                 <div className="mb-3 p-2 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">

@@ -144,16 +144,25 @@ function AllMatches() {
                         </span>
                     )}
 
-                    {match.matchResult && match.status === 'finished' && (
-                        <span className={`font-medium ${match.matchResult.result === 'win' ? 'text-green-600' :
-                            match.matchResult.result === 'lose' ? 'text-red-600' :
-                                'text-gray-600'
-                            }`}>
-                            {match.matchResult.result === 'win' ? '✓ Won' :
-                                match.matchResult.result === 'lose' ? '✗ Lost' :
-                                    '= Draw'} ({match.matchResult.ourScore} - {match.matchResult.opponentScore})
-                        </span>
-                    )}
+                    {match.matchResult && match.status === 'finished' && (() => {
+                        const result = match.matchResult.result
+                        const isWin = result === 'win' || result === 'win by forfeit'
+                        const isLoss = result === 'lose' || result === 'forfeit' || result === 'double forfeit'
+
+                        return (
+                            <span className={`font-medium ${isWin ? 'text-green-600' :
+                                    isLoss ? 'text-red-600' :
+                                        'text-gray-600'
+                                }`}>
+                                {result === 'win' ? '✓ Won' :
+                                    result === 'win by forfeit' ? '✓ Won by Forfeit' :
+                                        result === 'lose' ? '✗ Lost' :
+                                            result === 'forfeit' ? '✗ Lost by Forfeit' :
+                                                result === 'double forfeit' ? '✗ Lost (Double Forfeit)' :
+                                                    '= Draw'} ({match.matchResult.ourScore} - {match.matchResult.opponentScore})
+                            </span>
+                        )
+                    })()}
 
                     {match.matchResult && match.status === 'in_progress' && (
                         <span className="font-medium text-blue-600">

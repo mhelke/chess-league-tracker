@@ -4,6 +4,7 @@ import LeagueView from './pages/LeagueView'
 import SubLeagueView from './pages/SubLeagueView'
 import GlobalLeaderboard from './pages/GlobalLeaderboard'
 import AllMatches from './pages/AllMatches'
+import NotFound from './pages/NotFound'
 
 function App() {
     return (
@@ -58,6 +59,7 @@ function App() {
                         <Route path="/league/:leagueName" element={<LeagueView />} />
                         <Route path="/league/:leagueName/:subLeagueName" element={<SubLeagueView />} />
                         <Route path="/global" element={<GlobalLeaderboard />} />
+                        <Route path="*" element={<NotFound />} />
                     </Routes>
                 </main>
 

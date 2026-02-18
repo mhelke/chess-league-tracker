@@ -14,9 +14,9 @@ import json
 import re
 from collections import defaultdict
 
-INPUT_FILE = 'public/data/leagueData.json'
-OUTPUT_FILE = 'public/data/leagueData.json'
-BACKUP_FILE = 'public/data/leagueData.backup.json'
+INPUT_FILE = '../public/data/leagueData.json'
+OUTPUT_FILE = '../public/data/leagueData.json'
+BACKUP_FILE = '../public/data/leagueData.backup.json'
 
 def should_merge_subleague(sub_league_name, sub_league_data):
     """

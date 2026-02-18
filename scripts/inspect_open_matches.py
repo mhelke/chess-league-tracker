@@ -1,6 +1,6 @@
 import json
 
-with open('public/data/leagueData.json', 'r', encoding='utf-8') as f:
+with open('../public/data/leagueData.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
 open_matches = []

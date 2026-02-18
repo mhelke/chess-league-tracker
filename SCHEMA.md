@@ -176,7 +176,7 @@ Players are sorted by:
 ### Username
 # JSON Schema for League Data
 
-This document describes the actual structure of `leagueData.json` produced by `fetch_league_data.py` and consumed by the React UI. It includes fields for match metadata, results, registration information, and board-level rating data.
+This document describes the actual structure of `leagueData.json` produced by `scripts/fetch_league_data.py` and consumed by the React UI. It includes fields for match metadata, results, registration information, and board-level rating data.
 
 ## Root Object
 

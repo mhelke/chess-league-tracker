@@ -35,7 +35,7 @@ jobs:
       
       - name: Fetch league data
         run: |
-          python fetch_league_data.py
+          python scripts/fetch_league_data.py
       
       - name: Check for changes
         id: check_changes

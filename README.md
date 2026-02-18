@@ -43,7 +43,7 @@ Chess League Tracker is a static website that automatically tracks and displays 
 This is a **JAMstack** application with three components:
 
 1. **Data Layer** (Python)
-   - `fetch_league_data.py` fetches data from Chess.com Public API
+   - `scripts/fetch_league_data.py` fetches data from Chess.com Public API
    - Processes matches, calculates ratings, detects registration status
    - Generates static JSON file (`public/data/leagueData.json`)
 
@@ -125,6 +125,8 @@ chess-league-tracker/
 │   ├── CNAME                     # Custom domain config
 │   └── data/
 │       └── leagueData.json       # Generated data
+├── scripts/
+│   └── fetch_league_data.py      # Data fetcher script
 ├── src/
 │   ├── components/
 │   │   ├── Leaderboard.jsx       # Table component
@@ -139,7 +141,6 @@ chess-league-tracker/
 │   ├── App.jsx                   # Main app + routing
 │   ├── main.jsx                  # React entry point
 │   └── index.css                 # Tailwind styles
-├── fetch_league_data.py          # Data fetcher script
 ├── vite.config.js                # Build config
 ├── tailwind.config.js            # Style config
 └── package.json                  # Dependencies
@@ -167,7 +168,7 @@ npm run build            # Build for production
 npm run preview          # Preview production build
 
 # Data fetching
-python fetch_league_data.py  # Fetch latest data
+python scripts/fetch_league_data.py  # Fetch latest data
 ```
 
 ---
@@ -195,7 +196,7 @@ npm install
 
 ### Step 2: Configure Your Club
 
-Edit `fetch_league_data.py` and change these settings:
+Edit `scripts/fetch_league_data.py` and change these settings:
 
 ```python
 # Line 8-10: Change to your club's ID
@@ -230,7 +231,7 @@ Notes and examples:
 - "1WL summer league R2" → League: `1WL`, Sub-league: `summer league`, Round: `R2`
 - Titles that do not follow the prefix + sub-league + round pattern will be ignored by the league matcher (or require adding a new `LEAGUE_PREFIXES` entry).
 
-If your club uses a different naming convention, update `LEAGUE_PREFIXES` in `fetch_league_data.py` and ensure match titles consistently place the prefix first.
+If your club uses a different naming convention, update `LEAGUE_PREFIXES` in `scripts/fetch_league_data.py` and ensure match titles consistently place the prefix first.
 
 ### Step 3: Configure Deployment
 
@@ -240,7 +241,7 @@ Choose GitHub Pages or configure a custom domain
 
 ```bash
 # Test locally first
-python fetch_league_data.py      # Fetch your club's data
+python scripts/fetch_league_data.py      # Fetch your club's data
 npm run dev                       # Verify it looks good
 
 # Push to GitHub

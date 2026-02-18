@@ -24,7 +24,7 @@ if sys.stdout.encoding != 'utf-8':
 CLUB_ID = "1-day-per-move-club"
 CLUB_NAME_VARIATIONS = ["1 day per move club", "1-day-per-move-club", "1dayperMoveClub"]
 CLUB_MATCHES_URL = f"https://api.chess.com/pub/club/{CLUB_ID}/matches"
-OUTPUT_FILE = "public/data/leagueData.json"
+OUTPUT_FILE = "../public/data/leagueData.json"
 LEAGUE_PREFIXES = ["1WL", "TCMAC", "TMCL", "TMCL960"]
 
 # User agent for API requests

@@ -1,17 +1,25 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
+import TimeoutModal from '../components/TimeoutModal'
 
 function AllMatches() {
     const [data, setData] = useState(null)
+    const [timeoutData, setTimeoutData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('open')
+    const [showTimeoutModal, setShowTimeoutModal] = useState(false)
+    const [modalTitle, setModalTitle] = useState('')
+    const [modalPlayers, setModalPlayers] = useState([])
 
     useEffect(() => {
-        fetch('/data/leagueData.json')
-            .then(response => response.json())
-            .then(data => {
-                setData(data)
+        Promise.all([
+            fetch('/data/leagueData.json').then(r => r.json()),
+            fetch('/data/timeoutData.json').then(r => r.json()).catch(() => null),
+        ])
+            .then(([leagueJson, timeoutJson]) => {
+                setData(leagueJson)
+                setTimeoutData(timeoutJson)
                 setLoading(false)
             })
             .catch(err => {
@@ -70,6 +78,51 @@ function AllMatches() {
     }
 
     const MatchRow = ({ match }) => {
+        // Calculate timeout info for this match
+        const matchTimeouts = useMemo(() => {
+            let totalTimeouts = 0
+            let playersWithHighTimeout = 0
+            const alertPlayers = []
+            const seen = new Set()
+
+            if (match.status === 'open' && timeoutData?.players) {
+                // Open matches: players are in registrationData.ourRoster, not playerStats
+                const ourRoster = match.registrationData?.ourRoster ?? []
+                ourRoster.forEach(({ username }) => {
+                    if (!username) return
+                    const td = timeoutData.players[username.toLowerCase()]
+                    if (!td?.riskFlag) return
+                    if (seen.has(username)) return
+                    seen.add(username)
+                    playersWithHighTimeout++
+                    const subleagueTimeouts = td.subLeagueTimeouts?.[match.leagueName]?.[match.subLeagueName] ?? 0
+                    alertPlayers.push({
+                        username,
+                        dailyRating: td.dailyRating ?? null,
+                        rating960: td.rating960 ?? null,
+                        timeoutPercent: td.timeoutPercent ?? null,
+                        totalLeagueTimeouts90Days: td.totalLeagueTimeouts90Days ?? 0,
+                        subleagueTimeouts,
+                        dailyTimeouts: td.dailyTimeouts ?? {},
+                        riskFlag: true,
+                        riskLevel: td.riskLevel,
+                        riskReason: td.riskReason,
+                    })
+                })
+            } else if (match.playerStats) {
+                // In-progress / finished: count timeouts from playerStats
+                Object.values(match.playerStats).forEach(stats => {
+                    if (stats.timeouts) totalTimeouts += stats.timeouts
+                })
+            }
+
+            // Sort HIGH → MEDIUM → LOW
+            const order = { HIGH: 0, MEDIUM: 1, LOW: 2 }
+            alertPlayers.sort((a, b) => (order[a.riskLevel] ?? 99) - (order[b.riskLevel] ?? 99))
+
+            return { totalTimeouts, hasHighTimeout: playersWithHighTimeout > 0, playersWithHighTimeout, alertPlayers }
+        }, [match, timeoutData])
+
         // Calculate warning conditions for registration matches
         const minRequired = match.minTeamPlayers || 0
         const ourCount = match.registeredPlayers?.our || 0
@@ -90,12 +143,13 @@ function AllMatches() {
         }
 
         const hasWarning = minNotMet || playerDeficit || ratingDisadvantage
+        const hasTimeoutWarning = match.status === 'open' && matchTimeouts.hasHighTimeout
 
         return (
-            <div className={`card mb-3 ${hasWarning ? 'border-2 border-red-300' : ''}`}>
+            <div className={`card mb-3 overflow-hidden ${hasWarning || hasTimeoutWarning ? 'border-2' : ''} ${hasWarning ? 'border-red-300' : hasTimeoutWarning ? 'border-amber-300' : ''}`}>
                 {/* Warning Banner */}
                 {hasWarning && match.status === 'open' && (
-                    <div className="bg-red-50 border-b-2 border-red-200 -m-4 mb-3 p-3 rounded-t-lg">
+                    <div className="bg-red-50 border-b-2 border-red-200 -mx-6 -mt-6 mb-2 p-4">
                         <div className="flex items-center gap-2 text-sm font-semibold text-red-700">
                             <span className="text-xl">⚠️</span>
                             <span>Action Required</span>
@@ -104,6 +158,42 @@ function AllMatches() {
                             {minNotMet && <div>• Need {minRequired - ourCount} more player(s) to avoid forfeit</div>}
                             {playerDeficit && !minNotMet && <div>• Opponent has {oppCount - ourCount} more player(s) registered</div>}
                             {ratingDisadvantage && <div>• Team average rating is {Math.abs(avgDiff).toFixed(0)} points lower</div>}
+                        </div>
+                    </div>
+                )}
+
+                {/* Timeout alerts for open matches */}
+                {hasTimeoutWarning && (
+                    <button
+                        onClick={() => {
+                            setModalTitle('Players with High Timeout Risk (>25%)')
+                            setModalPlayers(matchTimeouts.alertPlayers)
+                            setShowTimeoutModal(true)
+                        }}
+                        className={`w-[calc(100%+3.05rem)] bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-300 -mx-6 p-4 mb-4 hover:from-orange-100 hover:to-amber-100 transition-all text-left ${!hasWarning ? '-mt-6' : ''}`}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="text-2xl">⏱️</span>
+                                <div>
+                                    <div className="text-sm font-bold text-amber-900">Timeout Risk Alert</div>
+                                    <div className="text-xs text-amber-800 mt-0.5">{matchTimeouts.playersWithHighTimeout} player{matchTimeouts.playersWithHighTimeout !== 1 ? 's' : ''} with timeout % over 25%</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs font-bold text-amber-700">
+                                <span>View Details</span>
+                                <span>→</span>
+                            </div>
+                        </div>
+                    </button>
+                )}
+
+                {/* Timeout info for finished/in_progress matches */}
+                {(match.status === 'finished' || match.status === 'in_progress') && matchTimeouts.totalTimeouts > 0 && (
+                    <div className="bg-orange-50 border-b border-orange-200 -m-4 mb-3 p-2 rounded-t-lg">
+                        <div className="flex items-center gap-2 text-xs font-medium text-orange-800">
+                            <span>⏱️</span>
+                            <span>{matchTimeouts.totalTimeouts} timeout{matchTimeouts.totalTimeouts !== 1 ? 's' : ''} by our team</span>
                         </div>
                     </div>
                 )}
@@ -135,7 +225,7 @@ function AllMatches() {
                 </div>
 
                 <div className="flex flex-wrap gap-4 text-xs text-gray-600 mt-3">
-                    <span>Started: {formatDate(match.startTime)}</span>
+                    <span>{match.status === 'open' ? `Starts: ${formatDate(match.startTime)}` : `Started: ${formatDate(match.startTime)}`}</span>
                     {match.endTime && <span>Ended: {formatDate(match.endTime)}</span>}
 
                     {match.registeredPlayers && (
@@ -151,8 +241,8 @@ function AllMatches() {
 
                         return (
                             <span className={`font-medium ${isWin ? 'text-green-600' :
-                                    isLoss ? 'text-red-600' :
-                                        'text-gray-600'
+                                isLoss ? 'text-red-600' :
+                                    'text-gray-600'
                                 }`}>
                                 {result === 'win' ? '✓ Won' :
                                     result === 'win by forfeit' ? '✓ Won by Forfeit' :
@@ -443,6 +533,14 @@ function AllMatches() {
             {activeTab === 'open' && renderMatches(allMatches.open, 'No matches open for registration')}
             {activeTab === 'in_progress' && renderMatches(allMatches.in_progress, 'No matches in progress')}
             {activeTab === 'finished' && renderMatches(allMatches.finished, 'No finished matches')}
+
+            {/* Timeout Modal */}
+            <TimeoutModal
+                isOpen={showTimeoutModal}
+                onClose={() => setShowTimeoutModal(false)}
+                title={modalTitle}
+                players={modalPlayers}
+            />
         </div>
     )
 }

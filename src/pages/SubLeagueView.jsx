@@ -6,14 +6,18 @@ import MatchCard from '../components/MatchCard'
 function SubLeagueView() {
     const { leagueName, subLeagueName } = useParams()
     const [data, setData] = useState(null)
+    const [timeoutData, setTimeoutData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('rounds')
 
     useEffect(() => {
-        fetch('/data/leagueData.json')
-            .then(response => response.json())
-            .then(data => {
-                setData(data)
+        Promise.all([
+            fetch('/data/leagueData.json').then(r => r.json()),
+            fetch('/data/timeoutData.json').then(r => r.json()).catch(() => null),
+        ])
+            .then(([leagueJson, timeoutJson]) => {
+                setData(leagueJson)
+                setTimeoutData(timeoutJson)
                 setLoading(false)
             })
             .catch(err => {
@@ -21,6 +25,9 @@ function SubLeagueView() {
                 setLoading(false)
             })
     }, [])
+
+    const subLeague = data?.leagues?.[leagueName]?.subLeagues?.[subLeagueName]
+
 
     if (loading) {
         return (
@@ -31,8 +38,6 @@ function SubLeagueView() {
             </div>
         )
     }
-
-    const subLeague = data?.leagues?.[leagueName]?.subLeagues?.[subLeagueName]
 
     if (!subLeague) {
         return (
@@ -119,7 +124,13 @@ function SubLeagueView() {
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {roundsByStatus.open.map((round, idx) => (
-                                    <MatchCard key={idx} round={round} />
+                                    <MatchCard
+                                        key={idx}
+                                        round={round}
+                                        timeoutData={timeoutData}
+                                        leagueName={leagueName}
+                                        subLeagueName={subLeagueName}
+                                    />
                                 ))}
                             </div>
                         </div>
@@ -133,7 +144,13 @@ function SubLeagueView() {
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {roundsByStatus.in_progress.map((round, idx) => (
-                                    <MatchCard key={idx} round={round} />
+                                    <MatchCard
+                                        key={idx}
+                                        round={round}
+                                        timeoutData={timeoutData}
+                                        leagueName={leagueName}
+                                        subLeagueName={subLeagueName}
+                                    />
                                 ))}
                             </div>
                         </div>
@@ -147,7 +164,13 @@ function SubLeagueView() {
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {roundsByStatus.finished.map((round, idx) => (
-                                    <MatchCard key={idx} round={round} />
+                                    <MatchCard
+                                        key={idx}
+                                        round={round}
+                                        timeoutData={timeoutData}
+                                        leagueName={leagueName}
+                                        subLeagueName={subLeagueName}
+                                    />
                                 ))}
                             </div>
                         </div>

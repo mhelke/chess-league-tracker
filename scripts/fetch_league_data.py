@@ -22,14 +22,42 @@ if sys.stdout.encoding != 'utf-8':
 
 # Configuration
 CLUB_ID = "1-day-per-move-club"
-CLUB_NAME_VARIATIONS = ["1 day per move club", "1-day-per-move-club", "1dayperMoveClub"]
+# CLUB_ID = "team-usa" 
 CLUB_MATCHES_URL = f"https://api.chess.com/pub/club/{CLUB_ID}/matches"
 OUTPUT_FILE = "../public/data/leagueData.json"
-LEAGUE_PREFIXES = ["1WL", "TCMAC", "TMCL", "TMCL960"]
+# ── League configuration ──────────────────────────────────────────────────────
+# Each entry defines one top-level league to track.
+#
+#  root_pattern  – regex searched *anywhere* in the title (case-insensitive).
+#                  A capture group named 'year' is extracted when present.
+#  name          – canonical league name written to output JSON.
+#
+# Examples that all resolve to league="WL", subleague="2026":
+#   "WL2026 R1"  |  "WL 2026 R1"  |  "WL2026 R1 USA vs Canada"
+LEAGUE_CONFIG = [
+    # Common Chess.com league patterns
+    # {"root_pattern": r"\bWL\s*(?P<year>\d{4})\b", "name": "WL"},
+    {"root_pattern": r"\b1WL\b",  "name": "1WL"},
+    {"root_pattern": r"\bTCMAC\b", "name": "TCMAC"}, 
+    {"root_pattern": r"\bTMCL\b",  "name": "TMCL"},
+    # Add more leagues below as needed...
+]
 
-# User agent for API requests
+# Variant keywords found anywhere in the title used ONLY to normalize
+# inconsistent spellings of the same concept so they group correctly into sub-leagues.
+# e.g. "Chess 960" and "Chess960" both become "Chess960".
+# You do NOT need to add entries here for every sub-league. Any qualifier
+# text left over after stripping the league root and round number becomes
+# the sub-league name automatically.
+VARIANT_PATTERNS = [
+    (r"\bChess\s*960\b", "Chess960"),
+    (r"\b960\b",         "Chess960"),
+]
+
+# User agent for API requests 
+# If your script is going to make a lot of requests, 
+# it is recommended to add contact info here so chess.com can reach out if there's an issue.
 USER_AGENT = "ChessLeagueTracker/1.0"
-
 
 def fetch_json(url: str) -> Optional[Dict]:
     """Fetch JSON data from a URL with error handling."""
@@ -48,67 +76,191 @@ def fetch_json(url: str) -> Optional[Dict]:
 def parse_match_title(title: str) -> Optional[Dict[str, str]]:
     """
     Parse a match title to extract league, sub-league, and round.
-    
-    Format: "{PREFIX} {sub-league text}: {teamA} vs {teamB}"
-    
-    Examples:
-      - "1WL 2026 960 U1400 Winter Experts G2: 1 day per move club vs I like beer"
-        -> league: "1WL", subLeague: "2026 960 U1400 Winter Experts G2", round: "1 day per move club vs I like beer"
-      - "1WL summer league R1"
-        -> league: "1WL", subLeague: "summer league", round: "R1"
+
+    Sub-leagues are discovered automatically so you never need to enumerate
+    them. Joining a new sub-league (e.g. "WL2026 U1500 R3") will automatically be picked up.
+
+    Team-name boundary detection (in priority order):
+      1. Colon:   "WL2026 SubLeague R1: TeamA vs TeamB"
+                   Everything before ':' is structural; team names ignored.
+      2. Round token: "WL2026 SubLeague R1 TeamA vs TeamB"
+                   Text LEFT  of the round token → sub-league qualifier.
+                   Text RIGHT of the round token (before ' vs ') → teamName,
+                   discarded automatically.
+      3. ' vs ' only (no colon, no round): "WL2026 SubLeague TeamA vs TeamB"
+                   Everything before ' vs ' is taken; team1 name unavoidably
+                   bleeds into the sub-league string.  Add a colon or round
+                   number to the match title to avoid this.
+                   (See `resolve_unresolved_matches` function which attempts to 
+                   resolve these cases automatically)
+
+    Round tokens recognized (case-insensitive, anywhere in title):
+        R1, R2 …       ("R" + digits)
+        Round 1 …      ("Round" + digits)
+        Rd 1 …         ("Rd" + digits)
+        G1, Game 1 …   ("G" / "Game" + digits)
+
+    Examples (all produce identical output for the same sub-league):
+      "WL2026 Open R1"                      -> league=WL, subLeague=2026 Open,         round=R1
+      "WL2026 Open R1: TeamA vs TeamB"      -> league=WL, subLeague=2026 Open,         round=R1
+      "WL2026 Open R1 TeamA vs TeamB"       -> league=WL, subLeague=2026 Open,         round=R1
+      "WL2026 Open TeamA vs TeamB"          -> league=WL, subLeague=2026 Open TeamA,   round=None  (ambiguous - add colon or round)
+      "WL2026 R1"                           -> league=WL, subLeague=2026,              round=R1
+      "Chess960 WL2026 R1"                  -> league=WL, subLeague=Chess960 2026,     round=R1
+      "WL2026 Chess960 Round 3"             -> league=WL, subLeague=Chess960 2026,     round=R3
+      "WL2026 U1500 Rd 4: TeamA vs TeamB"   -> league=WL, subLeague=2026 U1500,        round=R4
     """
-    title = title.strip()
-    
-    # Check if title starts with any league prefix
-    league_prefix = None
-    for prefix in LEAGUE_PREFIXES:
-        if title.startswith(prefix):
-            league_prefix = prefix
+    working = title.strip()
+
+    # ── 1. Find which league config matches ────────────────────────────────────
+    league_name: Optional[str] = None
+    year: Optional[str] = None
+    league_m = None
+
+    for cfg in LEAGUE_CONFIG:
+        m = re.search(cfg["root_pattern"], working, re.IGNORECASE)
+        if m:
+            league_name = cfg["name"]
+            year = m.groupdict().get("year")  # None if no year capture group
+            league_m = m
             break
-    
-    if not league_prefix:
+
+    if not league_name:
         return None
-    
-    # Remove the league prefix
-    remaining = title[len(league_prefix):].strip()
-    
-    # First, look for round pattern (R followed by digits) in the entire remaining string
-    round_match = re.search(r'\bR(\d+)\b', remaining, re.IGNORECASE)
-    
-    # Split by colon to separate sub-league from teams
-    if ":" in remaining:
-        sub_league = remaining.split(":", 1)[0].strip()
-        after_colon = remaining.split(":", 1)[1].strip()
-        
-        # If we found a round pattern in the sub-league part, extract it
-        if round_match and round_match.start() < remaining.index(":"):
-            # Round is before the colon, extract it from sub-league
-            round_str = round_match.group(0).upper()
-            sub_league = remaining[:round_match.start()].strip()
-        else:
-            # The part after the colon is the round identifier
-            round_str = after_colon
-    else:
-        # No colon - check for round pattern
-        if round_match:
-            round_str = round_match.group(0).upper()
-            # Everything before the round is the sub-league
-            # Everything after the round is ignored
-            sub_league = remaining[:round_match.start()].strip()
-        else:
-            # No round found, treat everything as sub-league
-            sub_league = remaining
-            round_str = None
-    
-    # Clean up sub-league name
-    if not sub_league:
-        sub_league = "main"
-    
+
+    # Remove the matched league identifier from the working string.
+    working = (working[:league_m.start()] + working[league_m.end():]).strip()
+
+    # ── 2. Isolate the structural portion (strip team names) ───────────────────
+    # Priority: colon > round token (acts as boundary in step 3) > bare " vs ".
+    # Track if we fell back to a bare " vs " split. That is the only case where
+    # team1's name may bleed into the sub-league text (ambiguous).
+    split_on_vs_only = False
+    if ":" in working:
+        working = working.split(":", 1)[0].strip()
+    elif re.search(r"\bvs\b", working, re.IGNORECASE):
+        vs_m = re.search(r"\bvs\b", working, re.IGNORECASE)
+        working = working[:vs_m.start()].strip()
+        split_on_vs_only = True
+
+    # ── 3. Extract round token ─────────────────────────────────────────────────
+    # Patterns tried in priority order; first match wins.
+    # Canonical form: R<n> for round-style, G<n> for game-style.
+    ROUND_PATTERNS = [
+        (r"\b(?:Round|Rd)\.?\s*(\d+)\b", "R"),   # Round 1 / Rd 1 / Rd.1
+        (r"\bR(\d+)\b",                   "R"),   # R1
+        (r"\b(?:Game|G)\.?\s*(\d+)\b",   "G"),   # Game 1 / G1
+    ]
+    round_str: Optional[str] = None
+    for rp, prefix in ROUND_PATTERNS:
+        round_m = re.search(rp, working, re.IGNORECASE)
+        if round_m:
+            round_str = f"{prefix}{round_m.group(1)}"
+            # Keep only the text LEFT of the round token as the sub-league
+            # qualifier; text to the right was team1's name (no colon present).
+            working = working[:round_m.start()].strip()
+            split_on_vs_only = False  # round token fully disambiguates
+            break
+
+    # ── 4. Extract variant keywords (in any order) ─────────────────────────────
+    variants: list = []
+    for pattern, canonical in VARIANT_PATTERNS:
+        vm = re.search(pattern, working, re.IGNORECASE)
+        if vm:
+            if canonical not in variants:
+                variants.append(canonical)
+            working = (working[:vm.start()] + working[vm.end():]).strip()
+
+    # ── 5. Assemble canonical sub-league name ──────────────────────────────────
+    # Format: "<variant(s)> <year> <any-remaining-qualifier>"
+    remaining = re.sub(r"\s+", " ", working).strip(" -:")
+    parts = variants + ([year] if year else []) + ([remaining] if remaining else [])
+    sub_league = " ".join(parts) if parts else "main"
+
+    # ── Ambiguous case ─────────────────────────────────────────────────────────
+    # No colon and no round token → team1's name has bled into sub_league.
+    # Return a sentinel so resolve_unresolved_matches() can fix it later using
+    # confirmed sub-league names from other matches.
+    if split_on_vs_only:
+        return {
+            "league":       league_name,
+            "subLeague":    "__unresolved__",
+            "round":        None,
+            "rawRemainder": sub_league,  # contaminated text, used for fuzzy match
+        }
+
     return {
-        "league": league_prefix,
+        "league":    league_name,
         "subLeague": sub_league,
-        "round": round_str
+        "round":     round_str,
     }
+
+
+def resolve_unresolved_matches(league_matches: List[Dict]) -> int:
+    """
+    Two-pass resolution for matches flagged as '__unresolved__' by parse_match_title.
+
+    These are titles that had no colon separator and no round token, meaning
+    team1's name bled into the sub-league qualifier text. This function tries
+    to fix them using confirmed sub-league names from other parsed matches.
+
+    Algorithm:
+      Pass 1 - collect every confirmed sub-league name (subLeague != '__unresolved__').
+      Pass 2 - for each unresolved match, score each confirmed sub-league by how
+               many of its non-year qualifier words appear in the rawRemainder.
+               The highest-scoring (most specific) match wins.
+               Ties broken by longer name (more words = more specific).
+               If no confirmed sub-league matches → assign 'Undefined Subleague'.
+
+    Returns the number of matches that could not be resolved.
+    """
+    confirmed: Dict[str, set] = defaultdict(set)
+    for m in league_matches:
+        sl = m["parsed"]["subLeague"]
+        if sl != "__unresolved__":
+            confirmed[m["parsed"]["league"]].add(sl)
+
+    unresolved_count = 0
+    for m in league_matches:
+        if m["parsed"]["subLeague"] != "__unresolved__":
+            continue
+
+        league  = m["parsed"]["league"]
+        raw     = m["parsed"].get("rawRemainder", "").lower().split()
+
+        best_sl:    Optional[str] = None
+        best_score: int           = 0
+        best_len:   int           = 0
+
+        for sl in confirmed[league]:
+            # Qualifier words are everything except a bare 4-digit year
+            qualifier_words = [w for w in sl.split() if not re.match(r"^\d{4}$", w)]
+
+            if not qualifier_words:
+                # Sub-league is just a year (e.g. "2026").
+                # Accept it only as a last-resort fallback (score 0, length 0).
+                if best_sl is None:
+                    best_sl = sl
+                continue
+
+            hits = sum(1 for w in qualifier_words if w.lower() in raw)
+            sl_len = len(qualifier_words)
+
+            # Must match ALL qualifier words; prefer longer (more specific) sub-leagues
+            if hits == sl_len and (hits > best_score or (hits == best_score and sl_len > best_len)):
+                best_sl    = sl
+                best_score = hits
+                best_len   = sl_len
+
+        if best_sl and best_score > 0:
+            m["parsed"]["subLeague"] = best_sl
+            print(f"  Resolved unresolved match → sub-league '{best_sl}': {m['title']}")
+        else:
+            m["parsed"]["subLeague"] = "Undefined Subleague"
+            unresolved_count += 1
+            print(f"  Could not resolve → 'Undefined Subleague': {m['title']}")
+
+    return unresolved_count
 
 
 def get_player_result_from_game(username: str, game: Dict) -> Optional[Dict[str, Any]]:
@@ -156,19 +308,10 @@ def get_player_result_from_game(username: str, game: Dict) -> Optional[Dict[str,
     return None
 
 
-def is_our_club(club_name: str) -> bool:
-    """Check if a club name matches our club (case-insensitive)."""
-    club_name_lower = club_name.lower()
-    for variation in CLUB_NAME_VARIATIONS:
-        if variation.lower() in club_name_lower:
-            return True
-    return False
-
-
 def get_match_web_url(match_url: str) -> str:
     """Convert API URL to web URL."""
-    # API URL: https://api.chess.com/pub/match/1895389
-    # Web URL: https://www.chess.com/club/matches/1895389
+    # API URL: https://api.chess.com/pub/match/<ID>
+    # Web URL: https://www.chess.com/club/matches/<ID>
     match_id = match_url.split("/")[-1]
     return f"https://www.chess.com/club/matches/{match_id}"
 
@@ -515,7 +658,7 @@ def create_global_leaderboard(leagues_data: Dict) -> List[Dict]:
 
 
 def load_existing_match_ids() -> set:
-    """Load FINISHED match IDs from existing data file to avoid re-processing.
+    """Load finished match IDs from existing data file to avoid re-processing.
     In-progress and open matches are always re-fetched for updated data."""
     import os
     if not os.path.exists(OUTPUT_FILE):
@@ -608,13 +751,22 @@ def main():
     
     print(f"\nSkipped {skipped_existing} already-processed finished matches")
     print(f"Note: In-progress and open matches are always re-fetched for updates")
-    print(f"Found {len(league_matches)} new league matches matching prefixes {LEAGUE_PREFIXES}")
+    league_names = [cfg["name"] for cfg in LEAGUE_CONFIG]
+    print(f"Found {len(league_matches)} new league matches for leagues {league_names}")
+
+    # Resolve ambiguous matches (no colon + no round token + has 'vs' in title)
+    unresolved_before = sum(1 for m in league_matches if m["parsed"]["subLeague"] == "__unresolved__")
+    if unresolved_before:
+        print(f"\nResolving {unresolved_before} ambiguous match title(s)...")
+        still_unresolved = resolve_unresolved_matches(league_matches)
+        if still_unresolved:
+            print(f"  {still_unresolved} match(es) could not be resolved → grouped as 'Undefined Subleague'")
     
     if len(league_matches) == 0:
         print("\nWARNING: No league matches found!")
         print("This could mean:")
         print("  1. The club has no matches with the specified prefixes")
-        print("  2. Match titles don't start with: " + ", ".join(LEAGUE_PREFIXES))
+        print("  2. Match titles don't contain known league identifiers: " + ", ".join(cfg["name"] for cfg in LEAGUE_CONFIG))
         print("\nPlease check the club's match titles on chess.com")
     
     # Organize matches by league and sub-league
@@ -663,48 +815,60 @@ def main():
             leagues_output[league_name] = {"subLeagues": {}}
         
         for sub_league_name, rounds in sub_leagues.items():
-            # Get existing rounds for this sub-league
+            # Get existing rounds for this sub-league, keeping only finished ones.
+            # Open and in_progress rounds are always discarded so fresh re-fetched data
+            # fills them in cleanly. This handles status transitions (open→in_progress,
+            # in_progress→finished, open→finished) with zero duplicates by construction.
             existing_rounds = []
             if sub_league_name in leagues_output[league_name].get("subLeagues", {}):
-                existing_rounds = leagues_output[league_name]["subLeagues"][sub_league_name].get("rounds", [])
+                all_existing = leagues_output[league_name]["subLeagues"][sub_league_name].get("rounds", [])
+                existing_rounds = [r for r in all_existing if r.get("status") == "finished"]
             
-            # Merge new rounds with existing rounds
             all_rounds = existing_rounds + rounds
             
-            # Sort rounds - try to extract round numbers, otherwise use timestamp
+            # Sort rounds: R<n> first (numerically), then G<n>, then NA/NA-2/… by timestamp
             def get_round_sort_key(round_data):
-                round_str = round_data.get("round", "")
-                if not round_str:
-                    return (0, round_data.get("startTime", 0))
-                # Try to extract number from R\d+ format
-                match = re.search(r'R(\d+)', round_str, re.IGNORECASE)
-                if match:
-                    return (1, int(match.group(1)))
-                # No explicit round number - sort by timestamp
-                return (2, round_data.get("startTime", 0))
-            
+                rs = (round_data.get("round") or "").strip()
+                if not rs:
+                    return (3, 0, round_data.get("startTime") or 0)
+                m_r = re.match(r'^R(\d+)$', rs, re.IGNORECASE)
+                if m_r:
+                    return (1, int(m_r.group(1)), 0)
+                m_g = re.match(r'^G(\d+)$', rs, re.IGNORECASE)
+                if m_g:
+                    return (2, int(m_g.group(1)), 0)
+                # NA / NA-2 / NA-3 … → after numbered rounds, ordered by timestamp
+                return (3, 0, round_data.get("startTime") or 0)
+
             all_rounds.sort(key=get_round_sort_key)
-            
-            # Find existing round numbers to determine next available number
-            existing_round_numbers = set()
-            rounds_needing_numbers = []
-            
+
+            # Assign "NA", "NA-2", "NA-3", … to rounds with no explicit round number.
+            # Rounds that already carry an R\d+, G\d+, or existing NA-style id are kept.
+            _EXPLICIT_ROUND_RE = re.compile(r'^(?:[RG]\d+|NA(?:-\d+)?)$', re.IGNORECASE)
+            _NA_RE             = re.compile(r'^NA(?:-(\d+))?$', re.IGNORECASE)
+            rounds_needing_na: list = []
+            existing_na_ids:   set  = set()
+
             for round_data in all_rounds:
-                round_str = round_data.get("round", "") or ""  # Handle None
-                # Check if this round has an explicit RX number
-                match = re.search(r'R(\d+)', round_str, re.IGNORECASE)
-                if match:
-                    existing_round_numbers.add(int(match.group(1)))
-                # Check if round needs auto-numbering (missing or looks like team matchup or starts with "Match ")
-                elif not round_str or " vs " in round_str or round_str.startswith("Match "):
-                    rounds_needing_numbers.append(round_data)
-            
-            # Assign sequential round numbers starting from max + 1
-            if rounds_needing_numbers:
-                next_number = max(existing_round_numbers) + 1 if existing_round_numbers else 1
-                for round_data in rounds_needing_numbers:
-                    round_data["round"] = f"R{next_number}"
-                    next_number += 1
+                rs = (round_data.get("round") or "").strip()
+                if _EXPLICIT_ROUND_RE.match(rs):
+                    if _NA_RE.match(rs):
+                        existing_na_ids.add(rs.upper())
+                elif not rs or " vs " in rs or rs.startswith("Match "):
+                    rounds_needing_na.append(round_data)
+
+            def _next_na(used: set) -> str:
+                if "NA" not in used:
+                    return "NA"
+                i = 2
+                while f"NA-{i}" in used:
+                    i += 1
+                return f"NA-{i}"
+
+            for round_data in rounds_needing_na:
+                na_id = _next_na(existing_na_ids)
+                existing_na_ids.add(na_id)
+                round_data["round"] = na_id
             
             # Aggregate player stats for this sub-league
             leaderboard = aggregate_player_stats(all_rounds)

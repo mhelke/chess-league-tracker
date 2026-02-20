@@ -368,7 +368,7 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
 
     # Extract player statistics from our team
     # Each player plays 2 games: played_as_white and played_as_black
-    player_stats = defaultdict(lambda: {"games": 0, "wins": 0, "draws": 0, "losses": 0})
+    player_stats = defaultdict(lambda: {"games": 0, "wins": 0, "draws": 0, "losses": 0, "timeouts": 0})
     
     players = our_team_data.get("players", [])
     print(f"  Processing {len(players)} players...")
@@ -381,29 +381,39 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
         if not username:
             continue
         
-        # Process white game
-        white_result = player.get("played_as_white")
-        if white_result:
-            player_stats[username]["games"] += 1
-            result_type = process_result(white_result)
-            if result_type == "win":
-                player_stats[username]["wins"] += 1
-            elif result_type == "draw":
-                player_stats[username]["draws"] += 1
-            elif result_type == "loss":
-                player_stats[username]["losses"] += 1
-        
-        # Process black game
-        black_result = player.get("played_as_black")
-        if black_result:
-            player_stats[username]["games"] += 1
-            result_type = process_result(black_result)
-            if result_type == "win":
-                player_stats[username]["wins"] += 1
-            elif result_type == "draw":
-                player_stats[username]["draws"] += 1
-            elif result_type == "loss":
-                player_stats[username]["losses"] += 1
+        # For in_progress and finished matches, count timeouts and process results
+        if status in ["in_progress", "finished"]:
+            # Process white game
+            white_result = player.get("played_as_white")
+            if white_result:
+                player_stats[username]["games"] += 1
+                if white_result == "timeout":
+                    player_stats[username]["timeouts"] += 1
+                    player_stats[username]["losses"] += 1
+                else:
+                    result_type = process_result(white_result)
+                    if result_type == "win":
+                        player_stats[username]["wins"] += 1
+                    elif result_type == "draw":
+                        player_stats[username]["draws"] += 1
+                    elif result_type == "loss":
+                        player_stats[username]["losses"] += 1
+            
+            # Process black game
+            black_result = player.get("played_as_black")
+            if black_result:
+                player_stats[username]["games"] += 1
+                if black_result == "timeout":
+                    player_stats[username]["timeouts"] += 1
+                    player_stats[username]["losses"] += 1
+                else:
+                    result_type = process_result(black_result)
+                    if result_type == "win":
+                        player_stats[username]["wins"] += 1
+                    elif result_type == "draw":
+                        player_stats[username]["draws"] += 1
+                    elif result_type == "loss":
+                        player_stats[username]["losses"] += 1
     
     # Determine match result
     our_score = our_team_data.get("score", 0)
@@ -420,6 +430,8 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
     opponent_player_count = len(opponent_players)
     
     # Detect forfeit scenarios for finished matches with 0-0 score
+    # Chess.com counts matches that never started as a draw. This is how they show up on a team's "official" list, 
+    # but leagues track these as forfeits in their standings.
     if status == "finished" and our_score == 0 and opponent_score == 0 and min_team_players is not None:
         our_below_min = our_player_count < min_team_players
         opp_below_min = opponent_player_count < min_team_players
@@ -429,11 +441,11 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
             our_result = "double forfeit"
             print(f"  Detected double forfeit: our={our_player_count}, opp={opponent_player_count}, min={min_team_players}")
         elif our_below_min:
-            # Only we forfeited
+            # We forfeited
             our_result = "forfeit"
             print(f"  Detected our forfeit: our={our_player_count}, min={min_team_players}")
         elif opp_below_min:
-            # Only opponent forfeited - we win
+            # Opponent forfeited - we win
             our_result = "win by forfeit"
             print(f"  Detected opponent forfeit: opp={opponent_player_count}, min={min_team_players}")
     
@@ -499,8 +511,8 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
                     
                     boards_data.append(board_data)
         else:
-            # No board assignments yet - collect all registered players
-            # Sort by rating (highest first) for strategic planning
+            # No board assignments yet, so collect all registered players
+            # Sort by rating descending.
             our_roster = sorted(
                 [{"username": p.get("username"), "rating": p.get("rating")} 
                  for p in players if isinstance(p, dict) and p.get("username")],
@@ -515,7 +527,7 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
                 reverse=True
             )
             
-            # Store roster data for display
+            # Store roster data
             boards_data = {
                 "type": "roster",
                 "ourRoster": our_roster,
@@ -524,6 +536,19 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
     
     # Use parsed round if available, otherwise let it be auto-assigned later
     round_str = parsed_title["round"] if parsed_title["round"] else None
+    
+    # Build cleaned player stats (timeouts only included when > 0)
+    cleaned_player_stats = {}
+    for username, stats in player_stats.items():
+        cleaned_stats = {
+            "games":  stats["games"],
+            "wins":   stats["wins"],
+            "draws":  stats["draws"],
+            "losses": stats["losses"],
+        }
+        if stats.get("timeouts", 0) > 0:
+            cleaned_stats["timeouts"] = stats["timeouts"]
+        cleaned_player_stats[username] = cleaned_stats
     
     result = {
         "round": round_str,
@@ -536,24 +561,26 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
         "endTime": match_data.get("end_time"),
         "boards": boards_count,
         "matchResult": match_result,
-        "playerStats": dict(player_stats)
+        "playerStats": cleaned_player_stats
     }
     
-    # Add minTeamPlayers for all matches (not just registration)
+    # Add minTeamPlayers for all matches
+    # This can be used to detect possible forfeits in open matches 
+    # and track projected winners in in-progress matches based on current player counts.
     if min_team_players is not None:
         result["minTeamPlayers"] = min_team_players
     
-    # Add registration data if available (only for registration matches)
+    # Add registration data if available for open matches
     if boards_data:
         if isinstance(boards_data, dict) and boards_data.get("type") == "roster":
-            # Roster format (no board assignments yet)
+            # Roster format
             result["registrationData"] = boards_data
             result["registeredPlayers"] = {
                 "our": len(boards_data.get("ourRoster", [])),
                 "opponent": len(boards_data.get("oppRoster", []))
             }
         elif isinstance(boards_data, list) and len(boards_data) > 0:
-            # Board-specific format (boards assigned)
+            # Board-specific format
             result["boardsData"] = boards_data
             result["registeredPlayers"] = {
                 "our": len(our_boards),
@@ -567,7 +594,7 @@ def is_our_club_from_url(team_url: str) -> bool:
     """Check if a team URL belongs to our club."""
     if not team_url:
         return False
-    # URL format: https://api.chess.com/pub/club/1-day-per-move-club
+    # URL format: https://api.chess.com/pub/club/<CLUB_ID>
     return CLUB_ID in team_url.lower()
 
 
@@ -586,7 +613,7 @@ def aggregate_player_stats(rounds: List[Dict]) -> List[Dict]:
             player_totals[username]["losses"] += stats["losses"]
             player_totals[username]["points"] += stats["wins"] + (stats["draws"] * 0.5)
     
-    # Convert to list and sort by points (descending), then by games (ascending)
+    # Convert to list and sort by points descending, then by games ascending
     leaderboard = []
     for username, stats in player_totals.items():
         leaderboard.append({

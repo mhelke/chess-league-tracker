@@ -19,6 +19,7 @@ Chess League Tracker is a static website that automatically tracks and displays 
 - ⚠️ **Smart Warnings** - Visual alerts for forfeit risks, player deficits, and rating disadvantages
 - 🏆 **Leaderboards** - Track player performance across all leagues
 - ⚖️ **Forfeit Detection** - Automatically identifies completed matches won/lost by forfeit
+- ⏱️ **Timeout Risk Analysis** - Player reliability metrics and timeout risk flags for upcoming matches
 
 **Match Intelligence:**
 - 📈 **Cohort Analysis** - See how your team stacks up by rating ranges (e.g., 1400-1500, 1500-1600)
@@ -110,11 +111,30 @@ This is a **JAMstack** application with three components:
 
 ### Data Flow
 
-1. **Fetch**: Script calls `/pub/club/{club_id}/matches` to get match IDs
-2. **Process**: For each match, calls `/pub/match/{match_id}` for detailed data
-3. **Detect Status**: Maps data arrays (registered/in_progress/finished) to status
-4. **Extract Ratings**: Grabs player ratings directly from match endpoint
-5. **Output**: Writes JSON with all processed data
+1. **Fetch League Data**: Script calls Chess.com API to get match data, registrations, and results
+2. **Process Matches**: Extracts league/sub-league info from match titles, maps players to rounds
+3. **Enrich Timeouts** (separate script): Analyzes player timeout history and risk levels
+4. **Output**: Writes two JSON files:
+   - `leagueData.json` - Match data, registration status, leaderboards
+   - `timeoutData.json` - Timeout statistics and risk flags for registered players
+5. **Deploy**: React frontend reads both files and renders the site
+
+### Data Files
+
+**leagueData.json** contains:
+- All matches grouped by league → sub-league → rounds
+- Match status (open/in_progress/finished)
+- Registration rosters and board assignments
+- Player stats and leaderboards
+- Forfeit detection (automatic for 0-0 matches)
+
+**timeoutData.json** contains:
+- Timeout risk analysis for players in open matches
+- Rating information (daily, Chess960)
+- Timeout counts and percentages
+- Risk level classification (HIGH/MEDIUM/LOW or unflagged)
+
+[See SCHEMA.md for detailed documentation →](SCHEMA.md)
 
 ### Project Structure
 
@@ -169,7 +189,8 @@ npm run build            # Build for production
 npm run preview          # Preview production build
 
 # Data fetching
-python scripts/fetch_league_data.py  # Fetch latest data
+python scripts/fetch_league_data.py      # Fetch match data from Chess.com
+python scripts/enrich_timeouts.py        # Analyze timeout risk (requires leagueData.json)
 ```
 
 ---

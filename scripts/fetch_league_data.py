@@ -22,7 +22,6 @@ if sys.stdout.encoding != 'utf-8':
 
 # Configuration
 CLUB_ID = "1-day-per-move-club"
-# CLUB_ID = "team-usa" 
 CLUB_MATCHES_URL = f"https://api.chess.com/pub/club/{CLUB_ID}/matches"
 OUTPUT_FILE = "../public/data/leagueData.json"
 # ── League configuration ──────────────────────────────────────────────────────

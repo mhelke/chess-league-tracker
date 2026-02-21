@@ -15,6 +15,13 @@ const ROW_BG = {
     LOW: 'bg-blue-50/30',
 }
 
+// Solid (opaque) equivalents for the sticky column — prevents scroll bleed-through
+const STICKY_BG = {
+    HIGH: 'bg-red-50',
+    MEDIUM: 'bg-amber-50',
+    LOW: 'bg-blue-50',
+}
+
 function RiskBadge({ level, reason }) {
     const [visible, setVisible] = useState(false)
     const [pos, setPos] = useState({ top: 0, left: 0 })
@@ -115,7 +122,7 @@ function TimeoutModal({ isOpen, onClose, title, players }) {
                     {sortedPlayers.length === 0 ? (
                         <p className="text-gray-500 text-center py-8">No at-risk players to display</p>
                     ) : (
-                        <table className="w-full text-sm border-collapse">
+                        <table className="w-full text-sm border-separate border-spacing-0">
                             <thead>
                                 <tr className="bg-gray-100 text-gray-600 uppercase text-[11px] tracking-wide">
                                     <th className="text-left py-2.5 px-3 font-semibold sticky left-0 bg-gray-100 z-10 whitespace-nowrap rounded-tl-lg">Username</th>
@@ -124,16 +131,17 @@ function TimeoutModal({ isOpen, onClose, title, players }) {
                                     <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">960&nbsp;Rating</th>
                                     <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">Timeout&nbsp;%</th>
                                     <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">League TOs<br /><span className="font-normal normal-case text-[10px] text-gray-400">90 days</span></th>
-                                    <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">Subleague<br /><span className="font-normal normal-case text-[10px] text-gray-400">TOs (all‑time)</span></th>
-                                    <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">1‑day<br /><span className="font-normal normal-case text-[10px] text-gray-400">TOs</span></th>
-                                    <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">2‑day<br /><span className="font-normal normal-case text-[10px] text-gray-400">TOs</span></th>
-                                    <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">3‑day<br /><span className="font-normal normal-case text-[10px] text-gray-400">TOs</span></th>
+                                    <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">Subleague<br /><span className="font-normal normal-case text-[10px] text-gray-400">TOs (all-time)</span></th>
+                                    <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">1-day<br /><span className="font-normal normal-case text-[10px] text-gray-400">TOs</span></th>
+                                    <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">2-day<br /><span className="font-normal normal-case text-[10px] text-gray-400">TOs</span></th>
+                                    <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">3-day<br /><span className="font-normal normal-case text-[10px] text-gray-400">TOs</span></th>
                                     <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap rounded-tr-lg">Last TO Date</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {sortedPlayers.map((player, idx) => {
                                     const bg = ROW_BG[player.riskLevel] || (idx % 2 === 0 ? 'bg-gray-50' : 'bg-white')
+                                    const stickyBg = STICKY_BG[player.riskLevel] || (idx % 2 === 0 ? 'bg-gray-50' : 'bg-white')
                                     const daily = player.dailyTimeouts || {}
                                     const allDates = ['1day', '2day', '3day']
                                         .map(k => daily[k]?.lastTimeoutDate)
@@ -144,7 +152,7 @@ function TimeoutModal({ isOpen, onClose, title, players }) {
                                     return (
                                         <tr key={player.username} className={`${bg} border-b border-gray-100 hover:brightness-[0.97] transition-colors`}>
                                             {/* Username */}
-                                            <td className={`py-3 px-3 font-medium sticky left-0 ${bg} z-10 whitespace-nowrap`}>
+                                            <td className={`py-3 px-3 font-medium sticky left-0 ${stickyBg} z-10 whitespace-nowrap`}>
                                                 <a
                                                     href={`https://www.chess.com/member/${player.username}`}
                                                     target="_blank"

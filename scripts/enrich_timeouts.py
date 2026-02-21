@@ -11,9 +11,11 @@ Does NOT modify leagueData.json.
 Overwrites timeoutData.json on every run.
 
 Run from the project root or the scripts/ directory:
-    python scripts/enrich_timeouts.py
+    python scripts/enrich_timeouts.py --site-key 1dpmc
+    python scripts/enrich_timeouts.py --site-key teamusa
 """
 
+import argparse
 import json
 import os
 import sys
@@ -27,10 +29,16 @@ from urllib.error import URLError, HTTPError
 
 # ── Paths (always relative to this file, regardless of cwd) ───────────────────
 
-SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR    = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "public", "data"))
-INPUT_FILE  = os.path.join(DATA_DIR, "leagueData.json")
-OUTPUT_FILE = os.path.join(DATA_DIR, "timeoutData.json")
+SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+
+
+# ── Module-level configuration ─────────────────────────────────────────────────
+# These globals are populated by load_config() in main() before any
+# processing functions are called.  They must not be used at import time.
+
+INPUT_FILE:  str = ""
+OUTPUT_FILE: str = ""
 
 
 # ── Configuration ──────────────────────────────────────────────────────────────
@@ -42,9 +50,7 @@ RISK_THRESHOLD_PERCENT: float = 25.0
 # Rolling window used for "total league timeouts" count.
 LEAGUE_TIMEOUT_WINDOW_DAYS: int = 90
 
-# User agent for API requests 
-# If your script is going to make a lot of requests, 
-# it is recommended to add contact info here so chess.com can reach out if there's an issue.
+# User agent for API requests
 USER_AGENT: str = "ChessLeagueTracker/1.0"
 
 # Map from "1/<seconds>" denominator → friendly output key.
@@ -58,6 +64,30 @@ DAILY_TC_SECONDS: Dict[int, str] = {
 # Maximum number of calendar months to look back in the game archive when
 # searching for daily timeout games (0 = current month only).
 ARCHIVE_MAX_MONTHS_BACK: int = 2
+
+
+def load_config(site_key: str) -> None:
+    """Load per-site config (script_params.json) and set module globals."""
+    global INPUT_FILE, OUTPUT_FILE
+    global RISK_THRESHOLD_PERCENT, LEAGUE_TIMEOUT_WINDOW_DAYS
+    global USER_AGENT, ARCHIVE_MAX_MONTHS_BACK
+
+    data_dir    = os.path.join(PROJECT_ROOT, "public", "data", site_key)
+    INPUT_FILE  = os.path.join(data_dir, "leagueData.json")
+    OUTPUT_FILE = os.path.join(data_dir, "timeoutData.json")
+
+    # ── script_params.json (per-site, optional) ────────────────────────────────
+    params_path = os.path.join(PROJECT_ROOT, "config", site_key, "script_params.json")
+    if os.path.exists(params_path):
+        with open(params_path, "r", encoding="utf-8") as f:
+            params = json.load(f)
+        RISK_THRESHOLD_PERCENT    = params.get("riskThresholdPercent",    RISK_THRESHOLD_PERCENT)
+        LEAGUE_TIMEOUT_WINDOW_DAYS = params.get("leagueTimeoutWindowDays", LEAGUE_TIMEOUT_WINDOW_DAYS)
+        ARCHIVE_MAX_MONTHS_BACK   = params.get("archiveMaxMonthsBack",   ARCHIVE_MAX_MONTHS_BACK)
+        USER_AGENT                = params.get("userAgent",              USER_AGENT)
+
+    # Environment variable overrides config file
+    USER_AGENT = os.environ.get("USER_AGENT", USER_AGENT)
 
 
 # ── HTTP helper ────────────────────────────────────────────────────────────────
@@ -447,6 +477,18 @@ def compute_risk_level(
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
+    # ── Parse arguments ────────────────────────────────────────────────────────
+    parser = argparse.ArgumentParser(
+        description="Enrich league data with per-player timeout statistics and risk flags."
+    )
+    parser.add_argument(
+        "--site-key", required=True,
+        help="Site key matching a directory under config/ (e.g. '1dpmc', 'teamusa')",
+    )
+    args = parser.parse_args()
+
+    load_config(args.site_key)
+
     # ── Load input ─────────────────────────────────────────────────────────────
     print(f"Loading {INPUT_FILE} …")
     if not os.path.exists(INPUT_FILE):

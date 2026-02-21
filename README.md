@@ -2,14 +2,17 @@
 
 > A comprehensive match tracking and analysis platform for Chess.com team leagues
 
-🌐 **Live Site:** [https://1dpmc.chessteamdata.com](https://1dpmc.chessteamdata.com)  
+🌐 **Live Sites:**
+- [https://1dpmc.chessteamdata.com](https://1dpmc.chessteamdata.com) — 1 Day Per Move Club
+- [https://teamusa.chessteamdata.com](https://teamusa.chessteamdata.com) — Team USA
+
 ⚠️ **Status:** BETA - Data may be incomplete or unreliable while under active development
 
 ---
 
 ## 📖 What Is This?
 
-Chess League Tracker is a static website that automatically tracks and displays team match data for Chess.com clubs. Built for the **1-day-per-move-club**, it provides real-time insights into league standings, match results, and most importantly—registration status to help teams avoid forfeits.
+Chess League Tracker is a static website that automatically tracks and displays team match data for Chess.com clubs. It provides real-time insights into league standings, match results, and most importantly—registration status to help teams avoid forfeits.
 
 ### Key Features
 
@@ -30,12 +33,6 @@ Chess League Tracker is a static website that automatically tracks and displays 
 **Automated & Always Updated:**
 - 🔄 Updates nightly via GitHub Actions
 
-### Who Is This For?
-
-- **Chess Team Admins** - Track registrations, avoid forfeits, and avoid rating deficits 
-- **Team Players** - See your stats and upcoming matches
-- **Other Chess Clubs** - Adapt this for your own club (see instructions below)
-
 ---
 
 ## 🔧 Technical Overview
@@ -46,18 +43,32 @@ This is a **JAMstack** application with three components:
 
 1. **Data Layer** (Python)
    - `scripts/fetch_league_data.py` fetches data from Chess.com Public API
-   - Processes matches, calculates ratings, detects registration status
-   - Generates static JSON file (`public/data/leagueData.json`)
+   - `scripts/enrich_timeouts.py` analyses player timeout history
+   - Generates static JSON files into `public/data/<siteKey>/`
 
 2. **Frontend** (React + Vite)
-   - Single-page application with React Router
-   - Reads static JSON from `/data/leagueData.json`
+   - React App
+   - Reads static JSON from `/data/`
    - No backend server required
 
-3. **Deployment** (GitHub Actions + Pages)
-   - Nightly workflow fetches fresh data
-   - Builds React app automatically
-   - Deploys to GitHub Pages or custom domain
+3. **Deployment**
+   - Each project runs its own build command against the same repo
+   - Python scripts run via GitHub Actions and commit the updated data
+
+### Multi-Site Architecture
+
+A single repository powers **multiple independent sites**, each tracking a
+different Chess.com club. Every site has its own:
+
+| Concern | Location |
+|---|---|
+| League patterns & club ID | `config/<siteKey>/league_config.json` |
+| Script parameters | `config/<siteKey>/script_params.json` |
+| Generated JSON data | `public/data/<siteKey>/` |
+| Build command | `npm run build:<siteKey>` |
+
+The frontend source (`src/`) and Python scripts (`scripts/`) are **shared**
+across all sites.
 
 ### Tech Stack
 
@@ -72,263 +83,338 @@ This is a **JAMstack** application with three components:
 - Chess.com Public API
 
 **Infrastructure:**
-- GitHub Actions
-- GitHub Pages
+- GitHub Actions (data generation)
+- Cloudflare Pages (hosting)
 
-### How It Works
+### Data Flow
 
 ```
 ┌─────────────────┐
-│  GitHub Actions │  ← Runs nightly at 2 AM UTC
+│  GitHub Actions  │  ← Runs nightly / on demand
 │   (Scheduler)   │
 └────────┬────────┘
          │
          ▼
-┌─────────────────┐
-│ Python Script   │  ← Fetches from Chess.com API
-│ fetch_league_   │     Processes 50+ matches
-│ data.py         │     Generates JSON (~500KB)
-└────────┬────────┘
+┌─────────────────────────────────────────────────────────┐
+│ python scripts/fetch_league_data.py --site-key 1dpmc    │
+│ python scripts/enrich_timeouts.py  --site-key 1dpmc     │
+│                                                         │
+│ python scripts/fetch_league_data.py --site-key teamusa  │
+│ python scripts/enrich_timeouts.py  --site-key teamusa   │
+└────────┬────────────────────────────────────────────────┘
          │
          ▼
 ┌─────────────────┐
-│ leagueData.json │  ← Static data file
-│ (committed)     │
+│ public/data/     │  ← Static JSON committed to repo
+│   1dpmc/         │     leagueData.json, timeoutData.json
+│   teamusa/       │     leagueData.json, timeoutData.json
 └────────┬────────┘
          │
          ▼
-┌─────────────────┐
-│  Vite Build     │  ← Bundles React app
-│  (npm run build)│     Optimizes assets
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ GitHub Pages    │  ← Serves static site
-│ club.chess...   │     CDN delivery
-└─────────────────┘
+┌──────────────────────────────────────────────┐
+│ Deploy (two projects)              │
+│                                              │
+│  Project A: npm run build:1dpmc  → dist/     │
+│    Domain:  1dpmc.chessteamdata.com           │
+│                                              │
+│  Project B: npm run build:teamusa → dist/    │
+│    Domain:  teamusa.chessteamdata.com         │
+└──────────────────────────────────────────────┘
 ```
-
-### Data Flow
-
-1. **Fetch League Data**: Script calls Chess.com API to get match data, registrations, and results
-2. **Process Matches**: Extracts league/sub-league info from match titles, maps players to rounds
-3. **Enrich Timeouts** (separate script): Analyzes player timeout history and risk levels
-4. **Output**: Writes two JSON files:
-   - `leagueData.json` - Match data, registration status, leaderboards
-   - `timeoutData.json` - Timeout statistics and risk flags for registered players
-5. **Deploy**: React frontend reads both files and renders the site
-
-### Data Files
-
-**leagueData.json** contains:
-- All matches grouped by league → sub-league → rounds
-- Match status (open/in_progress/finished)
-- Registration rosters and board assignments
-- Player stats and leaderboards
-- Forfeit detection (automatic for 0-0 matches)
-
-**timeoutData.json** contains:
-- Timeout risk analysis for players in open matches
-- Rating information (daily, Chess960)
-- Timeout counts and percentages
-- Risk level classification (HIGH/MEDIUM/LOW or unflagged)
-
-[See SCHEMA.md for detailed documentation →](SCHEMA.md)
 
 ### Project Structure
 
 ```
 chess-league-tracker/
 ├── .github/workflows/
-│   └── update-data.yml          # Nightly automation
-├── public/
-│   ├── CNAME                     # Custom domain config
-│   └── data/
-│       └── leagueData.json       # Generated data
+│   └── update-data.yml              # Nightly automation
+├── config/
+│   ├── 1dpmc/
+│   │   ├── league_config.json       # Club ID & league patterns
+│   │   └── script_params.json       # Timeout thresholds, user agent, etc.
+│   └── teamusa/
+│       ├── league_config.json
+│       └── script_params.json
 ├── scripts/
-│   └── fetch_league_data.py      # Data fetcher script
+│   ├── fetch_league_data.py         # Data fetcher (--site-key required)
+│   └── enrich_timeouts.py           # Timeout analysis (--site-key required)
+├── config/shared/
+│   └── variant_patterns.json        # Shared variant normalization rules
+├── public/
+│   └── data/
+│       ├── 1dpmc/
+│       │   ├── leagueData.json      # Generated
+│       │   └── timeoutData.json     # Generated
+│       └── teamusa/
+│           ├── leagueData.json      # Generated
+│           └── timeoutData.json     # Generated
 ├── src/
 │   ├── components/
-│   │   ├── Leaderboard.jsx       # Table component
-│   │   ├── MatchCard.jsx         # Match card with warnings
-│   │   └── StatusBadge.jsx       # Status indicators
+│   │   ├── Leaderboard.jsx
+│   │   ├── MatchCard.jsx
+│   │   ├── StatusBadge.jsx
+│   │   └── TimeoutModal.jsx
 │   ├── pages/
-│   │   ├── Home.jsx              # League overview
-│   │   ├── AllMatches.jsx        # Global match view
-│   │   ├── LeagueView.jsx        # Single league
-│   │   ├── SubLeagueView.jsx     # Sub-league details
-│   │   └── GlobalLeaderboard.jsx # Player rankings
-│   ├── App.jsx                   # Main app + routing
-│   ├── main.jsx                  # React entry point
-│   └── index.css                 # Tailwind styles
-├── vite.config.js                # Build config
-├── tailwind.config.js            # Style config
-└── package.json                  # Dependencies
-```
-
-### API Usage
-
-**Chess.com Public API:**
-- **Club Matches**: `GET /pub/club/{club-id}/matches`
-  - Returns: `registered[]`, `in_progress[]`, `finished[]` arrays
-- **Match Details**: `GET /pub/match/{match-id}`
-  - Returns: Board assignments, player ratings, scores, settings
-
-**Optimizations:**
-- ✅ Single API call per match (ratings extracted from match endpoint)
-- ✅ 0.5s delay between requests (respects rate limits)
-- ✅ Static JSON caching (no API calls from frontend)
-
-### Development Commands
-
-```bash
-# Local development
-npm run dev              # Start dev server (http://localhost:5173)
-npm run build            # Build for production
-npm run preview          # Preview production build
-
-# Data fetching
-python scripts/fetch_league_data.py      # Fetch match data from Chess.com
-python scripts/enrich_timeouts.py        # Analyze timeout risk (requires leagueData.json)
+│   │   ├── Home.jsx
+│   │   ├── AllMatches.jsx
+│   │   ├── LeagueView.jsx
+│   │   ├── SubLeagueView.jsx
+│   │   ├── GlobalLeaderboard.jsx
+│   │   └── NotFound.jsx
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
+├── vite.config.js                   # Multi-site Vite config
+├── tailwind.config.js
+├── package.json                     # Per-site build scripts
+└── README.md
 ```
 
 ---
 
-## 🚀 Use This For Your Own Club
-
-Want to track your own Chess.com club? Here's how to set it up!
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- GitHub account
-- Chess.com club with team matches
-- Node.js 18+ and Python 3.11+ (for local development)
+- **Node.js 18+** and **npm**
+- **Python 3.11+**
 
-### Step 1: Fork & Clone
+### Install Dependencies
 
 ```bash
-# Fork the repository on GitHub, then:
-git clone https://github.com/YOUR-USERNAME/chess-league-tracker.git
+git clone https://github.com/mhelke/chess-league-tracker.git
 cd chess-league-tracker
-
-# Install dependencies
 npm install
 ```
 
-### Step 2: Configure Your Club
+---
 
-Edit `scripts/fetch_league_data.py` and change these settings:
+## 📦 Generating Data (Python Scripts)
 
-```python
-# Line 8-10: Change to your club's ID
-CLUB_ID = "your-club-id-here"  # From chess.com/club/your-club-id
+Python scripts are run manually or via GitHub Actions. They are
+never executed during the build.
 
-# Line 13-15: Define your league prefixes
-LEAGUE_PREFIXES = ["YOUR", "LEAGUE", "PREFIXES"]
-# Example: If matches are titled "ML Summer League R1", use ["ML"]
-```
+### 1. Fetch League Data
 
-**Finding Your League Prefixes:**
-
-This project parses match titles using a simple, consistent pattern so it can map a title to a `league`, `subLeagueName`, and `round`.
-
-Example pattern and mapping:
-
-```text
-"ML Division A R1"
-  ^  ^         ^
-  |  |         +-- Round token (e.g. R1) — used as the `round` identifier
-  |  +------------ Sub-league name (e.g. Division A) — used as `subLeagueName`
-  +--------------- League prefix (e.g. ML) — used to map to the `league` key
-```
-
-What is used:
-- **League prefix** (first token): mapped to a top-level league key (e.g. `ML` → `1WL` or similar)
-- **Sub-league text** (middle tokens): everything between the prefix and the round token becomes `subLeagueName`
-- **Round token** (tail token like `R1`, `Round-1`, etc.): parsed as the `round` label
-
-Notes and examples:
-- "ML Division A R1" → League: `ML`, Sub-league: `Division A`, Round: `R1`
-- "1WL summer league R2" → League: `1WL`, Sub-league: `summer league`, Round: `R2`
-- Titles that do not follow the prefix + sub-league + round pattern will be ignored by the league matcher (or require adding a new `LEAGUE_PREFIXES` entry).
-
-If your club uses a different naming convention, update `LEAGUE_PREFIXES` in `scripts/fetch_league_data.py` and ensure match titles consistently place the prefix first.
-
-### Step 3: Configure Deployment
-
-Choose GitHub Pages or configure a custom domain
-
-### Step 4: Initial Deploy
+Fetches match data from the Chess.com API for a given site:
 
 ```bash
-# Test locally first
-python scripts/fetch_league_data.py      # Fetch your club's data
-npm run dev                       # Verify it looks good
-
-# Push to GitHub
-git add .
-git commit -m "Configure for my club"
-git push origin main
+python scripts/fetch_league_data.py --site-key 1dpmc
+python scripts/fetch_league_data.py --site-key teamusa
 ```
 
-GitHub Actions will automatically:
-1. Fetch your club's data
-2. Build the React site
-3. Deploy to GitHub Pages
+- Reads club ID and league patterns from `config/<siteKey>/league_config.json`
+- Reads variant normalization rules from `config/shared/variant_patterns.json`
+- Writes output to `public/data/<siteKey>/leagueData.json`
 
-Visit your site at:
-- GitHub Pages: `https://YOUR-USERNAME.github.io/chess-league-tracker/`
+### 2. Enrich Timeout Data
 
-### Step 5: Customize (Optional)
+Analyses player timeout history and assigns risk levels:
 
-**Change Colors:**
-
-Edit `tailwind.config.js`:
-```javascript
-colors: {
-  'chess-dark': '#312e2b',    // Dark brown
-  'chess-light': '#eeeed2',   // Light beige
-  'chess-green': '#769656',   // Green
-}
+```bash
+python scripts/enrich_timeouts.py --site-key 1dpmc
+python scripts/enrich_timeouts.py --site-key teamusa
 ```
 
-**Change Update Schedule:**
+ - Reads parameters from `config/<siteKey>/script_params.json`
+- Reads input from `public/data/<siteKey>/leagueData.json`
+- Writes output to `public/data/<siteKey>/timeoutData.json`
 
-Edit `.github/workflows/update-data.yml`:
-```yaml
-schedule:
-  - cron: '0 2 * * *'  # 2 AM UTC daily
+### 3. Commit the Generated JSON
+
+After running the scripts, commit the updated JSON files:
+
+```bash
+git add public/data/
+git commit -m "Update data for 1dpmc and teamusa"
+git push
 ```
 
-### Troubleshooting
+### Environment Variable Overrides
 
-**No data showing:**
-- Check GitHub Actions tab for errors
-- Verify CLUB_ID matches your chess.com club URL
-- Ensure club has league matches with consistent titles
-
-**Wrong matches showing:**
-- Update LEAGUE_PREFIXES to match your match titles
-- Prefixes are case-sensitive
-- The data displayed depends on how the match titles are structured 
-
-**Need more help?** See contact info below!
+| Variable | Purpose | Default |
+|---|---|---|
+| `USER_AGENT` | HTTP User-Agent header for Chess.com API requests | `ChessLeagueTracker/1.0` |
 
 ---
 
-## 💬 Get Help or Request a Custom Instance
+## 🔧 Per-Site Configuration
+
+### league_config.json
+
+Located at `config/<siteKey>/league_config.json`. Defines which
+Chess.com club to track and which league title patterns to match.
+
+```json
+{
+  "clubId": "1-day-per-move-club",
+  "leagues": [
+    {"root_pattern": "\\b1WL\\b", "name": "1WL"},
+    {"root_pattern": "\\bTCMAC\\b", "name": "TCMAC"},
+    {"root_pattern": "\\bTMCL\\b", "name": "TMCL"}
+  ]
+}
+```
+
+| Field | Description |
+|---|---|
+| `clubId` | Chess.com club identifier (from the club URL) |
+| `leagues[].root_pattern` | Regex pattern matched against match titles (case-insensitive) |
+| `leagues[].name` | Canonical league name written to the output JSON |
+
+### script_params.json
+
+Located at `config/<siteKey>/script_params.json`. Controls timeout
+enrichment thresholds and behaviour.
+
+```json
+{
+  "riskThresholdPercent": 25.0,
+  "leagueTimeoutWindowDays": 90,
+  "archiveMaxMonthsBack": 2,
+  "userAgent": "ChessLeagueTracker/1.0"
+}
+```
+
+| Field | Description | Default |
+|---|---|---|
+| `riskThresholdPercent` | Timeout % above which a player is flagged for archive analysis | `25.0` |
+| `leagueTimeoutWindowDays` | Rolling window (days) for league-wide timeout count | `90` |
+| `archiveMaxMonthsBack` | Calendar months to look back in the game archive | `2` |
+| `userAgent` | User-Agent header sent to Chess.com API | `ChessLeagueTracker/1.0` |
+
+### Shared: variant_patterns.json
+
+Located at `scripts/shared/variant_patterns.json`. Defines regex rules for
+normalising inconsistent variant spellings in match titles (e.g. "Chess 960"
+→ "Chess960"). Shared across all sites.
+
+```json
+[
+  ["\\bChess\\s*960\\b", "Chess960"],
+  ["\\b960\\b", "Chess960"]
+]
+```
+
+---
+
+## 🏗️ Building & Running Locally
+
+### Development Server
+
+```bash
+npm run dev            # Defaults to 1dpmc
+npm run dev:1dpmc      # Explicit
+npm run dev:teamusa    # Team USA site
+```
+
+Opens at [http://localhost:5173](http://localhost:5173).
+
+### Production Build
+
+```bash
+npm run build:1dpmc    # Build 1dpmc site → dist/
+npm run build:teamusa  # Build teamusa site → dist/
+```
+
+### Preview Production Build
+
+```bash
+npm run build:1dpmc
+npm run preview        # Serve from dist/ at http://localhost:4173
+```
+
+---
+
+## Deployment
+
+Two separate domains pointing to the same repository.
+
+### Project A — 1dpmc
+
+| Setting | Value |
+|---|---|
+| **Build command** | `npm run build:1dpmc` |
+| **Build output directory** | `dist` |
+| **Custom domain** | `1dpmc.chessteamdata.com` |
+
+### Project B — teamusa
+
+| Setting | Value |
+|---|---|
+| **Build command** | `npm run build:teamusa` |
+| **Build output directory** | `dist` |
+| **Custom domain** | `teamusa.chessteamdata.com` |
+
+Both projects trigger on pushes to the main branch. Because the JSON data is
+committed to the repo, no Python or API calls are needed during the build.
+
+---
+
+## ➕ Adding a New Site
+
+Adding support for a new Chess.com club is straightforward:
+
+1. **Create config directory:**
+   ```bash
+   mkdir -p config/<newSiteKey>
+   ```
+
+2. **Add `league_config.json`:**
+   ```json
+   {
+     "clubId": "your-club-id",
+     "leagues": [
+       {"root_pattern": "\\bYOUR_LEAGUE\\b", "name": "YourLeague"}
+     ]
+   }
+   ```
+
+3. **Add `script_params.json`:**
+   ```json
+   {
+     "riskThresholdPercent": 25.0,
+     "leagueTimeoutWindowDays": 90,
+     "archiveMaxMonthsBack": 2,
+     "userAgent": "ChessLeagueTracker/1.0"
+   }
+   ```
+
+4. **Create data directory:**
+   ```bash
+   mkdir -p public/data/<newSiteKey>
+   ```
+
+5. **Add build script** to `package.json`:
+   ```json
+   "build:<newSiteKey>": "vite build --mode <newSiteKey>"
+   ```
+
+6. **Generate initial data:**
+   ```bash
+   python scripts/fetch_league_data.py --site-key <newSiteKey>
+   python scripts/enrich_timeouts.py --site-key <newSiteKey>
+   ```
+
+7. **Build and Deploy**
+   - Build command: `npm run build:<newSiteKey>`
+   - Output directory: `dist`
+
+---
+
+## 💬 Get Help or Request a Feature
 
 Don't want to set it up yourself? I can help!
 
-**Contact me on Chess.com:**  
+**Contact me on Chess.com:**
 👤 **[@MasterMatthew52](https://www.chess.com/member/mastermatthew52)**
 
 I'm happy to:
 - Answer technical questions
 - Help troubleshoot your setup
-- Create a custom hosted instance for your club
 - Add new features or customizations
+
+
 
 ---
 
@@ -345,7 +431,7 @@ Contributions welcome! Feel free to:
 - Open pull requests with improvements
 - Share how you're using this for your club
 
-**Please note:** this repository is configured for the _1 Day Per Move Club_ and reflects that team's needs. Contributions that broadly benefit the project are welcome; however, I may decline or redirect requests that are specific to other clubs.
+**Please note:** this repository is configured for my teams and reflects the needs of those teams. Contributions that broadly benefit the project are welcome; however, I may decline or redirect requests that are specific to other clubs.
 
 ### Development Guidelines
 

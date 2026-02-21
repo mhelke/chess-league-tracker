@@ -141,7 +141,7 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
                                     <span className="text-xl">⏱️</span>
                                     <div>
                                         <div className="font-bold text-amber-900 text-sm">Timeout Risk Alert</div>
-                                        <div className="text-xs text-amber-800">{alerts.playersWithHighTimeoutPercent} player{alerts.playersWithHighTimeoutPercent !== 1 ? 's' : ''} with timeout % over 25%</div>
+                                        <div className="text-xs text-amber-800">{alerts.playersWithHighTimeoutPercent} player{alerts.playersWithHighTimeoutPercent !== 1 ? 's' : ''} with high timeout ratio</div>
                                     </div>
                                 </div>
                                 <span className="text-xs font-bold text-amber-700">View Details →</span>

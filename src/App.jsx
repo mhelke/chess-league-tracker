@@ -6,7 +6,13 @@ import GlobalLeaderboard from './pages/GlobalLeaderboard'
 import AllMatches from './pages/AllMatches'
 import NotFound from './pages/NotFound'
 
+const SITE_NAMES = {
+    '1dpmc': '1 Day Per Move Club',
+    'teamusa': 'Team USA'
+}
+
 function App() {
+    const siteName = SITE_NAMES[__SITE_KEY__] || 'Chess League Tracker'
     return (
         <Router basename="/">
             <div className="min-h-screen bg-gray-50">
@@ -20,7 +26,7 @@ function App() {
                                 </svg>
                                 <div>
                                     <h1 className="text-2xl font-bold">Chess League Tracker</h1>
-                                    <p className="text-sm text-gray-300">1 Day Per Move Club</p>
+                                    <p className="text-sm text-gray-300">{siteName}</p>
                                 </div>
                             </Link>
                             <nav className="flex space-x-4">

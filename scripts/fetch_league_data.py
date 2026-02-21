@@ -6,57 +6,81 @@ Fetches, parses, and aggregates chess league data from chess.com club matches.
 Outputs a JSON file for consumption by the static React website.
 """
 
+import argparse
 import json
+import os
 import re
 import sys
+import time
 from collections import defaultdict
 from typing import Dict, List, Any, Optional
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
-import time
 
 # Ensure stdout uses UTF-8 encoding
 if sys.stdout.encoding != 'utf-8':
     import codecs
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
 
-# Configuration
-CLUB_ID = "1-day-per-move-club"
-CLUB_MATCHES_URL = f"https://api.chess.com/pub/club/{CLUB_ID}/matches"
-OUTPUT_FILE = "../public/data/leagueData.json"
-# ── League configuration ──────────────────────────────────────────────────────
-# Each entry defines one top-level league to track.
-#
-#  root_pattern  – regex searched *anywhere* in the title (case-insensitive).
-#                  A capture group named 'year' is extracted when present.
-#  name          – canonical league name written to output JSON.
-#
-# Examples that all resolve to league="WL", subleague="2026":
-#   "WL2026 R1"  |  "WL 2026 R1"  |  "WL2026 R1 USA vs Canada"
-LEAGUE_CONFIG = [
-    # Common Chess.com league patterns
-    # {"root_pattern": r"\bWL\s*(?P<year>\d{4})\b", "name": "WL"},
-    {"root_pattern": r"\b1WL\b",  "name": "1WL"},
-    {"root_pattern": r"\bTCMAC\b", "name": "TCMAC"}, 
-    {"root_pattern": r"\bTMCL\b",  "name": "TMCL"},
-    # Add more leagues below as needed...
-]
+# ── Paths (always relative to this file, regardless of cwd) ───────────────────
 
-# Variant keywords found anywhere in the title used ONLY to normalize
-# inconsistent spellings of the same concept so they group correctly into sub-leagues.
-# e.g. "Chess 960" and "Chess960" both become "Chess960".
-# You do NOT need to add entries here for every sub-league. Any qualifier
-# text left over after stripping the league root and round number becomes
-# the sub-league name automatically.
-VARIANT_PATTERNS = [
-    (r"\bChess\s*960\b", "Chess960"),
-    (r"\b960\b",         "Chess960"),
-]
+SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 
-# User agent for API requests 
-# If your script is going to make a lot of requests, 
-# it is recommended to add contact info here so chess.com can reach out if there's an issue.
-USER_AGENT = "ChessLeagueTracker/1.0"
+
+# ── Module-level configuration ─────────────────────────────────────────────────
+# These globals are populated by load_config() in main() before any
+# processing functions are called.  They must not be used at import time.
+
+CLUB_ID: str           = ""
+CLUB_MATCHES_URL: str  = ""
+OUTPUT_FILE: str       = ""
+LEAGUE_CONFIG: list    = []
+VARIANT_PATTERNS: list = []
+USER_AGENT: str        = "ChessLeagueTracker/1.0"
+
+
+def load_config(site_key: str) -> None:
+    """Load per-site and shared config files from `config/` and set globals."""
+    global CLUB_ID, CLUB_MATCHES_URL, OUTPUT_FILE, LEAGUE_CONFIG, VARIANT_PATTERNS, USER_AGENT
+
+    config_dir = os.path.join(PROJECT_ROOT, "config", site_key)
+
+    # ── league_config.json (per-site, required)
+    league_config_path = os.path.join(config_dir, "league_config.json")
+    if not os.path.exists(league_config_path):
+        print(f"ERROR: Config file not found: {league_config_path}", file=sys.stderr)
+        sys.exit(1)
+    with open(league_config_path, "r", encoding="utf-8") as f:
+        league_cfg = json.load(f)
+
+    CLUB_ID          = league_cfg["clubId"]
+    LEAGUE_CONFIG    = league_cfg.get("leagues", [])
+    CLUB_MATCHES_URL = f"https://api.chess.com/pub/club/{CLUB_ID}/matches"
+
+    # ── variant_patterns.json (shared, optional)
+    # Prefer config/shared to keep all inputs together; fall back to
+    # scripts/shared for backward compatibility.
+    variant_path = os.path.join(PROJECT_ROOT, "config", "shared", "variant_patterns.json")
+    if not os.path.exists(variant_path):
+        variant_path = os.path.join(SCRIPT_DIR, "shared", "variant_patterns.json")
+
+    if os.path.exists(variant_path):
+        with open(variant_path, "r", encoding="utf-8") as f:
+            VARIANT_PATTERNS = json.load(f)
+    else:
+        VARIANT_PATTERNS = []
+
+    # ── Output file
+    OUTPUT_FILE = os.path.join(PROJECT_ROOT, "public", "data", site_key, "leagueData.json")
+
+    # ── User agent (env override > script_params.json > default)
+    params_path = os.path.join(config_dir, "script_params.json")
+    if os.path.exists(params_path):
+        with open(params_path, "r", encoding="utf-8") as f:
+            params = json.load(f)
+        USER_AGENT = params.get("userAgent", USER_AGENT)
+    USER_AGENT = os.environ.get("USER_AGENT", USER_AGENT)
 
 def fetch_json(url: str) -> Optional[Dict]:
     """Fetch JSON data from a URL with error handling."""
@@ -686,7 +710,6 @@ def create_global_leaderboard(leagues_data: Dict) -> List[Dict]:
 def load_existing_match_ids() -> set:
     """Load finished match IDs from existing data file to avoid re-processing.
     In-progress and open matches are always re-fetched for updated data."""
-    import os
     if not os.path.exists(OUTPUT_FILE):
         return set()
     
@@ -712,7 +735,18 @@ def load_existing_match_ids() -> set:
 
 def main():
     """Main execution function."""
-    print(f"Fetching matches for club: {CLUB_ID}")
+    parser = argparse.ArgumentParser(
+        description="Fetch chess league data from Chess.com"
+    )
+    parser.add_argument(
+        "--site-key", required=True,
+        help="Site key matching a directory under config/ (e.g. '1dpmc', 'teamusa')",
+    )
+    args = parser.parse_args()
+
+    load_config(args.site_key)
+
+    print(f"Fetching matches for club: {CLUB_ID} (site: {args.site_key})")
     
     # Load existing match IDs to skip
     existing_match_ids = load_existing_match_ids()
@@ -826,7 +860,6 @@ def main():
     
     # Load existing data to merge with new data
     existing_data = {}
-    import os
     if os.path.exists(OUTPUT_FILE):
         try:
             with open(OUTPUT_FILE, 'r', encoding='utf-8') as f:
@@ -919,7 +952,6 @@ def main():
     }
     
     # Ensure output directory exists
-    import os
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     
     # Write JSON file

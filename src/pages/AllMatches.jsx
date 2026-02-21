@@ -177,7 +177,7 @@ function AllMatches() {
                                 <span className="text-2xl">⏱️</span>
                                 <div>
                                     <div className="text-sm font-bold text-amber-900">Timeout Risk Alert</div>
-                                    <div className="text-xs text-amber-800 mt-0.5">{matchTimeouts.playersWithHighTimeout} player{matchTimeouts.playersWithHighTimeout !== 1 ? 's' : ''} with timeout % over 25%</div>
+                                    <div className="text-xs text-amber-800 mt-0.5">{matchTimeouts.playersWithHighTimeout} player{matchTimeouts.playersWithHighTimeout !== 1 ? 's' : ''} with high timeout ratio</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 text-xs font-bold text-amber-700">

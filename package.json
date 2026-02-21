@@ -3,18 +3,20 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Chess league match tracker for 1-day-per-move-club with registration warnings and rating analysis",
+  "description": "Chess league match tracker supporting multiple clubs via per-site configuration",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/<your-username>/chess-league-tracker.git"
+    "url": "https://github.com/mhelke/chess-league-tracker.git"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "dev": "vite --mode 1dpmc",
+    "dev:1dpmc": "vite --mode 1dpmc",
+    "dev:teamusa": "vite --mode teamusa",
+    "build": "vite build --mode 1dpmc",
+    "build:1dpmc": "vite build --mode 1dpmc",
+    "build:teamusa": "vite build --mode teamusa",
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -26,7 +28,6 @@
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
-    "gh-pages": "^6.3.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "vite": "^5.1.0"

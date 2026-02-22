@@ -33,7 +33,6 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
         const ourRoster = round.registrationData?.ourRoster ?? []
         if (ourRoster.length === 0) return null
 
-        let playersWithSubleagueTimeouts = 0
         let playersWithHighTimeoutPercent = 0
         const alertPlayers = []
         const seen = new Set()
@@ -45,7 +44,6 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
 
             const subleagueTimeouts = td.subLeagueTimeouts?.[leagueName]?.[subLeagueName] ?? 0
 
-            if (subleagueTimeouts > 0) playersWithSubleagueTimeouts++
             if ((td.timeoutPercent ?? 0) > 25) playersWithHighTimeoutPercent++
 
             if (!seen.has(username)) {
@@ -69,7 +67,7 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
         const order = { HIGH: 0, MEDIUM: 1, LOW: 2 }
         alertPlayers.sort((a, b) => (order[a.riskLevel] ?? 99) - (order[b.riskLevel] ?? 99))
 
-        return { playersWithSubleagueTimeouts, playersWithHighTimeoutPercent, alertPlayers }
+        return { playersWithHighTimeoutPercent, alertPlayers }
     }
 
     const alerts = openMatchAlerts()
@@ -106,48 +104,26 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
             })()}
 
             {/* Timeout alerts for open matches */}
-            {round.status === 'open' && alerts && (alerts.playersWithSubleagueTimeouts > 0 || alerts.playersWithHighTimeoutPercent > 0) && (
+            {round.status === 'open' && alerts && alerts.playersWithHighTimeoutPercent > 0 && (
                 <div className={`flex flex-col mb-6 -mx-6 block ${!round.registeredPlayers ? '-mt-6' : ''}`}>
-                    {alerts.playersWithSubleagueTimeouts > 0 && (
-                        <button
-                            onClick={() => handleAlertClick(
-                                'Players with Subleague Timeouts',
-                                alerts.alertPlayers.filter(p => p.subleagueTimeouts > 0)
-                            )}
-                            className="w-full p-4 border-b border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100 transition-all text-left"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xl">⚠️</span>
-                                    <div>
-                                        <div className="font-bold text-orange-900 text-sm">{alerts.playersWithSubleagueTimeouts} player{alerts.playersWithSubleagueTimeouts !== 1 ? 's' : ''}</div>
-                                        <div className="text-xs text-orange-800">with timeouts in this subleague</div>
-                                    </div>
+                    <button
+                        onClick={() => handleAlertClick(
+                            'Players with High Timeout Risk (>25%)',
+                            alerts.alertPlayers.filter(p => p.timeoutPercent > 25)
+                        )}
+                        className="w-full p-4 border-b border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition-all text-left"
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xl">⏱️</span>
+                                <div>
+                                    <div className="font-bold text-amber-900 text-sm">Timeout Risk Alert</div>
+                                    <div className="text-xs text-amber-800">{alerts.playersWithHighTimeoutPercent} player{alerts.playersWithHighTimeoutPercent !== 1 ? 's' : ''} with high timeout ratio</div>
                                 </div>
-                                <span className="text-xs font-bold text-orange-700">View Details →</span>
                             </div>
-                        </button>
-                    )}
-                    {alerts.playersWithHighTimeoutPercent > 0 && (
-                        <button
-                            onClick={() => handleAlertClick(
-                                'Players with High Timeout Risk (>25%)',
-                                alerts.alertPlayers.filter(p => p.timeoutPercent > 25)
-                            )}
-                            className="w-full p-4 border-b border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition-all text-left"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xl">⏱️</span>
-                                    <div>
-                                        <div className="font-bold text-amber-900 text-sm">Timeout Risk Alert</div>
-                                        <div className="text-xs text-amber-800">{alerts.playersWithHighTimeoutPercent} player{alerts.playersWithHighTimeoutPercent !== 1 ? 's' : ''} with high timeout ratio</div>
-                                    </div>
-                                </div>
-                                <span className="text-xs font-bold text-amber-700">View Details →</span>
-                            </div>
-                        </button>
-                    )}
+                            <span className="text-xs font-bold text-amber-700">View Details →</span>
+                        </div>
+                    </button>
                 </div>
             )}
 

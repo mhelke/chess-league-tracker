@@ -144,9 +144,28 @@ function AllMatches() {
 
         const hasWarning = minNotMet || playerDeficit || ratingDisadvantage
         const hasTimeoutWarning = match.status === 'open' && matchTimeouts.hasHighTimeout
+        const hasAlert = hasWarning || hasTimeoutWarning
+
+        const cardBorder = (() => {
+            if (match.status === 'finished') {
+                const result = match.matchResult?.result
+                if (result === 'win' || result === 'win by forfeit') return 'border-2 border-green-400'
+                if (result === 'lose' || result === 'forfeit' || result === 'double forfeit') return 'border-2 border-red-400'
+                return 'border-2 border-gray-300'
+            }
+            if (match.status === 'in_progress') {
+                const threshold = (match.boards || 0) + 0.5
+                if ((match.matchResult?.ourScore ?? 0) > threshold) return 'border-2 border-green-400'
+                if ((match.matchResult?.opponentScore ?? 0) > threshold) return 'border-2 border-red-400'
+                return 'border-2 border-gray-300'
+            }
+            // open
+            if (hasAlert) return 'border-2 border-red-300'
+            return 'border-2 border-gray-300'
+        })()
 
         return (
-            <div className={`card mb-3 overflow-hidden ${hasWarning || hasTimeoutWarning ? 'border-2' : ''} ${hasWarning ? 'border-red-300' : hasTimeoutWarning ? 'border-amber-300' : ''}`}>
+            <div className={`card mb-3 overflow-hidden ${cardBorder}`}>
                 {/* Warning Banner */}
                 {hasWarning && match.status === 'open' && (
                     <div className="bg-red-50 border-b-2 border-red-200 -mx-6 -mt-6 mb-2 p-4">

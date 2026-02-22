@@ -53,6 +53,37 @@ function LeagueView() {
         return statusCounts
     }
 
+    const sortSubLeagues = (entries) => {
+        return [...entries].sort(([, a], [, b]) => {
+            const getCategory = (subLeagueData) => {
+                const rounds = subLeagueData.rounds
+                if (rounds.some(r => r.status === 'open')) return 0
+                if (rounds.some(r => r.status === 'in_progress')) return 1
+                return 2
+            }
+
+            const catA = getCategory(a)
+            const catB = getCategory(b)
+
+            if (catA !== catB) return catA - catB
+
+            // Sort by date descending
+            if (catA === 1) {
+                // in_progress: latest startTime descending
+                const latestA = Math.max(...a.rounds.filter(r => r.status === 'in_progress').map(r => r.startTime || 0))
+                const latestB = Math.max(...b.rounds.filter(r => r.status === 'in_progress').map(r => r.startTime || 0))
+                return latestB - latestA
+            }
+            if (catA === 2) {
+                // finished: latest endTime descending
+                const latestA = Math.max(...a.rounds.filter(r => r.status === 'finished').map(r => r.endTime || 0))
+                const latestB = Math.max(...b.rounds.filter(r => r.status === 'finished').map(r => r.endTime || 0))
+                return latestB - latestA
+            }
+            return 0
+        })
+    }
+
     return (
         <div className="page-container">
             {/* Breadcrumb */}
@@ -72,7 +103,7 @@ function LeagueView() {
 
             {/* Sub-league Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Object.entries(league.subLeagues || {}).map(([subLeagueName, subLeagueData]) => {
+                {sortSubLeagues(Object.entries(league.subLeagues || {})).map(([subLeagueName, subLeagueData]) => {
                     const stats = getSubLeagueStats(subLeagueData)
                     const topPlayer = subLeagueData.leaderboard[0]
 

@@ -188,16 +188,27 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
                 )
             })()}
 
-            {round.status === 'in_progress' && round.matchResult && (
-                <div className="mb-3 p-2 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                    <div className="flex justify-between items-center">
-                        <span className="font-semibold">⏳ In Progress</span>
-                        <span>
-                            {round.matchResult.ourScore} - {round.matchResult.opponentScore}
-                        </span>
+            {round.status === 'in_progress' && round.matchResult && (() => {
+                const { ourScore, opponentScore } = round.matchResult
+                const threshold = (round.boards || 0) + 0.5
+                const isProjectedWin = ourScore > threshold
+                const isProjectedLoss = opponentScore > threshold
+                const ptsNeeded = threshold - ourScore
+
+                return (
+                    <div className="mb-3 p-2 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                        <div className="flex justify-between items-center">
+                            <span className="font-semibold">⏳ In Progress</span>
+                            <span>{ourScore} - {opponentScore}</span>
+                        </div>
+                        <div className="text-xs mt-1 opacity-80">
+                            {isProjectedWin ? '🟢 Projected Win'
+                                : isProjectedLoss ? '🔴 Projected Loss'
+                                    : `${ptsNeeded} pts needed to win`}
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            })()}
 
             {/* Timeout info for finished/in_progress matches */}
             {(round.status === 'finished' || round.status === 'in_progress') && timeoutInfo && timeoutInfo.totalTimeouts > 0 && (
@@ -281,12 +292,10 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
                     </div>
                 )}
 
-                {round.playerStats && Object.keys(round.playerStats).length > 0 && (
+                {round.boards > 0 && (
                     <div className="flex justify-between pt-2 border-t border-gray-200">
                         <span className="text-gray-500">Players:</span>
-                        <span className="text-gray-900 font-medium">
-                            {Object.keys(round.playerStats).length}
-                        </span>
+                        <span className="text-gray-900 font-medium">{round.boards}</span>
                     </div>
                 )}
             </div>

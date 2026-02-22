@@ -228,9 +228,9 @@ function AllMatches() {
                     <span>{match.status === 'open' ? `Starts: ${formatDate(match.startTime)}` : `Started: ${formatDate(match.startTime)}`}</span>
                     {match.endTime && <span>Ended: {formatDate(match.endTime)}</span>}
 
-                    {match.registeredPlayers && (
+                    {match.boards > 0 && (
                         <span className="font-medium text-chess-dark">
-                            Players: {match.registeredPlayers.our} registered
+                            Players: {match.boards}
                         </span>
                     )}
 
@@ -254,11 +254,26 @@ function AllMatches() {
                         )
                     })()}
 
-                    {match.matchResult && match.status === 'in_progress' && (
-                        <span className="font-medium text-blue-600">
-                            ⏳ {match.matchResult.ourScore} - {match.matchResult.opponentScore}
-                        </span>
-                    )}
+                    {match.matchResult && match.status === 'in_progress' && (() => {
+                        const { ourScore, opponentScore } = match.matchResult
+                        const threshold = (match.boards || 0) + 0.5
+                        const isProjectedWin = ourScore > threshold
+                        const isProjectedLoss = opponentScore > threshold
+                        const ptsNeeded = threshold - ourScore
+
+                        return (
+                            <span className={`font-medium ${isProjectedWin ? 'text-green-600' : isProjectedLoss ? 'text-red-600' : 'text-yellow-600'
+                                }`}>
+                                {isProjectedWin ? '🟢 Projected Win' : isProjectedLoss ? '🔴 Projected Loss' : '🟡 In Progress'}
+                                {' '}({ourScore} - {opponentScore})
+                                {!isProjectedWin && !isProjectedLoss && (
+                                    <span className="text-xs ml-1 opacity-75">
+                                        · {ptsNeeded} pts needed to win
+                                    </span>
+                                )}
+                            </span>
+                        )
+                    })()}
                 </div>
 
                 {match.boardsData && match.boardsData.length > 0 && (() => {
@@ -492,6 +507,11 @@ function AllMatches() {
                 <p className="text-gray-600">
                     View all matches across leagues
                 </p>
+                {data?.lastUpdated && (
+                    <p className="text-gray-600">
+                        Last updated: {new Date(data.lastUpdated).toLocaleString()}
+                    </p>
+                )}
             </div>
 
             {/* Tabs */}

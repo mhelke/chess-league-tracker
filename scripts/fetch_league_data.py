@@ -657,6 +657,11 @@ def calculate_subleague_record(rounds: List[Dict]) -> Dict:
     """
     Calculate the Win-Loss-Draw record for a sub-league based on match results.
     Returns dict with wins, losses, draws counts.
+
+    Forfeit results are counted as wins or losses (not draws):
+      "win by forfeit"  → win
+      "forfeit"         → loss (our team forfeited)
+      "double forfeit"  → loss
     """
     record = {"wins": 0, "losses": 0, "draws": 0}
     
@@ -664,9 +669,9 @@ def calculate_subleague_record(rounds: List[Dict]) -> Dict:
         match_result = round_data.get("matchResult", {})
         result = match_result.get("result", "unknown")
         
-        if result == "win":
+        if result in ["win", "win by forfeit"]:
             record["wins"] += 1
-        elif result == "lose":
+        elif result in ["lose", "forfeit", "double forfeit"]:
             record["losses"] += 1
         elif result in ["draw", "agreed"]:
             record["draws"] += 1

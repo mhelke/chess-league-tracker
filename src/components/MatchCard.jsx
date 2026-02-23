@@ -33,6 +33,7 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
         const ourRoster = round.registrationData?.ourRoster ?? []
         if (ourRoster.length === 0) return null
 
+        const highRiskThreshold = timeoutData?.riskThresholdPercent ?? 25
         let playersWithHighTimeoutPercent = 0
         const alertPlayers = []
         const seen = new Set()
@@ -44,7 +45,7 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
 
             const subleagueTimeouts = td.subLeagueTimeouts?.[leagueName]?.[subLeagueName] ?? 0
 
-            if ((td.timeoutPercent ?? 0) > 25) playersWithHighTimeoutPercent++
+            if ((td.timeoutPercent ?? 0) > highRiskThreshold) playersWithHighTimeoutPercent++
 
             if (!seen.has(username)) {
                 seen.add(username)
@@ -108,8 +109,8 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
                 <div className={`flex flex-col mb-6 -mx-6 block ${!round.registeredPlayers ? '-mt-6' : ''}`}>
                     <button
                         onClick={() => handleAlertClick(
-                            'Players with High Timeout Risk (>25%)',
-                            alerts.alertPlayers.filter(p => p.timeoutPercent > 25)
+                            `Players with High Timeout Risk (>${timeoutData?.riskThresholdPercent ?? 25}%)`,
+                            alerts.alertPlayers.filter(p => p.timeoutPercent > (timeoutData?.riskThresholdPercent ?? 25))
                         )}
                         className="w-full p-4 border-b border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition-all text-left"
                     >
@@ -309,6 +310,7 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
                 onClose={() => setShowTimeoutModal(false)}
                 title={modalTitle}
                 players={modalPlayers}
+                threshold={timeoutData?.riskThresholdPercent ?? 25}
             />
         </div >
     )

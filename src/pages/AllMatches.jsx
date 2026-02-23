@@ -185,7 +185,7 @@ function AllMatches() {
                 {hasTimeoutWarning && (
                     <button
                         onClick={() => {
-                            setModalTitle('Players with High Timeout Risk (>25%)')
+                            setModalTitle(`Players with High Timeout Risk (>${timeoutData?.riskThresholdPercent ?? 25}%)`)
                             setModalPlayers(matchTimeouts.alertPlayers)
                             setShowTimeoutModal(true)
                         }}
@@ -579,6 +579,7 @@ function AllMatches() {
                 onClose={() => setShowTimeoutModal(false)}
                 title={modalTitle}
                 players={modalPlayers}
+                threshold={timeoutData?.riskThresholdPercent ?? 25}
             />
         </div>
     )

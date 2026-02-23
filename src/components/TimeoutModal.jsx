@@ -70,7 +70,7 @@ function NumCell({ value, warn, danger }) {
     return <span className={cls}>{v}</span>
 }
 
-function TimeoutModal({ isOpen, onClose, title, players, threshold = 25 }) {
+function TimeoutModal({ isOpen, onClose, title, players, threshold = 25, highPct = 50 }) {
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden'
@@ -180,7 +180,7 @@ function TimeoutModal({ isOpen, onClose, title, players, threshold = 25 }) {
 
                                             {/* Timeout % */}
                                             <td className="py-3 px-3 text-center whitespace-nowrap">
-                                                <span className={`font-bold ${pct > 50 ? 'text-red-700' : pct > threshold ? 'text-amber-700' : 'text-gray-500'}`}>
+                                                <span className={`font-bold ${pct > highPct ? 'text-red-700' : pct > threshold ? 'text-amber-700' : 'text-gray-500'}`}>
                                                     {pct != null ? `${pct.toFixed(1)}%` : '—'}
                                                 </span>
                                             </td>

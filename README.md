@@ -272,7 +272,17 @@ enrichment thresholds and behaviour.
   "riskThresholdPercent": 25.0,
   "leagueTimeoutWindowDays": 90,
   "archiveMaxMonthsBack": 2,
-  "userAgent": "ChessLeagueTracker/1.0"
+  "userAgent": "ChessLeagueTracker/1.0",
+
+  "highTimeoutPct": 50.0,
+  "highDailyTimeoutCount": 10,
+  "highSubLeagueTimeoutCount": 2,
+  "highMinFactors": 2,
+
+  "lowMaxTimeoutPct": 30.0,
+  "lowMaxDailyTimeoutCount": 10,
+  "lowMaxTimeoutPctRecent": 40.0,
+  "lowRecencyDays": 60
 }
 ```
 
@@ -282,6 +292,14 @@ enrichment thresholds and behaviour.
 | `leagueTimeoutWindowDays` | Rolling window (days) for league-wide timeout count | `90` |
 | `archiveMaxMonthsBack` | Calendar months to look back in the game archive | `2` |
 | `userAgent` | User-Agent header sent to Chess.com API | `ChessLeagueTracker/1.0` |
+| `highTimeoutPct` | Timeout % that satisfies the HIGH-risk timeout-ratio factor | `50.0` |
+| `highDailyTimeoutCount` | Recent daily timeout count that satisfies the HIGH-risk daily factor | `10` |
+| `highSubLeagueTimeoutCount` | Sub-league timeout count that satisfies the HIGH-risk sub-league factor | `2` |
+| `highMinFactors` | Number of HIGH-risk factors that must be satisfied to receive a HIGH rating | `2` |
+| `lowMaxTimeoutPct` | Condition A upper bound: pct must be below this for LOW (with no recent activity) | `30.0` |
+| `lowMaxDailyTimeoutCount` | Condition A ceiling: daily timeouts must be below this for LOW | `10` |
+| `lowMaxTimeoutPctRecent` | Condition B upper bound: pct must be below this for LOW (recency gate) | `40.0` |
+| `lowRecencyDays` | Condition B: last timeout must be older than this many days for LOW | `60` |
 
 ### Shared: variant_patterns.json
 
@@ -376,7 +394,17 @@ Adding support for a new Chess.com club is straightforward:
      "riskThresholdPercent": 25.0,
      "leagueTimeoutWindowDays": 90,
      "archiveMaxMonthsBack": 2,
-     "userAgent": "ChessLeagueTracker/1.0"
+     "userAgent": "ChessLeagueTracker/1.0",
+
+     "highTimeoutPct": 50.0,
+     "highDailyTimeoutCount": 10,
+     "highSubLeagueTimeoutCount": 2,
+     "highMinFactors": 2,
+
+     "lowMaxTimeoutPct": 30.0,
+     "lowMaxDailyTimeoutCount": 10,
+     "lowMaxTimeoutPctRecent": 40.0,
+     "lowRecencyDays": 60
    }
    ```
 

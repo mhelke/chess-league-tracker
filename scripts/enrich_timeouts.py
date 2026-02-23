@@ -65,12 +65,32 @@ DAILY_TC_SECONDS: Dict[int, str] = {
 # searching for daily timeout games (0 = current month only).
 ARCHIVE_MAX_MONTHS_BACK: int = 2
 
+# ── Risk tier thresholds ───────────────────────────────────────────────────────
+# HIGH: a player is HIGH risk when at least HIGH_MIN_FACTORS of the three
+#       criteria below are satisfied simultaneously.
+HIGH_TIMEOUT_PCT: float = 50.0           # timeout_percent must exceed this
+HIGH_DAILY_TIMEOUT_COUNT: int = 10       # recent daily timeouts must reach this
+HIGH_SUBLEAGUE_TIMEOUT_COUNT: int = 2    # sub-league timeouts must reach this
+HIGH_MIN_FACTORS: int = 2               # how many of the 3 criteria must be met
+
+# LOW: a player is LOW risk when either condition A or condition B is satisfied.
+# Condition A: pct is below LOW_MAX_TIMEOUT_PCT AND no sub-league timeouts AND
+#              recent daily timeouts are below LOW_MAX_DAILY_TIMEOUT_COUNT.
+# Condition B: pct is below LOW_MAX_TIMEOUT_PCT_RECENT AND no sub-league timeouts
+#              AND the most recent timeout is older than LOW_RECENCY_DAYS days.
+LOW_MAX_TIMEOUT_PCT: float = 30.0        # condition A: upper pct bound
+LOW_MAX_DAILY_TIMEOUT_COUNT: int = 10    # condition A: daily timeout ceiling
+LOW_MAX_TIMEOUT_PCT_RECENT: float = 40.0 # condition B: upper pct bound (recency gate)
+LOW_RECENCY_DAYS: int = 60               # condition B: minimum days since last timeout
+
 
 def load_config(site_key: str) -> None:
     """Load per-site config (script_params.json) and set module globals."""
     global INPUT_FILE, OUTPUT_FILE
     global RISK_THRESHOLD_PERCENT, LEAGUE_TIMEOUT_WINDOW_DAYS
     global USER_AGENT, ARCHIVE_MAX_MONTHS_BACK
+    global HIGH_TIMEOUT_PCT, HIGH_DAILY_TIMEOUT_COUNT, HIGH_SUBLEAGUE_TIMEOUT_COUNT, HIGH_MIN_FACTORS
+    global LOW_MAX_TIMEOUT_PCT, LOW_MAX_DAILY_TIMEOUT_COUNT, LOW_MAX_TIMEOUT_PCT_RECENT, LOW_RECENCY_DAYS
 
     data_dir    = os.path.join(PROJECT_ROOT, "public", "data", site_key)
     INPUT_FILE  = os.path.join(data_dir, "leagueData.json")
@@ -81,10 +101,18 @@ def load_config(site_key: str) -> None:
     if os.path.exists(params_path):
         with open(params_path, "r", encoding="utf-8") as f:
             params = json.load(f)
-        RISK_THRESHOLD_PERCENT    = params.get("riskThresholdPercent",    RISK_THRESHOLD_PERCENT)
-        LEAGUE_TIMEOUT_WINDOW_DAYS = params.get("leagueTimeoutWindowDays", LEAGUE_TIMEOUT_WINDOW_DAYS)
-        ARCHIVE_MAX_MONTHS_BACK   = params.get("archiveMaxMonthsBack",   ARCHIVE_MAX_MONTHS_BACK)
-        USER_AGENT                = params.get("userAgent",              USER_AGENT)
+        RISK_THRESHOLD_PERCENT       = params.get("riskThresholdPercent",       RISK_THRESHOLD_PERCENT)
+        LEAGUE_TIMEOUT_WINDOW_DAYS   = params.get("leagueTimeoutWindowDays",    LEAGUE_TIMEOUT_WINDOW_DAYS)
+        ARCHIVE_MAX_MONTHS_BACK      = params.get("archiveMaxMonthsBack",       ARCHIVE_MAX_MONTHS_BACK)
+        USER_AGENT                   = params.get("userAgent",                  USER_AGENT)
+        HIGH_TIMEOUT_PCT             = params.get("highTimeoutPct",             HIGH_TIMEOUT_PCT)
+        HIGH_DAILY_TIMEOUT_COUNT     = params.get("highDailyTimeoutCount",      HIGH_DAILY_TIMEOUT_COUNT)
+        HIGH_SUBLEAGUE_TIMEOUT_COUNT = params.get("highSubLeagueTimeoutCount",  HIGH_SUBLEAGUE_TIMEOUT_COUNT)
+        HIGH_MIN_FACTORS             = params.get("highMinFactors",             HIGH_MIN_FACTORS)
+        LOW_MAX_TIMEOUT_PCT          = params.get("lowMaxTimeoutPct",           LOW_MAX_TIMEOUT_PCT)
+        LOW_MAX_DAILY_TIMEOUT_COUNT  = params.get("lowMaxDailyTimeoutCount",    LOW_MAX_DAILY_TIMEOUT_COUNT)
+        LOW_MAX_TIMEOUT_PCT_RECENT   = params.get("lowMaxTimeoutPctRecent",     LOW_MAX_TIMEOUT_PCT_RECENT)
+        LOW_RECENCY_DAYS             = params.get("lowRecencyDays",             LOW_RECENCY_DAYS)
 
     # Environment variable overrides config file
     USER_AGENT = os.environ.get("USER_AGENT", USER_AGENT)
@@ -404,7 +432,8 @@ def fetch_archive_timeouts(username_lower: str) -> Dict:
 
 
 # ── Risk level computation ────────────────────────────────────────────────────
-# If your definition of HIGH/MEDIUM/LOW risk differs, modify this function.
+# Thresholds are controlled by the HIGH_*/LOW_* module globals loaded from
+# script_params.json — see load_config().
 def compute_risk_level(
     timeout_percent: Optional[float],
     total_daily_timeouts: int,
@@ -414,27 +443,31 @@ def compute_risk_level(
     """
     Compute (riskLevel, riskReason) for a player whose riskFlag is True.
 
-    HIGH   - at least 2 of: timeout_percent > 50 | total_daily_timeouts >= 10
-             | total_sl_timeouts >= 2
-    LOW    - (pct < 30 AND sl == 0 AND total_daily < 10) OR
-             (pct < 40 AND sl == 0 AND last_timeout > 2 months ago)
+    HIGH   - at least HIGH_MIN_FACTORS of:
+               timeout_percent > HIGH_TIMEOUT_PCT
+             | total_daily_timeouts >= HIGH_DAILY_TIMEOUT_COUNT
+             | total_sl_timeouts >= HIGH_SUBLEAGUE_TIMEOUT_COUNT
+    LOW    - condition A: pct < LOW_MAX_TIMEOUT_PCT AND sl == 0
+                          AND total_daily < LOW_MAX_DAILY_TIMEOUT_COUNT
+             condition B: pct < LOW_MAX_TIMEOUT_PCT_RECENT AND sl == 0
+                          AND last_timeout > LOW_RECENCY_DAYS days ago
     MEDIUM - riskFlag==True but meets neither HIGH nor LOW criteria
     """
     pct = timeout_percent or 0.0
 
     # ── HIGH ─────────────────────────────────────────────────────────────────
     high_factors = [
-        pct > 50,
-        total_daily_timeouts >= 10,
-        total_sl_timeouts >= 2,
+        pct > HIGH_TIMEOUT_PCT,
+        total_daily_timeouts >= HIGH_DAILY_TIMEOUT_COUNT,
+        total_sl_timeouts >= HIGH_SUBLEAGUE_TIMEOUT_COUNT,
     ]
-    if sum(high_factors) >= 2:
+    if sum(high_factors) >= HIGH_MIN_FACTORS:
         parts = []
-        if pct > 50:
+        if pct > HIGH_TIMEOUT_PCT:
             parts.append(f"timeout ratio {pct:.0f}%")
-        if total_daily_timeouts >= 10:
+        if total_daily_timeouts >= HIGH_DAILY_TIMEOUT_COUNT:
             parts.append(f"{total_daily_timeouts} recent daily timeouts")
-        if total_sl_timeouts >= 2:
+        if total_sl_timeouts >= HIGH_SUBLEAGUE_TIMEOUT_COUNT:
             parts.append(f"{total_sl_timeouts} sub-league timeouts")
         return "HIGH", "High risk: " + ", ".join(parts) + "."
 
@@ -445,15 +478,15 @@ def compute_risk_level(
         if v.get("lastTimeoutDate")
     ]
     last_timeout_date = max(recent_dates) if recent_dates else None
-    two_months_ago = (
-        datetime.now(tz=timezone.utc) - timedelta(days=60)
+    recency_cutoff = (
+        datetime.now(tz=timezone.utc) - timedelta(days=LOW_RECENCY_DAYS)
     ).strftime("%Y-%m-%d")
 
-    low_a = pct < 30 and total_sl_timeouts == 0 and total_daily_timeouts < 10
+    low_a = pct < LOW_MAX_TIMEOUT_PCT and total_sl_timeouts == 0 and total_daily_timeouts < LOW_MAX_DAILY_TIMEOUT_COUNT
     low_b = (
-        pct < 40
+        pct < LOW_MAX_TIMEOUT_PCT_RECENT
         and total_sl_timeouts == 0
-        and (last_timeout_date is None or last_timeout_date < two_months_ago)
+        and (last_timeout_date is None or last_timeout_date < recency_cutoff)
     )
     if low_a or low_b:
         parts = [f"timeout ratio {pct:.0f}%", "no recent sub-league timeouts"]
@@ -606,6 +639,16 @@ def _write_output(players: Dict) -> None:
     output = {
         "generatedAt":          datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "riskThresholdPercent": RISK_THRESHOLD_PERCENT,
+        "riskConfig": {
+            "highTimeoutPct":            HIGH_TIMEOUT_PCT,
+            "highDailyTimeoutCount":     HIGH_DAILY_TIMEOUT_COUNT,
+            "highSubLeagueTimeoutCount": HIGH_SUBLEAGUE_TIMEOUT_COUNT,
+            "highMinFactors":            HIGH_MIN_FACTORS,
+            "lowMaxTimeoutPct":          LOW_MAX_TIMEOUT_PCT,
+            "lowMaxDailyTimeoutCount":   LOW_MAX_DAILY_TIMEOUT_COUNT,
+            "lowMaxTimeoutPctRecent":    LOW_MAX_TIMEOUT_PCT_RECENT,
+            "lowRecencyDays":            LOW_RECENCY_DAYS,
+        },
         "players":              players,
     }
 

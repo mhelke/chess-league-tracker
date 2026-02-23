@@ -2,5 +2,15 @@
   "riskThresholdPercent": 25.0,
   "leagueTimeoutWindowDays": 90,
   "archiveMaxMonthsBack": 2,
-  "userAgent": "ChessLeagueTracker/1.0"
+  "userAgent": "ChessLeagueTracker/1.0",
+
+  "highTimeoutPct": 50.0,
+  "highDailyTimeoutCount": 10,
+  "highSubLeagueTimeoutCount": 2,
+  "highMinFactors": 2,
+
+  "lowMaxTimeoutPct": 30.0,
+  "lowMaxDailyTimeoutCount": 10,
+  "lowMaxTimeoutPctRecent": 40.0,
+  "lowRecencyDays": 60
 }

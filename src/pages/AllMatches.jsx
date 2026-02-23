@@ -580,6 +580,7 @@ function AllMatches() {
                 title={modalTitle}
                 players={modalPlayers}
                 threshold={timeoutData?.riskThresholdPercent ?? 25}
+                highPct={timeoutData?.riskConfig?.highTimeoutPct ?? 50}
             />
         </div>
     )

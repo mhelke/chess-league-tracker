@@ -2,24 +2,34 @@ import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 import TimeoutModal from '../components/TimeoutModal'
+import EarlyResignModal from '../components/EarlyResignModal'
+import { buildEarlyResignIndex, getModalPlayersForMatch } from '../utils/earlyResignUtils'
 
 function AllMatches() {
     const [data, setData] = useState(null)
     const [timeoutData, setTimeoutData] = useState(null)
+    const [earlyResignData, setEarlyResignData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('open')
     const [showTimeoutModal, setShowTimeoutModal] = useState(false)
     const [modalTitle, setModalTitle] = useState('')
     const [modalPlayers, setModalPlayers] = useState([])
+    const [showEarlyResignModal, setShowEarlyResignModal] = useState(false)
+    const [earlyResignModalPlayers, setEarlyResignModalPlayers] = useState([])
+
+    // Build early resignation index — must be before any early return (Rules of Hooks)
+    const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData), [earlyResignData])
 
     useEffect(() => {
         Promise.all([
             fetch('/data/leagueData.json').then(r => r.json()),
             fetch('/data/timeoutData.json').then(r => r.json()).catch(() => null),
+            fetch('/data/earlyResignations.json').then(r => r.json()).catch(() => null),
         ])
-            .then(([leagueJson, timeoutJson]) => {
+            .then(([leagueJson, timeoutJson, earlyResignJson]) => {
                 setData(leagueJson)
                 setTimeoutData(timeoutJson)
+                setEarlyResignData(earlyResignJson)
                 setLoading(false)
             })
             .catch(err => {
@@ -146,6 +156,11 @@ function AllMatches() {
         const hasTimeoutWarning = match.status === 'open' && matchTimeouts.hasHighTimeout
         const hasAlert = hasWarning || hasTimeoutWarning
 
+        // Early resignation banner — in-progress and finished matches only
+        const earlyResignPlayers = (match.status === 'in_progress' || match.status === 'finished')
+            ? getModalPlayersForMatch(earlyResignIndex, match.matchUrl || match.matchId)
+            : []
+
         const cardBorder = (() => {
             if (match.status === 'finished') {
                 const result = match.matchResult?.result
@@ -215,6 +230,25 @@ function AllMatches() {
                             <span>{matchTimeouts.totalTimeouts} timeout{matchTimeouts.totalTimeouts !== 1 ? 's' : ''} by our team</span>
                         </div>
                     </div>
+                )}
+
+                {/* Early resignation banner — finished / in-progress matches */}
+                {(match.status === 'finished' || match.status === 'in_progress') && earlyResignPlayers.length > 0 && (
+                    <button
+                        onClick={() => {
+                            setEarlyResignModalPlayers(earlyResignPlayers)
+                            setShowEarlyResignModal(true)
+                        }}
+                        className={`w-[calc(100%+2rem)] text-left bg-rose-50 border-b border-rose-200 -mx-4 ${matchTimeouts.totalTimeouts > 0 ? 'mt-0' : '-mt-4'} mb-3 p-2 hover:bg-rose-100 transition-colors`}
+                    >
+                        <div className="flex items-center justify-between gap-2 text-xs font-medium text-rose-800">
+                            <div className="flex items-center gap-2">
+                                <span>🏳️</span>
+                                <span>{earlyResignPlayers.length} early resignation{earlyResignPlayers.length !== 1 ? 's' : ''} in this match</span>
+                            </div>
+                            <span className="font-bold text-rose-700">View →</span>
+                        </div>
+                    </button>
                 )}
 
                 {/* Success Banner for open matches */}
@@ -581,6 +615,14 @@ function AllMatches() {
                 players={modalPlayers}
                 threshold={timeoutData?.riskThresholdPercent ?? 25}
                 highPct={timeoutData?.riskConfig?.highTimeoutPct ?? 50}
+            />
+
+            {/* Early Resign Modal */}
+            <EarlyResignModal
+                isOpen={showEarlyResignModal}
+                onClose={() => setShowEarlyResignModal(false)}
+                title="Early Resignation History"
+                players={earlyResignModalPlayers}
             />
         </div>
     )

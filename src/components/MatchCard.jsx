@@ -2,11 +2,15 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import StatusBadge from './StatusBadge'
 import TimeoutModal from './TimeoutModal'
+import EarlyResignModal from './EarlyResignModal'
+import { getModalPlayersForMatch } from '../utils/earlyResignUtils'
 
-function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
+function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignIndex }) {
     const [showTimeoutModal, setShowTimeoutModal] = useState(false)
     const [modalTitle, setModalTitle] = useState('')
     const [modalPlayers, setModalPlayers] = useState([])
+    const [showEarlyResignModal, setShowEarlyResignModal] = useState(false)
+    const [earlyResignPlayers, setEarlyResignPlayers] = useState([])
 
     const formatDate = (timestamp) => {
         if (!timestamp) return null
@@ -78,6 +82,16 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
         setModalPlayers(players)
         setShowTimeoutModal(true)
     }
+
+    // Early resignation banner data — in-progress and finished matches only
+    const earlyResignBannerPlayers = (() => {
+        if (!earlyResignIndex) return []
+        if (round.status === 'in_progress' || round.status === 'finished') {
+            const matchUrl = round.matchUrl || round.matchId
+            return getModalPlayersForMatch(earlyResignIndex, matchUrl)
+        }
+        return []
+    })()
 
     return (
         <div className="card overflow-hidden">
@@ -186,6 +200,26 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
                     </div>
                 )
             })()}
+
+            {/* Early resign banner — finished / in-progress matches */}
+            {(round.status === 'finished' || round.status === 'in_progress') && earlyResignBannerPlayers.length > 0 && (
+                <div className="mb-3 p-2 rounded-md text-sm bg-rose-50 border border-rose-200 cursor-pointer hover:bg-rose-100 transition-colors"
+                    onClick={() => {
+                        setEarlyResignPlayers(earlyResignBannerPlayers)
+                        setShowEarlyResignModal(true)
+                    }}
+                >
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="text-rose-700">🏳️</span>
+                            <span className="text-rose-800 font-medium">
+                                {earlyResignBannerPlayers.length} early resignation{earlyResignBannerPlayers.length !== 1 ? 's' : ''} in this match
+                            </span>
+                        </div>
+                        <span className="text-xs font-bold text-rose-600">View →</span>
+                    </div>
+                </div>
+            )}
 
             {/* Timeout info for finished/in_progress matches */}
             {(round.status === 'finished' || round.status === 'in_progress') && timeoutInfo && timeoutInfo.totalTimeouts > 0 && (
@@ -312,6 +346,13 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName }) {
                 players={modalPlayers}
                 threshold={timeoutData?.riskThresholdPercent ?? 25}
                 highPct={timeoutData?.riskConfig?.highTimeoutPct ?? 50}
+            />
+
+            <EarlyResignModal
+                isOpen={showEarlyResignModal}
+                onClose={() => setShowEarlyResignModal(false)}
+                title="Early Resignation History"
+                players={earlyResignPlayers}
             />
         </div >
     )

@@ -1,23 +1,29 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Leaderboard from '../components/Leaderboard'
 import MatchCard from '../components/MatchCard'
+import { buildEarlyResignIndex } from '../utils/earlyResignUtils'
+import { GameLinksModal } from '../components/EarlyResignModal'
 
 function SubLeagueView() {
     const { leagueName, subLeagueName } = useParams()
     const [data, setData] = useState(null)
     const [timeoutData, setTimeoutData] = useState(null)
+    const [earlyResignData, setEarlyResignData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('rounds')
+    const [gameLinksFor, setGameLinksFor] = useState(null)
 
     useEffect(() => {
         Promise.all([
             fetch('/data/leagueData.json').then(r => r.json()),
             fetch('/data/timeoutData.json').then(r => r.json()).catch(() => null),
+            fetch('/data/earlyResignations.json').then(r => r.json()).catch(() => null),
         ])
-            .then(([leagueJson, timeoutJson]) => {
+            .then(([leagueJson, timeoutJson, earlyResignJson]) => {
                 setData(leagueJson)
                 setTimeoutData(timeoutJson)
+                setEarlyResignData(earlyResignJson)
                 setLoading(false)
             })
             .catch(err => {
@@ -28,6 +34,31 @@ function SubLeagueView() {
 
     const subLeague = data?.leagues?.[leagueName]?.subLeagues?.[subLeagueName]
 
+    const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData), [earlyResignData])
+
+    // Aggregate early resignations for this specific sub-league
+    const subLeagueEarlyResigns = useMemo(() => {
+        if (!earlyResignIndex?.byMatchUrl || !subLeague) return []
+        const matchUrls = (subLeague.rounds || []).map(r => r.matchUrl).filter(Boolean)
+        const byPlayer = {}
+        matchUrls.forEach(matchUrl => {
+            ; (earlyResignIndex.byMatchUrl[matchUrl] || []).forEach(entry => {
+                const u = entry.username
+                if (!byPlayer[u]) byPlayer[u] = { username: u, total: 0, games: [] }
+                const alreadyAdded = byPlayer[u].games.some(g => g.game_api === entry.game_api)
+                if (!alreadyAdded) {
+                    byPlayer[u].total++
+                    byPlayer[u].games.push({
+                        game_api: entry.game_api,
+                        board_api: entry.board_api,
+                        moves_ply: entry.moves_ply,
+                        matchWebUrl: entry.matchWebUrl,
+                    })
+                }
+            })
+        })
+        return Object.values(byPlayer).sort((a, b) => b.total - a.total)
+    }, [earlyResignIndex, subLeague])
 
     if (loading) {
         return (
@@ -109,6 +140,18 @@ function SubLeagueView() {
                         >
                             Leaderboard
                         </button>
+                        {subLeagueEarlyResigns.length > 0 && (
+                            <button
+                                onClick={() => setActiveTab('early_resignations')}
+                                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-1.5 ${activeTab === 'early_resignations'
+                                        ? 'border-rose-500 text-rose-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                            >
+                                <span className="text-rose-500 text-xs">&#9888;&#65039;</span>
+                                Early Resignations
+                            </button>
+                        )}
                     </nav>
                 </div>
             </div>
@@ -130,6 +173,7 @@ function SubLeagueView() {
                                         timeoutData={timeoutData}
                                         leagueName={leagueName}
                                         subLeagueName={subLeagueName}
+                                        earlyResignIndex={earlyResignIndex}
                                     />
                                 ))}
                             </div>
@@ -150,6 +194,7 @@ function SubLeagueView() {
                                         timeoutData={timeoutData}
                                         leagueName={leagueName}
                                         subLeagueName={subLeagueName}
+                                        earlyResignIndex={earlyResignIndex}
                                     />
                                 ))}
                             </div>
@@ -170,18 +215,75 @@ function SubLeagueView() {
                                         timeoutData={timeoutData}
                                         leagueName={leagueName}
                                         subLeagueName={subLeagueName}
+                                        earlyResignIndex={earlyResignIndex}
                                     />
                                 ))}
                             </div>
                         </div>
                     )}
                 </div>
-            ) : (
+            ) : activeTab === 'leaderboard' ? (
                 <div className="card">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6">Player Rankings</h3>
                     <Leaderboard players={subLeague.leaderboard} />
                 </div>
+            ) : (
+                <div className="card">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-1">Early Resignations</h3>
+                    <p className="text-sm text-gray-500 mb-6">{subLeagueEarlyResigns.length} player{subLeagueEarlyResigns.length !== 1 ? 's' : ''} with early resignations in this sub-league</p>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="table-header">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Early Resignations</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Games</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {subLeagueEarlyResigns.map((player, idx) => (
+                                    <tr key={player.username} className={idx % 2 === 0 ? 'bg-white' : 'bg-rose-50/30'}>
+                                        <td className="px-6 py-4 whitespace-nowrap font-medium">
+                                            <a
+                                                href={`https://www.chess.com/member/${player.username}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-chess-green hover:text-green-700 hover:underline"
+                                            >
+                                                {player.username}
+                                            </a>
+                                        </td>
+                                        <td className="px-6 py-4 text-center whitespace-nowrap">
+                                            <span className={`font-bold text-base ${player.total >= 3 ? 'text-red-700' :
+                                                    player.total === 2 ? 'text-amber-700' :
+                                                        'text-gray-700'
+                                                }`}>
+                                                {player.total}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center whitespace-nowrap">
+                                            <button
+                                                onClick={() => setGameLinksFor({ username: player.username, games: player.games })}
+                                                className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-semibold bg-rose-100 text-rose-800 hover:bg-rose-200 border border-rose-200 transition-colors"
+                                            >
+                                                <span>&#128279;</span>
+                                                <span>{player.games.length} game{player.games.length !== 1 ? 's' : ''}</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             )}
+
+            <GameLinksModal
+                isOpen={!!gameLinksFor}
+                onClose={() => setGameLinksFor(null)}
+                username={gameLinksFor?.username ?? ''}
+                games={gameLinksFor?.games ?? []}
+            />
         </div>
     )
 }

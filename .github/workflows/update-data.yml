@@ -37,11 +37,17 @@ jobs:
       - name: Enrich timeout data — 1dpmc
         run: python scripts/enrich_timeouts.py --site-key 1dpmc
 
+      - name: Detect early resignations — 1dpmc
+        run: python scripts/detect_early_resignations.py --site-key 1dpmc --threshold 4
+
       - name: Fetch league data — teamusa
         run: python scripts/fetch_league_data.py --site-key teamusa
 
       - name: Enrich timeout data — teamusa
         run: python scripts/enrich_timeouts.py --site-key teamusa
+
+      - name: Detect early resignations — teamusa
+        run: python scripts/detect_early_resignations.py --site-key teamusa --threshold 4
 
       - name: Check for changes
         id: check_changes

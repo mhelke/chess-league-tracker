@@ -111,9 +111,16 @@ def insert_result(results: Dict, league: str, subleague: str, match_key: str, ma
     matches = sub_entry.setdefault("matches", [])
     # Find existing match item by matchUrl if present
     match_url = match_info.get("matchUrl") or match_info.get("matchId")
+    dedup_key = (entry.get("username", "").lower(), entry.get("color", ""), entry.get("game_api", ""))
     for m in matches:
         if m.get("matchUrl") == match_url:
-            m.setdefault("players", []).append(entry)
+            # Guard: only append if this exact (username, color, game_api) isn't already present
+            existing_keys = {
+                (p.get("username", "").lower(), p.get("color", ""), p.get("game_api", ""))
+                for p in m.get("players", [])
+            }
+            if dedup_key not in existing_keys:
+                m.setdefault("players", []).append(entry)
             return
     # New match item
     match_item = {
@@ -164,24 +171,33 @@ def main() -> None:
 
     with open(league_path, "r", encoding="utf-8") as f:
         league_data = json.load(f)
-    total_matches_found = 0
 
-    cache = {"checked_players": [], "checked_boards": [], "checked_matches": [], "checked_players_by_match": {}}
+    cache: Dict = {}
     if os.path.exists(cache_path):
         try:
             with open(cache_path, "r", encoding="utf-8") as f:
                 cache = json.load(f)
         except Exception:
-            cache = {"checked_players": [], "checked_boards": [], "checked_matches": []}
+            cache = {}
 
-    # checked_players_by_match: { matchUrl: [username, ...] }
-    raw_checked_players_by_match = cache.get("checked_players_by_match", {}) or {}
-    checked_players_by_match: Dict[str, set] = {m: set([u.lower() for u in users]) for m, users in raw_checked_players_by_match.items()}
-    checked_boards = set(cache.get("checked_boards", []))
-    checked_matches = set(cache.get("checked_matches", []))
+    # checked_players_by_match: { matchUrl: set("username:color") } — players fully resolved
+    raw_checked = cache.get("checked_players_by_match", {}) or {}
+    checked_players_by_match: Dict[str, set] = {
+        m: set(u.lower() for u in users) for m, users in raw_checked.items()
+    }
+    # checked_boards: board URLs where every player is done — safe to skip fetching
+    checked_boards: set = set(cache.get("checked_boards", []))
+    # checked_matches: finished matches where every player is fully resolved — never visit again
+    checked_matches: set = set(cache.get("checked_matches", []))
+    # player_boards_by_match: cached player→board mapping so live match API re-fetches can be
+    # avoided on subsequent runs.  Structure: { matchUrl: { "username:color": boardUrl } }
+    raw_player_boards = cache.get("player_boards_by_match", {}) or {}
+    player_boards_by_match: Dict[str, Dict[str, str]] = {
+        m: dict(v) for m, v in raw_player_boards.items()
+    }
 
-    # If an existing results file exists, prefill checked_players_by_match
-    # so we won't re-record the same player for the same match when merging.
+    # Prefill checked_players_by_match from existing results so already-recorded early
+    # resignations are never double-inserted when merging on subsequent runs.
     if os.path.exists(out_path):
         try:
             with open(out_path, "r", encoding="utf-8") as f:
@@ -200,9 +216,15 @@ def main() -> None:
         except Exception:
             logging.debug("Unable to prefill checked players from existing results file; continuing")
 
-    # Find candidate (username, color, board_url, match_info)
-    candidates_by_board: Dict[str, List[Tuple[str, str, Dict]]] = {}
-    # Walk leagues -> subLeagues -> rounds/matches (shaped like fetch_league_data)
+    # candidates_by_board: board_url -> [(username, color_name, match_ref, is_resigned)]
+    # Tracks ALL our-team players with board URLs (not just resigned) so move-count caching
+    # applies to every player, reducing future fetches.
+    candidates_by_board: Dict[str, List[Tuple[str, str, Dict, bool]]] = {}
+    # match_player_set:  match_url -> full set of "username:color" for our team in that match
+    match_player_set: Dict[str, set] = {}
+    # match_board_urls:  match_url -> board URLs seen for that match (for cleanup later)
+    match_board_urls: Dict[str, set] = {}
+
     leagues = league_data.get("leagues", {})
     for league_key, league_val in leagues.items():
         sub_leagues = league_val.get("subLeagues", {}) if isinstance(league_val, dict) else {}
@@ -210,19 +232,65 @@ def main() -> None:
             rounds = sub_val.get("rounds") or sub_val.get("matches") or []
             for match in rounds:
                 status = (match.get("status") or "").lower()
+                # Skip matches that haven't started yet — only process active or finished matches
                 if status not in ("in_progress", "finished"):
                     continue
                 match_url = match.get("matchUrl") or match.get("matchId")
                 if not match_url:
                     continue
-                # Skip matches we've already inspected
+                # Skip fully-processed matches — all players already cached
                 if match_url in checked_matches:
+                    logging.debug("Skipping fully-cached match: %s", match_url)
                     continue
-                # Fetch the full match JSON from the Chess.com API
+
+                # Auto-cache forfeit/walkover matches — no games were actually played
+                match_result = match.get("matchResult", {}) or {}
+                result_str = str(match_result.get("result", "")).lower()
+                player_stats = match.get("playerStats")
+                if "forfeit" in result_str or (
+                    status == "finished"
+                    and isinstance(player_stats, dict)
+                    and len(player_stats) == 0
+                ):
+                    logging.info(
+                        "Auto-caching no-games match: %s (result: %s)",
+                        match_url, result_str or "empty playerStats",
+                    )
+                    checked_matches.add(match_url)
+                    continue
+
+                match_ref = {
+                    "matchUrl": match_url,
+                    "matchWebUrl": match.get("matchWebUrl"),
+                    "league": league_key,
+                    "subLeague": sub_name,
+                }
+
+                # If we have a cached player→board map for this match, use it directly
+                # without fetching the live match API again.
+                if match_url in player_boards_by_match:
+                    logging.debug(
+                        "Using cached board map for match %s — skipping live API fetch", match_url
+                    )
+                    for player_key, board_url in player_boards_by_match[match_url].items():
+                        if ":" not in player_key:
+                            continue
+                        username, color_name = player_key.split(":", 1)
+                        match_player_set.setdefault(match_url, set()).add(player_key)
+                        if player_key in checked_players_by_match.get(match_url, set()):
+                            logging.debug("Skipping already-done player %s (%s) in match %s",
+                                          username, color_name, match_url)
+                            continue
+                        match_board_urls.setdefault(match_url, set()).add(board_url)
+                        candidates_by_board.setdefault(board_url, []).append(
+                            (username, color_name, match_ref, False)
+                        )
+                    continue
+
+                # No cached board data — fetch the full match JSON from the Chess.com API
                 match_json = fetch_json(match_url)
                 if not match_json:
-                    # mark match as checked to avoid repeated failures
-                    checked_matches.add(match_url)
+                    logging.warning("Failed to fetch match JSON: %s — skipping", match_url)
                     continue
                 # Identify our team's players only (by matching clubId against teams.*.@id)
                 our_team_players = []
@@ -230,84 +298,89 @@ def main() -> None:
                 for team_data in teams.values():
                     if isinstance(team_data, dict) and club_id in team_data.get("@id", ""):
                         our_team_players = team_data.get("players", [])
-                        logging.debug("Found our team '%s' in match %s (%d players)", team_data.get("name"), match_url, len(our_team_players))
+                        logging.debug("Found our team '%s' in match %s (%d players)",
+                                      team_data.get("name"), match_url, len(our_team_players))
                         break
                 if not our_team_players:
                     logging.warning("Could not identify our team in match %s — skipping", match_url)
-                    checked_matches.add(match_url)
                     continue
-                # find player entries with played_as_* fields, restricted to our team
+                # Collect ALL our-team players with board URLs (resigned or not)
                 for username, player_obj in find_player_played_entries(our_team_players):
                     if not username:
                         continue
                     for color_field, color_name in (("played_as_white", "white"), ("played_as_black", "black")):
-                        # Skip if this player+color was already checked for this match
-                        if f"{username}:{color_name}" in checked_players_by_match.get(match_url, set()):
-                            logging.debug("Skipping %s (%s) for already-checked match %s", username, color_name, match_url)
-                            continue
                         field_val = player_obj.get(color_field)
                         if not field_val:
                             continue
-                        # Determine if this was a resignation indicator
-                        is_resigned = False
                         board_url = None
                         if isinstance(field_val, str):
-                            if field_val.lower() == "resigned" or "resign" in field_val.lower():
-                                is_resigned = True
-                            # board might be sibling property
                             board_url = player_obj.get("board")
                         elif isinstance(field_val, dict):
-                            # often shaped like {"result": "resigned", "board": "https://..."}
-                            res = str(field_val.get("result", "")).lower()
-                            if res == "resigned" or "resign" in res:
-                                is_resigned = True
                             board_url = field_val.get("board") or field_val.get("board_url") or player_obj.get("board")
 
-                        if is_resigned and board_url:
-                            lst = candidates_by_board.setdefault(board_url, [])
-                            # include league/subleague and match reference from the original leagueData.json
-                            match_ref = {
-                                "matchUrl": match_url,
-                                "matchWebUrl": match.get("matchWebUrl"),
-                                "league": league_key,
-                                "subLeague": sub_name,
-                            }
-                            lst.append((username, color_name, match_ref))
-                # Mark match as checked to avoid re-fetching next run
-                checked_matches.add(match_url)
+                        player_key = f"{username}:{color_name}"
+                        # Always register in match_player_set (even already-cached players) so we
+                        # can correctly detect when a match is fully resolved later.
+                        match_player_set.setdefault(match_url, set()).add(player_key)
+
+                        # Cache the board URL for this player so future runs skip the live fetch
+                        if board_url:
+                            player_boards_by_match.setdefault(match_url, {})[player_key] = board_url
+
+                        # Skip players already marked done — no board fetch needed for them
+                        if player_key in checked_players_by_match.get(match_url, set()):
+                            logging.debug("Skipping already-done player %s (%s) in match %s",
+                                          username, color_name, match_url)
+                            continue
+
+                        if board_url:
+                            match_board_urls.setdefault(match_url, set()).add(board_url)
+                            candidates_by_board.setdefault(board_url, []).append(
+                                (username, color_name, match_ref, False)
+                            )
 
     if not candidates_by_board:
-        logging.info("No candidate resigned players with board URLs found.")
+        logging.info("No unchecked players with board URLs found in finished matches.")
 
     results: Dict = {"lastUpdated": datetime.now(timezone.utc).isoformat(), "leagues": {}}
 
-    # For efficiency, fetch each board once
+    # Result codes that mean a game is permanently over
+    DEFINITIVE_RESULTS = {
+        "win", "loss", "agreed", "stalemate", "checkmated", "timeout", "resigned",
+        "timevsinsufficient", "insufficient", "repetition", "50move", "abandoned",
+    }
+
     for board_url, candidates in candidates_by_board.items():
         if not candidates:
             continue
-        # Skip candidates already checked for their specific match+color
-        remaining = [c for c in candidates if f"{c[0]}:{c[1]}" not in checked_players_by_match.get(c[2].get("matchUrl"), set())]
+        # Filter out players already marked done
+        remaining = [
+            c for c in candidates
+            if f"{c[0]}:{c[1]}" not in checked_players_by_match.get(c[2].get("matchUrl"), set())
+        ]
         if not remaining:
+            logging.debug("All players already done for board: %s", board_url)
+            continue
+        # Board already cached means every player on it was resolved in a prior run;
+        # mark any remaining stragglers as done and move on.
+        if board_url in checked_boards:
+            logging.debug("Skipping cached board: %s (%d player(s) — marking done)", board_url, len(remaining))
+            for username, color_name, match_ref, _ in remaining:
+                murl = match_ref.get("matchUrl")
+                if murl:
+                    checked_players_by_match.setdefault(murl, set()).add(f"{username}:{color_name}")
             continue
         logging.info("Fetching board: %s for %d candidate(s)", board_url, len(remaining))
         board_json = fetch_json(board_url, timeout=http_timeout, retries=http_retries)
         if not board_json:
-            logging.warning("Failed to fetch board: %s", board_url)
-            # mark players as checked for their matches to avoid repeated failures
-            for username, color_name, match_ref in remaining:
-                murl = match_ref.get("matchUrl") if isinstance(match_ref, dict) else None
-                if murl:
-                    checked_players_by_match.setdefault(murl, set()).add(f"{username}:{color_name}")
-            checked_boards.add(board_url)
+            logging.warning("Failed to fetch board: %s — will retry next run", board_url)
             continue
 
         games = board_json.get("games") or board_json.get("game") or []
         if isinstance(games, dict):
             games = [games]
 
-        # Iterate games and match to candidates
         for idx, game in enumerate(games):
-            # Normalize usernames
             white_user = (game.get("white", {}) or {}).get("username") if isinstance(game.get("white"), dict) else None
             black_user = (game.get("black", {}) or {}).get("username") if isinstance(game.get("black"), dict) else None
             if white_user:
@@ -315,61 +388,85 @@ def main() -> None:
             if black_user:
                 black_user = black_user.lower()
 
-            # Candidate match
-            for username, color_name, match_info in list(remaining):
+            for username, color_name, match_info, is_resigned_flag in list(remaining):
                 if username not in (white_user, black_user):
                     continue
-                # Determine if this game records resignation for this player
                 person_side = "white" if username == white_user else "black"
-                # Check result fields in game
                 side_obj = game.get(person_side) if isinstance(game.get(person_side), dict) else {}
                 result_field = str(side_obj.get("result", "")).lower() if side_obj else ""
                 termination = str(game.get("termination", "")).lower() if game.get("termination") else ""
-                top_result = str(game.get("result", "")).lower() if game.get("result") else ""
-                resigned = False
-                for chk in (result_field, termination, top_result):
-                    if chk and "resign" in chk:
-                        resigned = True
-                        break
-
-                # As a fallback, check pgn for the word 'resign'
-                if not resigned:
-                    pgn_txt = game.get("pgn") or ""
-                    if pgn_txt and "resign" in pgn_txt.lower():
-                        resigned = True
-
-                if not resigned:
-                    logging.debug("Player %s (%s) in match %s: not resigned in fetched game", username, color_name, match_info.get("matchUrl"))
-                    # mark as checked for this match+color and skip
-                    checked_players_by_match.setdefault(match_info.get("matchUrl"), set()).add(f"{username}:{color_name}")
-                    remaining = [c for c in remaining if not (c[0] == username and c[1] == color_name and c[2].get("matchUrl") == match_info.get("matchUrl"))]
-                    continue
-
-                # Compute move count
                 pgn_txt = game.get("pgn") or ""
+
+                # Detect resignation: only flag if the Team USA player's own result is "resigned".
+                # Do NOT use termination or PGN text — those say "X won by resignation" when the
+                # *opponent* resigned, which would falsely flag the winning player.
+                resigned = result_field == "resigned"
+
                 moves = parse_pgn_move_count(pgn_txt)
-                if moves <= threshold:
-                    # Build entry
-                    game_api_link = game.get("url") or game.get("game_url") or f"{board_url}#index={idx}"
-                    entry = {
-                        "username": username,
-                        "color": person_side,
-                        "moves_ply": moves,
-                        "game_api": game_api_link,
-                        "board_api": board_url,
-                    }
-                    # Insert into results under league/subleague/match
-                    # We need league and subleague names: try to find via match_info fields
-                    league_name = match_info.get("league") or match_info.get("leagueName") or "unknown"
-                    subleague_name = match_info.get("subLeague") or match_info.get("subLeagueName") or "unknown"
-                    insert_result(results, league_name, subleague_name, match_info.get("matchId") or match_info.get("matchUrl"), match_info, entry)
 
-                # Whether or not we recorded, mark player+color as checked for this match
-                checked_players_by_match.setdefault(match_info.get("matchUrl"), set()).add(f"{username}:{color_name}")
-                remaining = [c for c in remaining if not (c[0] == username and c[1] == color_name and c[2].get("matchUrl") == match_info.get("matchUrl"))]
+                # A game is definitively over when the player's side has a known final result
+                game_finished = bool(result_field and any(r in result_field for r in DEFINITIVE_RESULTS))
 
-        # After processing this board, mark it checked
-        checked_boards.add(board_url)
+                murl = match_info.get("matchUrl")
+                player_key = f"{username}:{color_name}"
+
+                # Mark a player as done (and cache them) when:
+                #   a) the game has a definitive final result, OR
+                #   b) move count already exceeds the threshold (can never be an early resign)
+                # Do NOT cache yet if the game is still in progress and within the threshold —
+                # the game could still be resigned or gain more moves on a future run.
+                above_threshold = moves > threshold
+                if game_finished or above_threshold:
+                    # Record early resignation if it qualifies
+                    if resigned and moves <= threshold:
+                        game_api_link = game.get("url") or game.get("game_url") or f"{board_url}#index={idx}"
+                        entry = {
+                            "username": username,
+                            "color": person_side,
+                            "moves_ply": moves,
+                            "game_api": game_api_link,
+                            "board_api": board_url,
+                        }
+                        league_name = match_info.get("league") or "unknown"
+                        subleague_name = match_info.get("subLeague") or "unknown"
+                        insert_result(results, league_name, subleague_name, murl, match_info, entry)
+
+                    checked_players_by_match.setdefault(murl, set()).add(player_key)
+                    remaining = [
+                        c for c in remaining
+                        if not (c[0] == username and c[1] == color_name and c[2].get("matchUrl") == murl)
+                    ]
+                    logging.debug(
+                        "Marked %s (%s) done in match %s (moves=%d, finished=%s, resigned=%s)",
+                        username, color_name, murl, moves, game_finished, resigned,
+                    )
+                else:
+                    # Game still in progress and within the threshold — leave uncached for now
+                    logging.debug(
+                        "Leaving %s (%s) uncached in match %s (moves=%d, in-progress, within threshold)",
+                        username, color_name, murl, moves,
+                    )
+
+        # Cache this board only when every candidate on it is now done
+        if all(
+            f"{c[0]}:{c[1]}" in checked_players_by_match.get(c[2].get("matchUrl"), set())
+            for c in candidates
+        ):
+            checked_boards.add(board_url)
+            logging.debug("All players done for board — cached: %s", board_url)
+
+    # Promote fully-resolved finished matches to checked_matches and release their boards.
+    # A match is fully resolved when every expected player+color is in checked_players_by_match.
+    for match_url, expected_players in match_player_set.items():
+        if expected_players.issubset(checked_players_by_match.get(match_url, set())):
+            checked_matches.add(match_url)
+            logging.info("Match fully resolved — promoted to checked_matches: %s", match_url)
+            # Release per-player entries: the match-level cache supersedes them
+            checked_players_by_match.pop(match_url, None)
+            # Release board-level entries: same reason
+            for burl in match_board_urls.get(match_url, set()):
+                checked_boards.discard(burl)
+                logging.debug("Released board from cache (match complete): %s", burl)
 
     # Write results and cache
     try:
@@ -395,10 +492,13 @@ def main() -> None:
                 found = False
                 for dm in dest_matches:
                     if dm.get("matchUrl") == murl:
-                        # Append players not already present (by username + game_api)
-                        existing_players = {(p.get("username"), p.get("game_api")) for p in dm.get("players", [])}
+                        # Append players not already present (by username + color + game_api)
+                        existing_players = {
+                            (p.get("username", "").lower(), p.get("color", ""), p.get("game_api", ""))
+                            for p in dm.get("players", [])
+                        }
                         for p in match_item.get("players", []):
-                            key = (p.get("username"), p.get("game_api"))
+                            key = (p.get("username", "").lower(), p.get("color", ""), p.get("game_api", ""))
                             if key not in existing_players:
                                 dm.setdefault("players", []).append(p)
                         found = True
@@ -413,10 +513,17 @@ def main() -> None:
         json.dump(existing, f, indent=2, ensure_ascii=False)
 
     # Update cache
+    # Drop player_boards_by_match entries for fully-resolved matches — the match-level
+    # cache supersedes them and there's no need to store per-player board URLs anymore.
+    for murl in checked_matches:
+        player_boards_by_match.pop(murl, None)
     cache_obj = {
         "checked_players_by_match": {m: sorted(list(users)) for m, users in checked_players_by_match.items()},
         "checked_boards": sorted(list(checked_boards)),
         "checked_matches": sorted(list(checked_matches)),
+        "player_boards_by_match": {
+            m: v for m, v in player_boards_by_match.items() if v
+        },
         "lastRun": datetime.now(timezone.utc).isoformat(),
     }
     with open(cache_path, "w", encoding="utf-8") as f:
@@ -432,7 +539,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logging.warning("Interrupted by user; exiting")
         sys.exit(2)
-
-
-if __name__ == "__main__":
-    main()

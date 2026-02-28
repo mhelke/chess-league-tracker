@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-28T01:20:16Z",
+  "generatedAt": "2026-02-28T01:35:32Z",
   "riskThresholdPercent": 25.0,
   "riskConfig": {
     "highTimeoutPct": 50.0,
@@ -1456,6 +1456,30 @@
       "riskLevel": null,
       "riskReason": null
     },
+    "jcrchess": {
+      "timeoutPercent": 0.0,
+      "dailyRating": 1811,
+      "rating960": 1688,
+      "totalLeagueTimeouts90Days": 0,
+      "subLeagueTimeouts": {},
+      "dailyTimeouts": {
+        "1day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "2day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "3day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        }
+      },
+      "riskFlag": false,
+      "riskLevel": null,
+      "riskReason": null
+    },
     "jennydaddy": {
       "timeoutPercent": 0.0,
       "dailyRating": 1242,
@@ -2321,9 +2345,9 @@
       "riskReason": null
     },
     "pacdan1": {
-      "timeoutPercent": 30.0,
+      "timeoutPercent": 28.0,
       "dailyRating": 798,
-      "rating960": 339,
+      "rating960": 337,
       "totalLeagueTimeouts90Days": 2,
       "subLeagueTimeouts": {
         "WL": {
@@ -2347,7 +2371,7 @@
       },
       "riskFlag": true,
       "riskLevel": "MEDIUM",
-      "riskReason": "Medium risk: timeout ratio 30%, 2 sub-league timeout(s), 5 recent daily timeout(s)."
+      "riskReason": "Medium risk: timeout ratio 28%, 2 sub-league timeout(s), 5 recent daily timeout(s)."
     },
     "papillian": {
       "timeoutPercent": 0.0,
@@ -2828,6 +2852,30 @@
       "riskFlag": false,
       "riskLevel": null,
       "riskReason": null
+    },
+    "rc_scott": {
+      "timeoutPercent": 28.0,
+      "dailyRating": 815,
+      "rating960": 434,
+      "totalLeagueTimeouts90Days": 0,
+      "subLeagueTimeouts": {},
+      "dailyTimeouts": {
+        "1day": {
+          "count": 5,
+          "lastTimeoutDate": "2026-01-16"
+        },
+        "2day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "3day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        }
+      },
+      "riskFlag": true,
+      "riskLevel": "LOW",
+      "riskReason": "Low risk: timeout ratio 28%, no recent sub-league timeouts, only 5 recent daily timeout(s)."
     },
     "revanatreides": {
       "timeoutPercent": 0.0,

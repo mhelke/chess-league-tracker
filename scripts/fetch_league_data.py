@@ -539,14 +539,14 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
             our_roster = sorted(
                 [{"username": p.get("username"), "rating": p.get("rating")} 
                  for p in players if isinstance(p, dict) and p.get("username")],
-                key=lambda x: x.get("rating", 0),
+                key=lambda x: x.get("rating") or 0,
                 reverse=True
             )
             
             opp_roster = sorted(
                 [{"username": p.get("username"), "rating": p.get("rating")} 
                  for p in opponent_players if isinstance(p, dict) and p.get("username")],
-                key=lambda x: x.get("rating", 0),
+                key=lambda x: x.get("rating") or 0,
                 reverse=True
             )
             

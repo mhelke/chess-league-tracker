@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-23T03:12:30Z",
+  "lastUpdated": "2026-03-24T03:08:18Z",
   "leagues": {
     "1WL": {
       "subLeagues": {
@@ -151,7 +151,7 @@
               "endTime": null,
               "boards": 8,
               "matchResult": {
-                "ourScore": 4,
+                "ourScore": 5,
                 "opponentScore": 1,
                 "result": "unknown"
               },
@@ -171,6 +171,12 @@
                 "langtrys": {
                   "games": 2,
                   "wins": 2,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "lone_wolf_2006": {
+                  "games": 1,
+                  "wins": 1,
                   "draws": 0,
                   "losses": 0
                 }
@@ -218,6 +224,14 @@
               "draws": 0,
               "losses": 0,
               "points": 2.0
+            },
+            {
+              "username": "lone_wolf_2006",
+              "games": 1,
+              "wins": 1,
+              "draws": 0,
+              "losses": 0,
+              "points": 1.0
             },
             {
               "username": "johndavidclive",
@@ -5012,11 +5026,30 @@
               "endTime": null,
               "boards": 52,
               "matchResult": {
-                "ourScore": 0,
+                "ourScore": 5,
                 "opponentScore": 0,
                 "result": "unknown"
               },
-              "playerStats": {},
+              "playerStats": {
+                "alangoode108": {
+                  "games": 1,
+                  "wins": 1,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "peon-4-rey": {
+                  "games": 2,
+                  "wins": 2,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "vi30555": {
+                  "games": 2,
+                  "wins": 2,
+                  "draws": 0,
+                  "losses": 0
+                }
+              },
               "minTeamPlayers": 10
             }
           ],
@@ -5031,6 +5064,22 @@
             },
             {
               "username": "sachamr",
+              "games": 2,
+              "wins": 2,
+              "draws": 0,
+              "losses": 0,
+              "points": 2.0
+            },
+            {
+              "username": "peon-4-rey",
+              "games": 2,
+              "wins": 2,
+              "draws": 0,
+              "losses": 0,
+              "points": 2.0
+            },
+            {
+              "username": "vi30555",
               "games": 2,
               "wins": 2,
               "draws": 0,
@@ -5063,6 +5112,14 @@
             },
             {
               "username": "kyljys",
+              "games": 1,
+              "wins": 1,
+              "draws": 0,
+              "losses": 0,
+              "points": 1.0
+            },
+            {
+              "username": "alangoode108",
               "games": 1,
               "wins": 1,
               "draws": 0,
@@ -5301,7 +5358,7 @@
               "boards": 13,
               "matchResult": {
                 "ourScore": 16,
-                "opponentScore": 7,
+                "opponentScore": 8,
                 "result": "unknown"
               },
               "playerStats": {
@@ -5342,10 +5399,10 @@
                   "losses": 0
                 },
                 "ninburg": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 1,
                   "draws": 0,
-                  "losses": 0
+                  "losses": 1
                 },
                 "ramgi": {
                   "games": 2,
@@ -5439,10 +5496,10 @@
           "leaderboard": [
             {
               "username": "ninburg",
-              "games": 4,
+              "games": 5,
               "wins": 4,
               "draws": 0,
-              "losses": 0,
+              "losses": 1,
               "points": 4.0
             },
             {
@@ -19138,11 +19195,11 @@
                 "ourRoster": [
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
                   },
                   {
                     "username": "claystor",
-                    "rating": 1518
+                    "rating": 1509
                   },
                   {
                     "username": "andy67123",
@@ -19160,15 +19217,15 @@
                 "oppRoster": [
                   {
                     "username": "kas1958",
-                    "rating": 1578
+                    "rating": 1546
                   },
                   {
                     "username": "j-gc",
-                    "rating": 1486
+                    "rating": 1483
                   },
                   {
                     "username": "yrnehtluabiht",
-                    "rating": 1481
+                    "rating": 1483
                   },
                   {
                     "username": "vladi0707",
@@ -19203,7 +19260,7 @@
                 "ourRoster": [
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
                   },
                   {
                     "username": "andy67123",
@@ -19211,11 +19268,11 @@
                   },
                   {
                     "username": "kyljys",
-                    "rating": 1446
+                    "rating": 1457
                   },
                   {
                     "username": "sawa-yan",
-                    "rating": 1426
+                    "rating": 1418
                   },
                   {
                     "username": "mikesexton21",
@@ -19233,7 +19290,7 @@
                   },
                   {
                     "username": "andriirudyk",
-                    "rating": 1558
+                    "rating": 1560
                   },
                   {
                     "username": "vovanchik74",
@@ -19259,7 +19316,7 @@
               "name": " 1WL 2026 1400-1600 Spring Masters: Promote to King vs 1 day per move club",
               "startTime": 1774767600,
               "endTime": null,
-              "boards": 5,
+              "boards": 6,
               "matchResult": {
                 "ourScore": 0,
                 "opponentScore": 0,
@@ -19272,15 +19329,19 @@
                 "ourRoster": [
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
+                  },
+                  {
+                    "username": "andy67123",
+                    "rating": 1499
                   },
                   {
                     "username": "sirbabalot",
-                    "rating": 1434
+                    "rating": 1436
                   },
                   {
                     "username": "sawa-yan",
-                    "rating": 1426
+                    "rating": 1418
                   },
                   {
                     "username": "mikesexton21",
@@ -19294,11 +19355,11 @@
                 "oppRoster": [
                   {
                     "username": "kas1958",
-                    "rating": 1578
+                    "rating": 1546
                   },
                   {
                     "username": "matcorm",
-                    "rating": 1517
+                    "rating": 1518
                   },
                   {
                     "username": "michellps2022",
@@ -19306,7 +19367,11 @@
                   },
                   {
                     "username": "gilizca",
-                    "rating": 1450
+                    "rating": 1456
+                  },
+                  {
+                    "username": "ferrum_lucis",
+                    "rating": 1432
                   },
                   {
                     "username": "frohbaby",
@@ -19317,17 +19382,13 @@
                     "rating": 1429
                   },
                   {
-                    "username": "ferrum_lucis",
-                    "rating": 1428
-                  },
-                  {
                     "username": "guitarrich",
-                    "rating": 1406
+                    "rating": 1410
                   }
                 ]
               },
               "registeredPlayers": {
-                "our": 5,
+                "our": 6,
                 "opponent": 8
               }
             },
@@ -19353,7 +19414,7 @@
                 "ourRoster": [
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
                   },
                   {
                     "username": "andy67123",
@@ -19364,24 +19425,24 @@
                     "rating": 1468
                   },
                   {
+                    "username": "kyljys",
+                    "rating": 1457
+                  },
+                  {
                     "username": "fisch-brasil",
                     "rating": 1451
                   },
                   {
-                    "username": "kyljys",
-                    "rating": 1446
-                  },
-                  {
                     "username": "sirbabalot",
-                    "rating": 1434
-                  },
-                  {
-                    "username": "sawa-yan",
-                    "rating": 1426
+                    "rating": 1436
                   },
                   {
                     "username": "steelman420",
-                    "rating": 1422
+                    "rating": 1424
+                  },
+                  {
+                    "username": "sawa-yan",
+                    "rating": 1418
                   },
                   {
                     "username": "mikesexton21",
@@ -19407,7 +19468,7 @@
                   },
                   {
                     "username": "samvimaire",
-                    "rating": 1449
+                    "rating": 1447
                   },
                   {
                     "username": "alfonsodelareal",
@@ -19442,11 +19503,11 @@
                 "ourRoster": [
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
                   },
                   {
                     "username": "joeh1957",
-                    "rating": 1570
+                    "rating": 1578
                   },
                   {
                     "username": "badlandrew646",
@@ -19454,7 +19515,7 @@
                   },
                   {
                     "username": "claystor",
-                    "rating": 1518
+                    "rating": 1509
                   },
                   {
                     "username": "andy67123",
@@ -19466,7 +19527,7 @@
                   },
                   {
                     "username": "narendra3000",
-                    "rating": 1483
+                    "rating": 1491
                   },
                   {
                     "username": "luckyleftydetroit",
@@ -19478,7 +19539,7 @@
                   },
                   {
                     "username": "sawa-yan",
-                    "rating": 1426
+                    "rating": 1418
                   },
                   {
                     "username": "cpt-lego",
@@ -19492,7 +19553,7 @@
                   },
                   {
                     "username": "liquidskies74",
-                    "rating": 1557
+                    "rating": 1555
                   },
                   {
                     "username": "moazosmanadam",
@@ -19512,22 +19573,22 @@
                   },
                   {
                     "username": "daniyarayazbayev",
-                    "rating": 1415
-                  },
-                  {
-                    "username": "sgreeven",
-                    "rating": 1409
+                    "rating": 1420
                   },
                   {
                     "username": "mayaskara45",
-                    "rating": 1405
+                    "rating": 1410
                   },
                   {
-                    "username": "diagonalhit",
-                    "rating": 1402
+                    "username": "sgreeven",
+                    "rating": 1406
                   },
                   {
                     "username": "amadeus",
+                    "rating": null
+                  },
+                  {
+                    "username": "diagonalhit",
                     "rating": null
                   }
                 ]
@@ -20593,10 +20654,16 @@
               "boards": 15,
               "matchResult": {
                 "ourScore": 5,
-                "opponentScore": 12,
+                "opponentScore": 13,
                 "result": "unknown"
               },
               "playerStats": {
+                "anasssej": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1
+                },
                 "carlouchetrange": {
                   "games": 1,
                   "wins": 0,
@@ -20934,6 +21001,14 @@
               "draws": 1,
               "losses": 1,
               "points": 0.5
+            },
+            {
+              "username": "anasssej",
+              "games": 1,
+              "wins": 0,
+              "draws": 0,
+              "losses": 1,
+              "points": 0.0
             },
             {
               "username": "carlouchetrange",
@@ -23037,8 +23112,8 @@
               "endTime": null,
               "boards": 20,
               "matchResult": {
-                "ourScore": 2,
-                "opponentScore": 3,
+                "ourScore": 4,
+                "opponentScore": 4,
                 "result": "unknown"
               },
               "playerStats": {
@@ -23049,16 +23124,28 @@
                   "losses": 1
                 },
                 "gidamacika": {
-                  "games": 1,
-                  "wins": 1,
+                  "games": 2,
+                  "wins": 2,
                   "draws": 0,
                   "losses": 0
+                },
+                "justinwest": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1
                 },
                 "mightydragon65": {
                   "games": 2,
                   "wins": 0,
                   "draws": 0,
                   "losses": 2
+                },
+                "sawa-yan": {
+                  "games": 1,
+                  "wins": 1,
+                  "draws": 0,
+                  "losses": 0
                 }
               },
               "minTeamPlayers": 15
@@ -23067,6 +23154,14 @@
           "leaderboard": [
             {
               "username": "gidamacika",
+              "games": 2,
+              "wins": 2,
+              "draws": 0,
+              "losses": 0,
+              "points": 2.0
+            },
+            {
+              "username": "sawa-yan",
               "games": 1,
               "wins": 1,
               "draws": 0,
@@ -23080,6 +23175,14 @@
               "draws": 0,
               "losses": 1,
               "points": 1.0
+            },
+            {
+              "username": "justinwest",
+              "games": 1,
+              "wins": 0,
+              "draws": 0,
+              "losses": 1,
+              "points": 0.0
             },
             {
               "username": "mightydragon65",
@@ -23199,7 +23302,7 @@
               "name": "1WL 2026 Eight4Us Spring Masters: - King Of The Hill Team - vs 1 day per move club",
               "startTime": 1774767600,
               "endTime": null,
-              "boards": 12,
+              "boards": 13,
               "matchResult": {
                 "ourScore": 0,
                 "opponentScore": 0,
@@ -23212,7 +23315,7 @@
                 "ourRoster": [
                   {
                     "username": "lavendermojito",
-                    "rating": 1869
+                    "rating": 1858
                   },
                   {
                     "username": "sachamr",
@@ -23220,15 +23323,19 @@
                   },
                   {
                     "username": "mastermatthew52",
-                    "rating": 1607
+                    "rating": 1601
                   },
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
+                  },
+                  {
+                    "username": "andy67123",
+                    "rating": 1499
                   },
                   {
                     "username": "sawa-yan",
-                    "rating": 1426
+                    "rating": 1418
                   },
                   {
                     "username": "mikesexton21",
@@ -23240,7 +23347,7 @@
                   },
                   {
                     "username": "malvolio62",
-                    "rating": 1290
+                    "rating": 1297
                   },
                   {
                     "username": "haritutsav",
@@ -23256,7 +23363,7 @@
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 937
+                    "rating": 934
                   }
                 ],
                 "oppRoster": [
@@ -23266,23 +23373,23 @@
                   },
                   {
                     "username": "kas1958",
-                    "rating": 1578
+                    "rating": 1546
                   },
                   {
                     "username": "j-gc",
-                    "rating": 1486
+                    "rating": 1483
                   },
                   {
                     "username": "yrnehtluabiht",
-                    "rating": 1481
+                    "rating": 1483
                   },
                   {
                     "username": "heavenpainter",
-                    "rating": 1432
+                    "rating": 1434
                   },
                   {
                     "username": "prometheusincarnate",
-                    "rating": 1387
+                    "rating": 1376
                   },
                   {
                     "username": "vladi0707",
@@ -23290,11 +23397,11 @@
                   },
                   {
                     "username": "krasitzz",
-                    "rating": 1267
+                    "rating": 1265
                   },
                   {
                     "username": "mvroglic",
-                    "rating": 1247
+                    "rating": 1240
                   },
                   {
                     "username": "standuhrenmacher",
@@ -23302,15 +23409,15 @@
                   },
                   {
                     "username": "alinbur",
-                    "rating": 1225
-                  },
-                  {
-                    "username": "nonamepotato2",
-                    "rating": 1165
+                    "rating": 1235
                   },
                   {
                     "username": "raphael1127",
-                    "rating": 1163
+                    "rating": 1161
+                  },
+                  {
+                    "username": "nonamepotato2",
+                    "rating": 1153
                   },
                   {
                     "username": "clebelis",
@@ -23331,7 +23438,7 @@
                 ]
               },
               "registeredPlayers": {
-                "our": 12,
+                "our": 13,
                 "opponent": 17
               }
             },
@@ -23342,135 +23449,6 @@
               "matchUrl": "https://api.chess.com/pub/match/1921003",
               "matchWebUrl": "https://www.chess.com/club/matches/1921003",
               "name": "1WL 2026 Eight4Us Spring Masters: 1 day per move club vs Team Match Chess",
-              "startTime": 1774767600,
-              "endTime": null,
-              "boards": 11,
-              "matchResult": {
-                "ourScore": 0,
-                "opponentScore": 0,
-                "result": "unknown"
-              },
-              "playerStats": {},
-              "minTeamPlayers": 8,
-              "registrationData": {
-                "type": "roster",
-                "ourRoster": [
-                  {
-                    "username": "lavendermojito",
-                    "rating": 1869
-                  },
-                  {
-                    "username": "fequalma",
-                    "rating": 1652
-                  },
-                  {
-                    "username": "sachamr",
-                    "rating": 1644
-                  },
-                  {
-                    "username": "mastermatthew52",
-                    "rating": 1607
-                  },
-                  {
-                    "username": "ninburg",
-                    "rating": 1579
-                  },
-                  {
-                    "username": "sawa-yan",
-                    "rating": 1426
-                  },
-                  {
-                    "username": "mikesexton21",
-                    "rating": 1409
-                  },
-                  {
-                    "username": "peon-4-rey",
-                    "rating": 1387
-                  },
-                  {
-                    "username": "oldsavage",
-                    "rating": 1349
-                  },
-                  {
-                    "username": "malvolio62",
-                    "rating": 1290
-                  },
-                  {
-                    "username": "plamen196565",
-                    "rating": 1273
-                  },
-                  {
-                    "username": "congmark",
-                    "rating": 1204
-                  },
-                  {
-                    "username": "josepcdc",
-                    "rating": 1129
-                  },
-                  {
-                    "username": "alangoode108",
-                    "rating": 937
-                  }
-                ],
-                "oppRoster": [
-                  {
-                    "username": "omgdidirealyjustsact",
-                    "rating": 1760
-                  },
-                  {
-                    "username": "xadrezdonorte",
-                    "rating": 1707
-                  },
-                  {
-                    "username": "bnatarajan",
-                    "rating": 1405
-                  },
-                  {
-                    "username": "garysolboy",
-                    "rating": 1362
-                  },
-                  {
-                    "username": "carl26",
-                    "rating": 1335
-                  },
-                  {
-                    "username": "pkinnicutt",
-                    "rating": 1326
-                  },
-                  {
-                    "username": "septictea",
-                    "rating": 1301
-                  },
-                  {
-                    "username": "postmortemchess-official",
-                    "rating": 1238
-                  },
-                  {
-                    "username": "paddyavinadav",
-                    "rating": 1230
-                  },
-                  {
-                    "username": "masengabrown",
-                    "rating": 1210
-                  },
-                  {
-                    "username": "adaelyhwh",
-                    "rating": 1081
-                  }
-                ]
-              },
-              "registeredPlayers": {
-                "our": 14,
-                "opponent": 11
-              }
-            },
-            {
-              "round": "NA-3",
-              "status": "open",
-              "matchId": "https://api.chess.com/pub/match/1921169",
-              "matchUrl": "https://api.chess.com/pub/match/1921169",
-              "matchWebUrl": "https://www.chess.com/club/matches/1921169",
-              "name": "1WL 2026 Eight4Us Spring Masters: Chess Bombers vs 1 day per move club",
               "startTime": 1774767600,
               "endTime": null,
               "boards": 12,
@@ -23486,31 +23464,27 @@
                 "ourRoster": [
                   {
                     "username": "lavendermojito",
-                    "rating": 1869
-                  },
-                  {
-                    "username": "ethannorris2006",
-                    "rating": 1768
+                    "rating": 1858
                   },
                   {
                     "username": "sachamr",
                     "rating": 1644
                   },
                   {
+                    "username": "fequalma",
+                    "rating": 1635
+                  },
+                  {
                     "username": "mastermatthew52",
-                    "rating": 1607
+                    "rating": 1601
                   },
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
                   },
                   {
-                    "username": "andy67123",
-                    "rating": 1499
-                  },
-                  {
-                    "username": "sirbabalot",
-                    "rating": 1434
+                    "username": "sawa-yan",
+                    "rating": 1418
                   },
                   {
                     "username": "mikesexton21",
@@ -23522,11 +23496,152 @@
                   },
                   {
                     "username": "oldsavage",
-                    "rating": 1349
+                    "rating": 1346
                   },
                   {
                     "username": "malvolio62",
-                    "rating": 1290
+                    "rating": 1297
+                  },
+                  {
+                    "username": "plamen196565",
+                    "rating": 1273
+                  },
+                  {
+                    "username": "congmark",
+                    "rating": 1197
+                  },
+                  {
+                    "username": "josepcdc",
+                    "rating": 1129
+                  },
+                  {
+                    "username": "alangoode108",
+                    "rating": 934
+                  }
+                ],
+                "oppRoster": [
+                  {
+                    "username": "omgdidirealyjustsact",
+                    "rating": 1774
+                  },
+                  {
+                    "username": "xadrezdonorte",
+                    "rating": 1733
+                  },
+                  {
+                    "username": "bnatarajan",
+                    "rating": 1405
+                  },
+                  {
+                    "username": "garysolboy",
+                    "rating": 1353
+                  },
+                  {
+                    "username": "pkinnicutt",
+                    "rating": 1326
+                  },
+                  {
+                    "username": "carl26",
+                    "rating": 1325
+                  },
+                  {
+                    "username": "septictea",
+                    "rating": 1306
+                  },
+                  {
+                    "username": "dragonchess246",
+                    "rating": 1287
+                  },
+                  {
+                    "username": "postmortemchess-official",
+                    "rating": 1238
+                  },
+                  {
+                    "username": "paddyavinadav",
+                    "rating": 1235
+                  },
+                  {
+                    "username": "masengabrown",
+                    "rating": 1207
+                  },
+                  {
+                    "username": "adaelyhwh",
+                    "rating": 1077
+                  }
+                ]
+              },
+              "registeredPlayers": {
+                "our": 14,
+                "opponent": 12
+              }
+            },
+            {
+              "round": "NA-3",
+              "status": "open",
+              "matchId": "https://api.chess.com/pub/match/1921169",
+              "matchUrl": "https://api.chess.com/pub/match/1921169",
+              "matchWebUrl": "https://www.chess.com/club/matches/1921169",
+              "name": "1WL 2026 Eight4Us Spring Masters: Chess Bombers vs 1 day per move club",
+              "startTime": 1774767600,
+              "endTime": null,
+              "boards": 13,
+              "matchResult": {
+                "ourScore": 0,
+                "opponentScore": 0,
+                "result": "unknown"
+              },
+              "playerStats": {},
+              "minTeamPlayers": 8,
+              "registrationData": {
+                "type": "roster",
+                "ourRoster": [
+                  {
+                    "username": "lavendermojito",
+                    "rating": 1858
+                  },
+                  {
+                    "username": "ethannorris2006",
+                    "rating": 1755
+                  },
+                  {
+                    "username": "sachamr",
+                    "rating": 1644
+                  },
+                  {
+                    "username": "mastermatthew52",
+                    "rating": 1601
+                  },
+                  {
+                    "username": "ninburg",
+                    "rating": 1583
+                  },
+                  {
+                    "username": "andy67123",
+                    "rating": 1499
+                  },
+                  {
+                    "username": "sirbabalot",
+                    "rating": 1436
+                  },
+                  {
+                    "username": "mikesexton21",
+                    "rating": 1409
+                  },
+                  {
+                    "username": "joes31",
+                    "rating": 1394
+                  },
+                  {
+                    "username": "peon-4-rey",
+                    "rating": 1387
+                  },
+                  {
+                    "username": "oldsavage",
+                    "rating": 1346
+                  },
+                  {
+                    "username": "malvolio62",
+                    "rating": 1297
                   },
                   {
                     "username": "josepcdc",
@@ -23536,7 +23651,7 @@
                 "oppRoster": [
                   {
                     "username": "maska_x",
-                    "rating": 1578
+                    "rating": 1575
                   },
                   {
                     "username": "shikamaru0513",
@@ -23544,11 +23659,11 @@
                   },
                   {
                     "username": "ryansocks5",
-                    "rating": 1357
+                    "rating": 1361
                   },
                   {
                     "username": "patrick_70",
-                    "rating": 1341
+                    "rating": 1349
                   },
                   {
                     "username": "smittyredux",
@@ -23560,7 +23675,7 @@
                   },
                   {
                     "username": "mdog99",
-                    "rating": 1290
+                    "rating": 1283
                   },
                   {
                     "username": "chris_sv",
@@ -23575,12 +23690,12 @@
                     "rating": 1225
                   },
                   {
-                    "username": "abbas-samin",
-                    "rating": 1224
-                  },
-                  {
                     "username": "erikn81",
                     "rating": 1209
+                  },
+                  {
+                    "username": "abbas-samin",
+                    "rating": 1203
                   },
                   {
                     "username": "memeid",
@@ -23596,12 +23711,12 @@
                   },
                   {
                     "username": "geez1949",
-                    "rating": 965
+                    "rating": 972
                   }
                 ]
               },
               "registeredPlayers": {
-                "our": 12,
+                "our": 13,
                 "opponent": 16
               }
             },
@@ -23614,7 +23729,7 @@
               "name": "1WL 2026 Eight4Us Spring Masters: 1 day per move club vs Chess School Ukraine",
               "startTime": 1774767600,
               "endTime": null,
-              "boards": 10,
+              "boards": 11,
               "matchResult": {
                 "ourScore": 0,
                 "opponentScore": 0,
@@ -23627,15 +23742,15 @@
                 "ourRoster": [
                   {
                     "username": "lavendermojito",
-                    "rating": 1869
+                    "rating": 1858
                   },
                   {
                     "username": "ethannorris2006",
-                    "rating": 1768
+                    "rating": 1755
                   },
                   {
                     "username": "chief-blackhawk",
-                    "rating": 1665
+                    "rating": 1668
                   },
                   {
                     "username": "sachamr",
@@ -23643,19 +23758,19 @@
                   },
                   {
                     "username": "mastermatthew52",
-                    "rating": 1607
+                    "rating": 1601
                   },
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
                   },
                   {
                     "username": "sirbabalot",
-                    "rating": 1434
+                    "rating": 1436
                   },
                   {
                     "username": "sawa-yan",
-                    "rating": 1426
+                    "rating": 1418
                   },
                   {
                     "username": "mikesexton21",
@@ -23667,7 +23782,7 @@
                   },
                   {
                     "username": "oldsavage",
-                    "rating": 1349
+                    "rating": 1346
                   },
                   {
                     "username": "robin0606",
@@ -23679,7 +23794,7 @@
                   },
                   {
                     "username": "congmark",
-                    "rating": 1204
+                    "rating": 1197
                   },
                   {
                     "username": "snappypawn",
@@ -23687,11 +23802,11 @@
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 937
+                    "rating": 934
                   },
                   {
                     "username": "langtrys",
-                    "rating": 934
+                    "rating": 932
                   },
                   {
                     "username": "magnuso2",
@@ -23699,10 +23814,14 @@
                   },
                   {
                     "username": "marcel795",
-                    "rating": 861
+                    "rating": 867
                   }
                 ],
                 "oppRoster": [
+                  {
+                    "username": "games4you",
+                    "rating": 1736
+                  },
                   {
                     "username": "yriikudryashov",
                     "rating": 1679
@@ -23717,7 +23836,7 @@
                   },
                   {
                     "username": "andriirudyk",
-                    "rating": 1558
+                    "rating": 1560
                   },
                   {
                     "username": "vovanchik74",
@@ -23728,26 +23847,26 @@
                     "rating": 1435
                   },
                   {
+                    "username": "alieck589",
+                    "rating": 1322
+                  },
+                  {
                     "username": "consum7aliis7inserviendo",
                     "rating": 1318
                   },
                   {
-                    "username": "alieck589",
-                    "rating": 1317
-                  },
-                  {
                     "username": "knut2305",
-                    "rating": 1100
+                    "rating": 1092
                   },
                   {
                     "username": "iuriiiemelianov",
-                    "rating": 970
+                    "rating": 985
                   }
                 ]
               },
               "registeredPlayers": {
                 "our": 19,
-                "opponent": 10
+                "opponent": 11
               }
             },
             {
@@ -23772,39 +23891,39 @@
                 "ourRoster": [
                   {
                     "username": "lavendermojito",
-                    "rating": 1869
+                    "rating": 1858
                   },
                   {
                     "username": "lezama1972",
                     "rating": 1807
                   },
                   {
-                    "username": "ethannorris2006",
-                    "rating": 1768
+                    "username": "g3tw4ck3d",
+                    "rating": 1776
                   },
                   {
-                    "username": "g3tw4ck3d",
-                    "rating": 1761
+                    "username": "ethannorris2006",
+                    "rating": 1755
                   },
                   {
                     "username": "chief-blackhawk",
-                    "rating": 1665
-                  },
-                  {
-                    "username": "mastermatthew52",
-                    "rating": 1607
+                    "rating": 1668
                   },
                   {
                     "username": "ghost_scarface",
                     "rating": 1603
                   },
                   {
+                    "username": "mastermatthew52",
+                    "rating": 1601
+                  },
+                  {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
                   },
                   {
                     "username": "sawa-yan",
-                    "rating": 1426
+                    "rating": 1418
                   },
                   {
                     "username": "sylar4",
@@ -23812,11 +23931,11 @@
                   },
                   {
                     "username": "oldsavage",
-                    "rating": 1349
+                    "rating": 1346
                   },
                   {
                     "username": "malvolio62",
-                    "rating": 1290
+                    "rating": 1297
                   },
                   {
                     "username": "plamen196565",
@@ -23828,19 +23947,19 @@
                   },
                   {
                     "username": "nasadusthead",
-                    "rating": 1198
+                    "rating": 1188
                   },
                   {
                     "username": "voimddweller",
-                    "rating": 1167
+                    "rating": 1172
                   },
                   {
                     "username": "joedoan07",
-                    "rating": 1154
+                    "rating": 1160
                   },
                   {
                     "username": "cichociemnyj",
-                    "rating": 1153
+                    "rating": 1158
                   },
                   {
                     "username": "josepcdc",
@@ -23852,11 +23971,11 @@
                   },
                   {
                     "username": "nicorio3",
-                    "rating": 1108
+                    "rating": 1096
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 937
+                    "rating": 934
                   },
                   {
                     "username": "magnuso2",
@@ -23864,7 +23983,7 @@
                   },
                   {
                     "username": "wots40",
-                    "rating": 737
+                    "rating": 727
                   }
                 ],
                 "oppRoster": [
@@ -23874,7 +23993,7 @@
                   },
                   {
                     "username": "liquidskies74",
-                    "rating": 1557
+                    "rating": 1555
                   },
                   {
                     "username": "jorgeluiscfc",
@@ -23882,7 +24001,7 @@
                   },
                   {
                     "username": "spopy",
-                    "rating": 1480
+                    "rating": 1479
                   },
                   {
                     "username": "frohbaby",
@@ -23890,22 +24009,18 @@
                   },
                   {
                     "username": "daniyarayazbayev",
-                    "rating": 1415
-                  },
-                  {
-                    "username": "sgreeven",
-                    "rating": 1409
+                    "rating": 1420
                   },
                   {
                     "username": "mayaskara45",
-                    "rating": 1405
+                    "rating": 1410
+                  },
+                  {
+                    "username": "sgreeven",
+                    "rating": 1406
                   },
                   {
                     "username": "diagonalhit",
-                    "rating": 1402
-                  },
-                  {
-                    "username": "chezzjc",
                     "rating": 1389
                   },
                   {
@@ -23917,20 +24032,24 @@
                     "rating": 1382
                   },
                   {
+                    "username": "chezzjc",
+                    "rating": 1370
+                  },
+                  {
                     "username": "leodow",
                     "rating": 1359
                   },
                   {
                     "username": "shdk1980",
-                    "rating": 1335
+                    "rating": 1328
                   },
                   {
                     "username": "battaglia-horacio",
-                    "rating": 1276
+                    "rating": 1269
                   },
                   {
                     "username": "buli500",
-                    "rating": 1197
+                    "rating": 1193
                   },
                   {
                     "username": "psattva",
@@ -23942,7 +24061,7 @@
                   },
                   {
                     "username": "brandon2329",
-                    "rating": 1095
+                    "rating": 1091
                   }
                 ]
               },
@@ -23983,15 +24102,15 @@
                 "ourRoster": [
                   {
                     "username": "lezama1972",
-                    "rating": 1773
+                    "rating": 1774
                   },
                   {
                     "username": "vystress",
-                    "rating": 1594
+                    "rating": 1592
                   },
                   {
                     "username": "ninburg",
-                    "rating": 1496
+                    "rating": 1467
                   },
                   {
                     "username": "rookedmesideways123",
@@ -24011,7 +24130,7 @@
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 747
+                    "rating": 739
                   },
                   {
                     "username": "vi30555",
@@ -24061,19 +24180,19 @@
                   },
                   {
                     "username": "raphael1127",
-                    "rating": 1093
+                    "rating": 1079
+                  },
+                  {
+                    "username": "nonamepotato2",
+                    "rating": 1024
                   },
                   {
                     "username": "noobuschess",
                     "rating": 1004
                   },
                   {
-                    "username": "nonamepotato2",
-                    "rating": 993
-                  },
-                  {
                     "username": "therealcheese27",
-                    "rating": 972
+                    "rating": 983
                   },
                   {
                     "username": "joalbertjo",
@@ -24092,6 +24211,10 @@
                     "rating": 800
                   },
                   {
+                    "username": "yrnehtluabiht",
+                    "rating": 800
+                  },
+                  {
                     "username": "marklot",
                     "rating": 400
                   },
@@ -24103,7 +24226,7 @@
               },
               "registeredPlayers": {
                 "our": 9,
-                "opponent": 20
+                "opponent": 21
               }
             }
           ],
@@ -25756,7 +25879,7 @@
               "endTime": null,
               "boards": 12,
               "matchResult": {
-                "ourScore": 14.5,
+                "ourScore": 15.5,
                 "opponentScore": 7.5,
                 "result": "unknown"
               },
@@ -25804,8 +25927,8 @@
                   "losses": 1
                 },
                 "invincible_r": {
-                  "games": 1,
-                  "wins": 1,
+                  "games": 2,
+                  "wins": 2,
                   "draws": 0,
                   "losses": 0
                 },
@@ -25865,7 +25988,7 @@
               "endTime": null,
               "boards": 16,
               "matchResult": {
-                "ourScore": 14,
+                "ourScore": 15,
                 "opponentScore": 9,
                 "result": "unknown"
               },
@@ -25909,6 +26032,12 @@
                 "malvolio62": {
                   "games": 2,
                   "wins": 2,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "ninburg": {
+                  "games": 1,
+                  "wins": 1,
                   "draws": 0,
                   "losses": 0
                 },
@@ -25957,11 +26086,11 @@
             },
             {
               "username": "invincible_r",
-              "games": 3,
-              "wins": 3,
+              "games": 4,
+              "wins": 4,
               "draws": 0,
               "losses": 0,
-              "points": 3.0
+              "points": 4.0
             },
             {
               "username": "mikesexton21",
@@ -26077,6 +26206,14 @@
             },
             {
               "username": "damjan1989",
+              "games": 1,
+              "wins": 1,
+              "draws": 0,
+              "losses": 0,
+              "points": 1.0
+            },
+            {
+              "username": "ninburg",
               "games": 1,
               "wins": 1,
               "draws": 0,
@@ -28668,7 +28805,7 @@
               "boards": 20,
               "matchResult": {
                 "ourScore": 32,
-                "opponentScore": 4,
+                "opponentScore": 5,
                 "result": "unknown"
               },
               "playerStats": {
@@ -28749,6 +28886,12 @@
                   "wins": 2,
                   "draws": 0,
                   "losses": 0
+                },
+                "nicky11s": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1
                 },
                 "ninburg": {
                   "games": 2,
@@ -29029,7 +29172,7 @@
                 "ourRoster": [
                   {
                     "username": "lavendermojito",
-                    "rating": 1869
+                    "rating": 1858
                   },
                   {
                     "username": "jero1980",
@@ -29037,7 +29180,7 @@
                   },
                   {
                     "username": "chief-blackhawk",
-                    "rating": 1665
+                    "rating": 1668
                   },
                   {
                     "username": "pari3008",
@@ -29045,11 +29188,11 @@
                   },
                   {
                     "username": "mastermatthew52",
-                    "rating": 1607
+                    "rating": 1601
                   },
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
                   },
                   {
                     "username": "georgex88",
@@ -29061,11 +29204,11 @@
                   },
                   {
                     "username": "loudomvis",
-                    "rating": 1488
+                    "rating": 1494
                   },
                   {
                     "username": "malvolio62",
-                    "rating": 1290
+                    "rating": 1297
                   },
                   {
                     "username": "netnazgul",
@@ -29073,7 +29216,7 @@
                   },
                   {
                     "username": "voimddweller",
-                    "rating": 1167
+                    "rating": 1172
                   },
                   {
                     "username": "mpho190815",
@@ -29085,7 +29228,7 @@
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 937
+                    "rating": 934
                   }
                 ],
                 "oppRoster": [
@@ -29457,6 +29600,14 @@
               "draws": 1,
               "losses": 1,
               "points": 0.5
+            },
+            {
+              "username": "nicky11s",
+              "games": 1,
+              "wins": 0,
+              "draws": 0,
+              "losses": 1,
+              "points": 0.0
             },
             {
               "username": "ajedrezvenezuela",
@@ -29989,7 +30140,7 @@
               "endTime": null,
               "boards": 44,
               "matchResult": {
-                "ourScore": 29,
+                "ourScore": 30,
                 "opponentScore": 16,
                 "result": "unknown"
               },
@@ -30061,8 +30212,8 @@
                   "losses": 2
                 },
                 "kyljys": {
-                  "games": 1,
-                  "wins": 0,
+                  "games": 2,
+                  "wins": 1,
                   "draws": 0,
                   "losses": 1,
                   "timeouts": 1
@@ -30285,6 +30436,14 @@
               "points": 1.0
             },
             {
+              "username": "kyljys",
+              "games": 2,
+              "wins": 1,
+              "draws": 0,
+              "losses": 1,
+              "points": 1.0
+            },
+            {
               "username": "masterdean00",
               "games": 2,
               "wins": 1,
@@ -30307,14 +30466,6 @@
               "draws": 1,
               "losses": 1,
               "points": 0.5
-            },
-            {
-              "username": "kyljys",
-              "games": 1,
-              "wins": 0,
-              "draws": 0,
-              "losses": 1,
-              "points": 0.0
             },
             {
               "username": "mpho190815",
@@ -36089,10 +36240,17 @@
               "boards": 22,
               "matchResult": {
                 "ourScore": 0,
-                "opponentScore": 0,
+                "opponentScore": 1,
                 "result": "unknown"
               },
-              "playerStats": {},
+              "playerStats": {
+                "ke1g1": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1
+                }
+              },
               "minTeamPlayers": 5
             }
           ],
@@ -36259,6 +36417,14 @@
             },
             {
               "username": "dtrayne",
+              "games": 1,
+              "wins": 0,
+              "draws": 0,
+              "losses": 1,
+              "points": 0.0
+            },
+            {
+              "username": "ke1g1",
               "games": 1,
               "wins": 0,
               "draws": 0,
@@ -40559,7 +40725,7 @@
               "name": "TCMAC GLADIATOR R6 Promote to King vs 1 day per move club",
               "startTime": 1775210400,
               "endTime": null,
-              "boards": 4,
+              "boards": 8,
               "matchResult": {
                 "ourScore": 0,
                 "opponentScore": 0,
@@ -40572,15 +40738,11 @@
                 "ourRoster": [
                   {
                     "username": "ninburg",
-                    "rating": 1579
+                    "rating": 1583
                   },
                   {
                     "username": "nova5streets",
-                    "rating": 1543
-                  },
-                  {
-                    "username": "andy67123",
-                    "rating": 1499
+                    "rating": 1547
                   },
                   {
                     "username": "sakura_4",
@@ -40592,7 +40754,7 @@
                   },
                   {
                     "username": "vi30555",
-                    "rating": 1461
+                    "rating": 1456
                   },
                   {
                     "username": "some0ne96o",
@@ -40600,7 +40762,11 @@
                   },
                   {
                     "username": "dabibbs91",
-                    "rating": 1403
+                    "rating": 1416
+                  },
+                  {
+                    "username": "malvolio62",
+                    "rating": 1297
                   },
                   {
                     "username": "plamen196565",
@@ -40612,31 +40778,31 @@
                   },
                   {
                     "username": "congmark",
-                    "rating": 1204
+                    "rating": 1197
                   },
                   {
                     "username": "sushilramrakhyani",
-                    "rating": 1187
+                    "rating": 1188
                   },
                   {
                     "username": "voimddweller",
-                    "rating": 1167
+                    "rating": 1172
                   },
                   {
                     "username": "nicorio3",
-                    "rating": 1098
+                    "rating": 1096
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 937
+                    "rating": 934
                   },
                   {
                     "username": "calq78",
-                    "rating": 900
+                    "rating": 919
                   },
                   {
                     "username": "mioyuna247",
-                    "rating": 583
+                    "rating": 600
                   }
                 ],
                 "oppRoster": [
@@ -40649,18 +40815,34 @@
                     "rating": 1395
                   },
                   {
+                    "username": "barouhc123",
+                    "rating": 1381
+                  },
+                  {
                     "username": "milad_khadem",
                     "rating": 1268
                   },
                   {
+                    "username": "ajnm",
+                    "rating": 1255
+                  },
+                  {
+                    "username": "wangsandy",
+                    "rating": 1055
+                  },
+                  {
+                    "username": "jwz1105",
+                    "rating": 1000
+                  },
+                  {
                     "username": "richwang99",
-                    "rating": 879
+                    "rating": 901
                   }
                 ]
               },
               "registeredPlayers": {
                 "our": 17,
-                "opponent": 4
+                "opponent": 8
               }
             }
           ],
@@ -43921,6 +44103,77 @@
             "losses": 1,
             "draws": 0
           }
+        },
+        "S45": {
+          "rounds": [
+            {
+              "round": "R1",
+              "status": "open",
+              "matchId": "https://api.chess.com/pub/match/1925983",
+              "matchUrl": "https://api.chess.com/pub/match/1925983",
+              "matchWebUrl": "https://www.chess.com/club/matches/1925983",
+              "name": "KOTML S45 R1: 1 day per move club vs Europe Dream Club",
+              "startTime": 1775163600,
+              "endTime": null,
+              "boards": 1,
+              "matchResult": {
+                "ourScore": 0,
+                "opponentScore": 0,
+                "result": "unknown"
+              },
+              "playerStats": {},
+              "minTeamPlayers": 10,
+              "registrationData": {
+                "type": "roster",
+                "ourRoster": [
+                  {
+                    "username": "lezama1972",
+                    "rating": 1807
+                  },
+                  {
+                    "username": "slimpickins61",
+                    "rating": 1693
+                  },
+                  {
+                    "username": "mastermatthew52",
+                    "rating": 1601
+                  },
+                  {
+                    "username": "socaltennis",
+                    "rating": 1417
+                  },
+                  {
+                    "username": "jaypi_fromla",
+                    "rating": 1042
+                  },
+                  {
+                    "username": "alangoode108",
+                    "rating": 934
+                  },
+                  {
+                    "username": "mioyuna247",
+                    "rating": 600
+                  }
+                ],
+                "oppRoster": [
+                  {
+                    "username": "rubinary",
+                    "rating": 1579
+                  }
+                ]
+              },
+              "registeredPlayers": {
+                "our": 7,
+                "opponent": 1
+              }
+            }
+          ],
+          "leaderboard": [],
+          "record": {
+            "wins": 0,
+            "losses": 0,
+            "draws": 0
+          }
         }
       }
     }
@@ -44023,20 +44276,20 @@
       "points": 58.0
     },
     {
+      "username": "sawa-yan",
+      "games": 99,
+      "wins": 51,
+      "draws": 13,
+      "losses": 35,
+      "points": 57.5
+    },
+    {
       "username": "sushilramrakhyani",
       "games": 104,
       "wins": 53,
       "draws": 8,
       "losses": 43,
       "points": 57.0
-    },
-    {
-      "username": "sawa-yan",
-      "games": 98,
-      "wins": 50,
-      "draws": 13,
-      "losses": 35,
-      "points": 56.5
     },
     {
       "username": "fluffy_i",
@@ -44128,11 +44381,11 @@
     },
     {
       "username": "ninburg",
-      "games": 69,
-      "wins": 39,
+      "games": 71,
+      "wins": 40,
       "draws": 7,
-      "losses": 23,
-      "points": 42.5
+      "losses": 24,
+      "points": 43.5
     },
     {
       "username": "engelleik",
@@ -44271,6 +44524,14 @@
       "points": 20.5
     },
     {
+      "username": "invincible_r",
+      "games": 30,
+      "wins": 20,
+      "draws": 0,
+      "losses": 10,
+      "points": 20.0
+    },
+    {
       "username": "joedoan07",
       "games": 36,
       "wins": 18,
@@ -44284,14 +44545,6 @@
       "wins": 15,
       "draws": 8,
       "losses": 5,
-      "points": 19.0
-    },
-    {
-      "username": "invincible_r",
-      "games": 29,
-      "wins": 19,
-      "draws": 0,
-      "losses": 10,
       "points": 19.0
     },
     {
@@ -44431,6 +44684,14 @@
       "points": 14.0
     },
     {
+      "username": "peon-4-rey",
+      "games": 18,
+      "wins": 12,
+      "draws": 3,
+      "losses": 3,
+      "points": 13.5
+    },
+    {
       "username": "ceffin",
       "games": 22,
       "wins": 13,
@@ -44508,14 +44769,6 @@
       "wins": 11,
       "draws": 1,
       "losses": 2,
-      "points": 11.5
-    },
-    {
-      "username": "peon-4-rey",
-      "games": 16,
-      "wins": 10,
-      "draws": 3,
-      "losses": 3,
       "points": 11.5
     },
     {
@@ -44792,10 +45045,10 @@
     },
     {
       "username": "nicky11s",
-      "games": 19,
+      "games": 20,
       "wins": 6,
       "draws": 3,
-      "losses": 10,
+      "losses": 11,
       "points": 7.5
     },
     {
@@ -44820,6 +45073,14 @@
       "wins": 7,
       "draws": 0,
       "losses": 1,
+      "points": 7.0
+    },
+    {
+      "username": "lone_wolf_2006",
+      "games": 9,
+      "wins": 7,
+      "draws": 0,
+      "losses": 2,
       "points": 7.0
     },
     {
@@ -44863,11 +45124,19 @@
       "points": 7.0
     },
     {
+      "username": "kyljys",
+      "games": 16,
+      "wins": 6,
+      "draws": 2,
+      "losses": 8,
+      "points": 7.0
+    },
+    {
       "username": "ke1g1",
-      "games": 18,
+      "games": 19,
       "wins": 7,
       "draws": 0,
-      "losses": 11,
+      "losses": 12,
       "points": 7.0
     },
     {
@@ -44884,14 +45153,6 @@
       "wins": 6,
       "draws": 0,
       "losses": 0,
-      "points": 6.0
-    },
-    {
-      "username": "lone_wolf_2006",
-      "games": 8,
-      "wins": 6,
-      "draws": 0,
-      "losses": 2,
       "points": 6.0
     },
     {
@@ -44947,14 +45208,6 @@
       "games": 14,
       "wins": 6,
       "draws": 0,
-      "losses": 8,
-      "points": 6.0
-    },
-    {
-      "username": "kyljys",
-      "games": 15,
-      "wins": 5,
-      "draws": 2,
       "losses": 8,
       "points": 6.0
     },
@@ -45016,10 +45269,10 @@
     },
     {
       "username": "justinwest",
-      "games": 6,
+      "games": 7,
       "wins": 5,
       "draws": 0,
-      "losses": 1,
+      "losses": 2,
       "points": 5.0
     },
     {
@@ -45391,6 +45644,14 @@
       "points": 2.0
     },
     {
+      "username": "vi30555",
+      "games": 2,
+      "wins": 2,
+      "draws": 0,
+      "losses": 0,
+      "points": 2.0
+    },
+    {
       "username": "purpleraven1950",
       "games": 2,
       "wins": 2,
@@ -45424,6 +45685,14 @@
     },
     {
       "username": "myselfaadil",
+      "games": 2,
+      "wins": 2,
+      "draws": 0,
+      "losses": 0,
+      "points": 2.0
+    },
+    {
+      "username": "gidamacika",
       "games": 2,
       "wins": 2,
       "draws": 0,
@@ -45559,14 +45828,6 @@
       "points": 2.0
     },
     {
-      "username": "anasssej",
-      "games": 2,
-      "wins": 2,
-      "draws": 0,
-      "losses": 0,
-      "points": 2.0
-    },
-    {
       "username": "ghost_scarface",
       "games": 2,
       "wins": 2,
@@ -45576,6 +45837,14 @@
     },
     {
       "username": "dabibbs91",
+      "games": 3,
+      "wins": 2,
+      "draws": 0,
+      "losses": 1,
+      "points": 2.0
+    },
+    {
+      "username": "anasssej",
       "games": 3,
       "wins": 2,
       "draws": 0,
@@ -45775,7 +46044,7 @@
       "points": 1.5
     },
     {
-      "username": "gidamacika",
+      "username": "alangoode108",
       "games": 1,
       "wins": 1,
       "draws": 0,

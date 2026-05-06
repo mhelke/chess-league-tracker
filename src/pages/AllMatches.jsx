@@ -85,9 +85,9 @@ function AllMatches() {
         })
     }
 
-    // Sort by most recent first
-    allMatches.open.sort((a, b) => (b.startTime || 0) - (a.startTime || 0))
-    allMatches.in_progress.sort((a, b) => (b.startTime || 0) - (a.startTime || 0))
+    // Sort: open/in_progress ascending by startTime (next starting first); finished descending (most recent first)
+    allMatches.open.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
+    allMatches.in_progress.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
     allMatches.finished.sort((a, b) => (b.startTime || 0) - (a.startTime || 0))
 
     const formatDate = (timestamp) => {
@@ -557,6 +557,17 @@ function AllMatches() {
     }
 
     const renderMatches = (matches, emptyMessage) => {
+        // Apply search filter
+        const q = searchQuery.trim().toLowerCase()
+        const filtered = q
+            ? matches.filter(match => {
+                const nameMatch = match.name?.toLowerCase().includes(q)
+                const clubName = clubIcons[match.opponentClubId]?.name?.toLowerCase() || ''
+                const clubIdMatch = match.opponentClubId?.toLowerCase().includes(q)
+                return nameMatch || clubName.includes(q) || clubIdMatch
+            })
+            : matches
+
         if (matches.length === 0) {
             return (
                 <div className="card text-center py-12 text-gray-500">
@@ -565,27 +576,66 @@ function AllMatches() {
             )
         }
 
+        if (filtered.length === 0) {
+            return (
+                <div className="card text-center py-12 text-gray-500">
+                    No matches found for &ldquo;{searchQuery.trim()}&rdquo;
+                </div>
+            )
+        }
+
         // Group by league
         const byLeague = {}
         matches.forEach(match => {
-            if (!byLeague[match.leagueName]) {
-                byLeague[match.leagueName] = []
-            }
+            if (!byLeague[match.leagueName]) byLeague[match.leagueName] = []
             byLeague[match.leagueName].push(match)
         })
 
         return (
             <div className="space-y-6">
-                {Object.entries(byLeague).map(([leagueName, leagueMatches]) => (
-                    <div key={leagueName}>
-                        <h3 className="text-xl font-bold text-chess-dark mb-3">
-                            {leagueName} ({leagueMatches.length})
-                        </h3>
-                        {leagueMatches.map((match, idx) => (
-                            <MatchRow key={`${match.matchId}-${idx}`} match={match} />
-                        ))}
-                    </div>
-                ))}
+                {Object.entries(byLeague).map(([leagueName, leagueMatches]) => {
+                    const visibleMatches = q
+                        ? leagueMatches.filter(match => {
+                            const nameMatch = match.name?.toLowerCase().includes(q)
+                            const clubName = clubIcons[match.opponentClubId]?.name?.toLowerCase() || ''
+                            const clubIdMatch = match.opponentClubId?.toLowerCase().includes(q)
+                            return nameMatch || clubName.includes(q) || clubIdMatch
+                        })
+                        : leagueMatches
+
+                    if (visibleMatches.length === 0) return null
+
+                    const isCollapsed = !!collapsedLeagues[leagueName]
+                    const countLabel = q && visibleMatches.length !== leagueMatches.length
+                        ? `${visibleMatches.length} of ${leagueMatches.length}`
+                        : leagueMatches.length
+
+                    return (
+                        <div key={leagueName} className="border border-gray-200 rounded-lg overflow-hidden">
+                            <button
+                                onClick={() => setCollapsedLeagues(prev => ({ ...prev, [leagueName]: !prev[leagueName] }))}
+                                className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                            >
+                                <h3 className="text-xl font-bold text-chess-dark">
+                                    {leagueName} <span className="text-base font-normal text-gray-500">({countLabel})</span>
+                                </h3>
+                                <svg
+                                    className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`}
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            {!isCollapsed && (
+                                <div className="p-3 space-y-2">
+                                    {visibleMatches.map((match, idx) => (
+                                        <MatchRow key={`${match.matchId}-${idx}`} match={match} />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )
+                })}
             </div>
         )
     }
@@ -603,6 +653,31 @@ function AllMatches() {
                         Last updated: {new Date(data.lastUpdated).toLocaleString()}
                     </p>
                 )}
+            </div>
+
+            {/* Search */}
+            <div className="mb-6">
+                <div className="relative">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                    </svg>
+                    <input
+                        type="text"
+                        placeholder="Search by match name or opponent club…"
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-chess-green focus:border-transparent"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            aria-label="Clear search"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Tabs */}

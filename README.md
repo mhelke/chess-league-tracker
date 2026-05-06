@@ -6,8 +6,6 @@
 - [https://1dpmc.chessteamdata.com](https://1dpmc.chessteamdata.com) — 1 Day Per Move Club
 - [https://teamusa.chessteamdata.com](https://teamusa.chessteamdata.com) — Team USA
 
-⚠️ **Status:** BETA - Data may be incomplete or unreliable while under active development
-
 ---
 
 ## 📖 What Is This?

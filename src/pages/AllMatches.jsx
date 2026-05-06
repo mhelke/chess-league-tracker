@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 import TimeoutModal from '../components/TimeoutModal'
 import EarlyResignModal from '../components/EarlyResignModal'
+import AuditLogModal from '../components/AuditLogModal'
 import { buildEarlyResignIndex, getModalPlayersForMatch } from '../utils/earlyResignUtils'
 
 function AllMatches() {
@@ -17,6 +18,10 @@ function AllMatches() {
     const [modalPlayers, setModalPlayers] = useState([])
     const [showEarlyResignModal, setShowEarlyResignModal] = useState(false)
     const [earlyResignModalPlayers, setEarlyResignModalPlayers] = useState([])
+    const [showHistoryModal, setShowHistoryModal] = useState(false)
+    const [historyModalMatch, setHistoryModalMatch] = useState(null)
+    const [collapsedLeagues, setCollapsedLeagues] = useState({})
+    const [searchQuery, setSearchQuery] = useState('')
 
     // Build early resignation index — must be before any early return (Rules of Hooks)
     const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData), [earlyResignData])
@@ -163,6 +168,12 @@ function AllMatches() {
         const earlyResignPlayers = (match.status === 'in_progress' || match.status === 'finished')
             ? getModalPlayersForMatch(earlyResignIndex, match.matchUrl || match.matchId)
             : []
+
+        // Audit log
+        const hasHistory = (match.registrationHistory ?? []).length > 0
+        const hasOppRemovals = (match.registrationHistory ?? []).some(
+            entry => entry.opp?.removed?.length > 0
+        )
 
         const cardBorder = (() => {
             if (match.status === 'finished') {
@@ -528,6 +539,18 @@ function AllMatches() {
                     >
                         View on chess.com →
                     </a>
+                    {(match.status === 'open' || match.status === 'in_progress') && hasHistory && (
+                        <button
+                            onClick={() => { setHistoryModalMatch(match); setShowHistoryModal(true) }}
+                            className="ml-4 inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                            <span>📋</span>
+                            <span>Audit Log</span>
+                            {hasOppRemovals && (
+                                <span title="Opponent player(s) have left this match">⚠️</span>
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
         )
@@ -638,6 +661,16 @@ function AllMatches() {
                 onClose={() => setShowEarlyResignModal(false)}
                 title="Early Resignation History"
                 players={earlyResignModalPlayers}
+            />
+
+            {/* Audit Log Modal */}
+            <AuditLogModal
+                isOpen={showHistoryModal}
+                onClose={() => { setShowHistoryModal(false); setHistoryModalMatch(null) }}
+                matchName={historyModalMatch?.name || historyModalMatch?.round || 'Match'}
+                history={historyModalMatch?.registrationHistory ?? []}
+                ourTeamName="1DPMC"
+                oppTeamName={clubIcons?.[historyModalMatch?.opponentClubId]?.name || 'Opponent'}
             />
         </div>
     )

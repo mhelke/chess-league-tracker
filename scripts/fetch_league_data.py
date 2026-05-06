@@ -35,6 +35,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 CLUB_ID: str           = ""
 CLUB_MATCHES_URL: str  = ""
 OUTPUT_FILE: str       = ""
+REG_HISTORY_CACHE_FILE: str = ""
 LEAGUE_CONFIG: list    = []
 VARIANT_PATTERNS: list = []
 USER_AGENT: str        = "ChessLeagueTracker/1.0"
@@ -42,7 +43,7 @@ USER_AGENT: str        = "ChessLeagueTracker/1.0"
 
 def load_config(site_key: str) -> None:
     """Load per-site and shared config files from `config/` and set globals."""
-    global CLUB_ID, CLUB_MATCHES_URL, OUTPUT_FILE, LEAGUE_CONFIG, VARIANT_PATTERNS, USER_AGENT
+    global CLUB_ID, CLUB_MATCHES_URL, OUTPUT_FILE, REG_HISTORY_CACHE_FILE, LEAGUE_CONFIG, VARIANT_PATTERNS, USER_AGENT
 
     config_dir = os.path.join(PROJECT_ROOT, "config", site_key)
 
@@ -73,6 +74,7 @@ def load_config(site_key: str) -> None:
 
     # ── Output file
     OUTPUT_FILE = os.path.join(PROJECT_ROOT, "public", "data", site_key, "leagueData.json")
+    REG_HISTORY_CACHE_FILE = os.path.join(PROJECT_ROOT, "public", "data", site_key, "registration_history_cache.json")
 
     # ── User agent (env override > script_params.json > default)
     params_path = os.path.join(config_dir, "script_params.json")
@@ -723,6 +725,92 @@ def create_global_leaderboard(leagues_data: Dict) -> List[Dict]:
     return global_leaderboard
 
 
+# ── Registration history helpers ──────────────────────────────────────────────
+
+def load_registration_history_cache() -> Dict:
+    """Load the registration history cache, returning an empty structure if missing."""
+    if not os.path.exists(REG_HISTORY_CACHE_FILE):
+        return {"matches": {}}
+    try:
+        with open(REG_HISTORY_CACHE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Warning: Could not load registration history cache: {e}")
+        return {"matches": {}}
+
+
+def save_registration_history_cache(cache: Dict) -> None:
+    """Persist the registration history cache to disk."""
+    try:
+        os.makedirs(os.path.dirname(REG_HISTORY_CACHE_FILE), exist_ok=True)
+        with open(REG_HISTORY_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(cache, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Warning: Could not save registration history cache: {e}", file=sys.stderr)
+
+
+def _diff_roster(old_names: set, new_names: set):
+    """Return (added, removed) sorted lists from two username sets."""
+    return sorted(new_names - old_names), sorted(old_names - new_names)
+
+
+def update_registration_history(
+    cache: Dict,
+    match_url: str,
+    our_roster: List[Dict],
+    opp_roster: List[Dict],
+    run_ts: str,
+) -> List[Dict]:
+    """
+    Compute roster diff for an open match, update the cache in-place, and return
+    the full history list for that match.
+
+    On the first run for a match, all current players are recorded as 'added'.
+    Subsequent runs only append an entry if at least one player joined or left.
+    Only usernames are stored (not ratings) to keep snapshots small.
+    """
+    our_names = {p["username"].lower() for p in our_roster if p.get("username")}
+    opp_names = {p["username"].lower() for p in opp_roster if p.get("username")}
+
+    entry = cache["matches"].get(match_url)
+
+    if entry is None:
+        # First time seeing this match — initialise snapshot and record all as added.
+        cache["matches"][match_url] = {
+            "snapshot": {
+                "our": sorted(our_names),
+                "opp": sorted(opp_names),
+            },
+            "history": [
+                {
+                    "ts": run_ts,
+                    "our": {"added": sorted(our_names), "removed": []},
+                    "opp": {"added": sorted(opp_names), "removed": []},
+                }
+            ],
+        }
+    else:
+        old_our = set(entry["snapshot"]["our"])
+        old_opp = set(entry["snapshot"]["opp"])
+
+        our_added, our_removed = _diff_roster(old_our, our_names)
+        opp_added, opp_removed = _diff_roster(old_opp, opp_names)
+
+        if our_added or our_removed or opp_added or opp_removed:
+            entry["history"].append(
+                {
+                    "ts": run_ts,
+                    "our": {"added": our_added, "removed": our_removed},
+                    "opp": {"added": opp_added, "removed": opp_removed},
+                }
+            )
+            # Update snapshot to reflect current state.
+            entry["snapshot"]["our"] = sorted(our_names)
+            entry["snapshot"]["opp"] = sorted(opp_names)
+
+    return cache["matches"][match_url]["history"]
+
+
 def load_existing_match_ids() -> set:
     """Load finished match IDs from existing data file to avoid re-processing.
     In-progress and open matches are always re-fetched for updated data."""
@@ -875,7 +963,11 @@ def main():
         return
 
     print(f"Fetching matches for club: {CLUB_ID} (site: {args.site_key})")
-    
+
+    # Load registration history cache once before processing.
+    reg_history_cache = load_registration_history_cache()
+    run_timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
     # Load existing match IDs to skip
     existing_match_ids = load_existing_match_ids()
     print(f"Loaded {len(existing_match_ids)} existing match IDs to skip")
@@ -973,6 +1065,24 @@ def main():
         try:
             match_data = process_match(match_info["url"], match_info["parsed"], match_info["status"])
             if match_data:
+                # ── Registration history ───────────────────────────────────────
+                if match_info["status"] == "open":
+                    reg_data = match_data.get("registrationData")
+                    if reg_data and reg_data.get("type") == "roster":
+                        history = update_registration_history(
+                            reg_history_cache,
+                            match_info["url"],
+                            reg_data.get("ourRoster", []),
+                            reg_data.get("oppRoster", []),
+                            run_timestamp,
+                        )
+                        match_data["registrationHistory"] = history
+                elif match_info["status"] == "in_progress":
+                    # Attach existing history read-only; no new diffs once boards are set.
+                    cached_entry = reg_history_cache["matches"].get(match_info["url"])
+                    if cached_entry:
+                        match_data["registrationHistory"] = cached_entry["history"]
+                # ──────────────────────────────────────────────────────────────
                 organized_data[league][sub_league].append(match_data)
                 print(f"  ✓ Collected stats for {len(match_data['playerStats'])} players")
             else:
@@ -983,9 +1093,22 @@ def main():
         # Be nice to the API
         time.sleep(0.5)
     
+    # ── Prune stale registration history cache entries ────────────────────────
+    # Keep only matches that are still open or in_progress this run.
+    active_match_urls = {
+        m["url"] for m in league_matches if m["status"] in ("open", "in_progress")
+    }
+    stale_keys = [k for k in reg_history_cache["matches"] if k not in active_match_urls]
+    for k in stale_keys:
+        del reg_history_cache["matches"][k]
+    if stale_keys:
+        print(f"Pruned {len(stale_keys)} stale registration history cache entry(ies)")
+    save_registration_history_cache(reg_history_cache)
+    # ───────────────────────────────────────────────────────────────────────────
+
     # Build final data structure
     print("\nBuilding final data structure...")
-    
+
     # Load existing data to merge with new data
     existing_data = {}
     if os.path.exists(OUTPUT_FILE):

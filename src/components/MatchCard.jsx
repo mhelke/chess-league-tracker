@@ -3,6 +3,7 @@ import { useState } from 'react'
 import StatusBadge from './StatusBadge'
 import TimeoutModal from './TimeoutModal'
 import EarlyResignModal from './EarlyResignModal'
+import AuditLogModal from './AuditLogModal'
 import { getModalPlayersForMatch } from '../utils/earlyResignUtils'
 
 function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignIndex, clubIcons }) {
@@ -11,6 +12,7 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
     const [modalPlayers, setModalPlayers] = useState([])
     const [showEarlyResignModal, setShowEarlyResignModal] = useState(false)
     const [earlyResignPlayers, setEarlyResignPlayers] = useState([])
+    const [showHistoryModal, setShowHistoryModal] = useState(false)
 
     const formatDate = (timestamp) => {
         if (!timestamp) return null
@@ -76,6 +78,12 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
     }
 
     const alerts = openMatchAlerts()
+
+    // True when opponent has at least one removal across any history snapshot
+    const hasOppRemovals = (round.registrationHistory ?? []).some(
+        entry => entry.opp?.removed?.length > 0
+    )
+    const hasHistory = (round.registrationHistory ?? []).length > 0
 
     const handleAlertClick = (title, players) => {
         setModalTitle(title)
@@ -275,6 +283,29 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
             })()
             }
 
+            {/* Audit log */}
+            {(round.status === 'open' || round.status === 'in_progress') && hasHistory && (
+                <div className="mb-3">
+                    <button
+                        onClick={() => setShowHistoryModal(true)}
+                        className="w-full p-2.5 rounded-md text-sm border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 transition-colors text-left"
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                                <span>📋</span>
+                                <span className="font-medium">Audit Log</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {hasOppRemovals && (
+                                    <span title="Opponent player(s) have left this match" className="text-base leading-none">⚠️</span>
+                                )}
+                                <span className="text-xs font-bold text-blue-500">View →</span>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            )}
+
             {
                 round.registrationData && round.registrationData.type === 'roster' && (() => {
                     const ourRatings = round.registrationData.ourRoster?.map(p => p.rating).filter(r => r) || []
@@ -370,6 +401,15 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
                 onClose={() => setShowEarlyResignModal(false)}
                 title="Early Resignation History"
                 players={earlyResignPlayers}
+            />
+
+            <AuditLogModal
+                isOpen={showHistoryModal}
+                onClose={() => setShowHistoryModal(false)}
+                matchName={round.name || round.round || 'Match'}
+                history={round.registrationHistory ?? []}
+                ourTeamName="1DPMC"
+                oppTeamName={clubIcons?.[round.opponentClubId]?.name || 'Opponent'}
             />
         </div >
     )

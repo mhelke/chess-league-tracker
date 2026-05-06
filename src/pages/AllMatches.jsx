@@ -9,6 +9,7 @@ function AllMatches() {
     const [data, setData] = useState(null)
     const [timeoutData, setTimeoutData] = useState(null)
     const [earlyResignData, setEarlyResignData] = useState(null)
+    const [clubIcons, setClubIcons] = useState({})
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('open')
     const [showTimeoutModal, setShowTimeoutModal] = useState(false)
@@ -25,11 +26,13 @@ function AllMatches() {
             fetch('/data/leagueData.json').then(r => r.json()),
             fetch('/data/timeoutData.json').then(r => r.json()).catch(() => null),
             fetch('/data/earlyResignations.json').then(r => r.json()).catch(() => null),
+            fetch('/data/clubIcons.json').then(r => r.json()).catch(() => ({})),
         ])
-            .then(([leagueJson, timeoutJson, earlyResignJson]) => {
+            .then(([leagueJson, timeoutJson, earlyResignJson, clubIconsJson]) => {
                 setData(leagueJson)
                 setTimeoutData(timeoutJson)
                 setEarlyResignData(earlyResignJson)
+                setClubIcons(clubIconsJson || {})
                 setLoading(false)
             })
             .catch(err => {
@@ -274,6 +277,18 @@ function AllMatches() {
                             {match.subLeagueName}
                         </Link>
                         <p className="text-sm text-gray-600 mt-1">{match.name}</p>
+                        {match.opponentClubId && clubIcons[match.opponentClubId] && (
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                                {clubIcons[match.opponentClubId].icon && (
+                                    <img
+                                        src={clubIcons[match.opponentClubId].icon}
+                                        alt=""
+                                        className="w-4 h-4 rounded-full object-cover flex-shrink-0"
+                                    />
+                                )}
+                                <span className="text-xs text-gray-500">{clubIcons[match.opponentClubId].name}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 

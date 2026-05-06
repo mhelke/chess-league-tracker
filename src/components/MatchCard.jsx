@@ -5,7 +5,7 @@ import TimeoutModal from './TimeoutModal'
 import EarlyResignModal from './EarlyResignModal'
 import { getModalPlayersForMatch } from '../utils/earlyResignUtils'
 
-function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignIndex }) {
+function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignIndex, clubIcons }) {
     const [showTimeoutModal, setShowTimeoutModal] = useState(false)
     const [modalTitle, setModalTitle] = useState('')
     const [modalPlayers, setModalPlayers] = useState([])
@@ -150,6 +150,23 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
             {round.name && (
                 <p className="text-sm text-gray-600 mb-3 line-clamp-2">{round.name}</p>
             )}
+
+            {/* Opponent club identity */}
+            {round.opponentClubId && clubIcons?.[round.opponentClubId] && (() => {
+                const opp = clubIcons[round.opponentClubId]
+                return (
+                    <div className="flex items-center gap-2 mb-3">
+                        {opp.icon && (
+                            <img
+                                src={opp.icon}
+                                alt=""
+                                className="w-5 h-5 rounded-full object-cover flex-shrink-0 ring-1 ring-gray-200"
+                            />
+                        )}
+                        <span className="text-xs text-gray-500 font-medium">{opp.name}</span>
+                    </div>
+                )
+            })()}
 
             {round.matchResult && round.matchResult.result && round.matchResult.result !== 'unknown' && round.status === 'finished' && (() => {
                 const result = round.matchResult.result

@@ -10,6 +10,7 @@ function SubLeagueView() {
     const [data, setData] = useState(null)
     const [timeoutData, setTimeoutData] = useState(null)
     const [earlyResignData, setEarlyResignData] = useState(null)
+    const [clubIcons, setClubIcons] = useState({})
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('rounds')
     const [gameLinksFor, setGameLinksFor] = useState(null)
@@ -19,11 +20,13 @@ function SubLeagueView() {
             fetch('/data/leagueData.json').then(r => r.json()),
             fetch('/data/timeoutData.json').then(r => r.json()).catch(() => null),
             fetch('/data/earlyResignations.json').then(r => r.json()).catch(() => null),
+            fetch('/data/clubIcons.json').then(r => r.json()).catch(() => ({})),
         ])
-            .then(([leagueJson, timeoutJson, earlyResignJson]) => {
+            .then(([leagueJson, timeoutJson, earlyResignJson, clubIconsJson]) => {
                 setData(leagueJson)
                 setTimeoutData(timeoutJson)
                 setEarlyResignData(earlyResignJson)
+                setClubIcons(clubIconsJson || {})
                 setLoading(false)
             })
             .catch(err => {
@@ -144,8 +147,8 @@ function SubLeagueView() {
                             <button
                                 onClick={() => setActiveTab('early_resignations')}
                                 className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-1.5 ${activeTab === 'early_resignations'
-                                        ? 'border-rose-500 text-rose-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-rose-500 text-rose-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
                             >
                                 <span className="text-rose-500 text-xs">&#9888;&#65039;</span>
@@ -174,6 +177,7 @@ function SubLeagueView() {
                                         leagueName={leagueName}
                                         subLeagueName={subLeagueName}
                                         earlyResignIndex={earlyResignIndex}
+                                        clubIcons={clubIcons}
                                     />
                                 ))}
                             </div>
@@ -195,6 +199,7 @@ function SubLeagueView() {
                                         leagueName={leagueName}
                                         subLeagueName={subLeagueName}
                                         earlyResignIndex={earlyResignIndex}
+                                        clubIcons={clubIcons}
                                     />
                                 ))}
                             </div>
@@ -216,6 +221,7 @@ function SubLeagueView() {
                                         leagueName={leagueName}
                                         subLeagueName={subLeagueName}
                                         earlyResignIndex={earlyResignIndex}
+                                        clubIcons={clubIcons}
                                     />
                                 ))}
                             </div>
@@ -255,8 +261,8 @@ function SubLeagueView() {
                                         </td>
                                         <td className="px-6 py-4 text-center whitespace-nowrap">
                                             <span className={`font-bold text-base ${player.total >= 3 ? 'text-red-700' :
-                                                    player.total === 2 ? 'text-amber-700' :
-                                                        'text-gray-700'
+                                                player.total === 2 ? 'text-amber-700' :
+                                                    'text-gray-700'
                                                 }`}>
                                                 {player.total}
                                             </span>

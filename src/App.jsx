@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Home from './pages/Home'
 import LeagueView from './pages/LeagueView'
 import SubLeagueView from './pages/SubLeagueView'
@@ -15,6 +15,11 @@ const SITE_NAMES = {
 const MEMBER_CLUB_IDS = {
     '1dpmc': '1dpmc',
     'teamusa': 'tusa'
+}
+
+const CLUB_API_IDS = {
+    '1dpmc': '1-day-per-move-club',
+    'teamusa': 'team-usa'
 }
 
 const NAV_LINKS = [
@@ -40,6 +45,16 @@ function NavLink({ to, label, onClick }) {
 function App() {
     const siteName = SITE_NAMES[__SITE_KEY__] || 'Chess League Tracker'
     const [menuOpen, setMenuOpen] = useState(false)
+    const [clubIcon, setClubIcon] = useState(null)
+
+    useEffect(() => {
+        const apiId = CLUB_API_IDS[__SITE_KEY__]
+        if (!apiId) return
+        fetch(`https://api.chess.com/pub/club/${apiId}`)
+            .then(r => r.json())
+            .then(data => { if (data?.icon) setClubIcon(data.icon) })
+            .catch(() => { })
+    }, [])
 
     return (
         <Router basename="/">
@@ -49,9 +64,17 @@ function App() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                         <div className="flex items-center justify-between">
                             <Link to="/" className="flex items-center space-x-3" onClick={() => setMenuOpen(false)}>
-                                <svg className="w-10 h-10 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M19 22H5v-2h14v2M17.16 8.26A8.92 8.92 0 0 0 12 6.5a8.92 8.92 0 0 0-5.16 1.76l-2.59-2.59C6.42 3.47 9.13 2.5 12 2.5s5.58.97 7.75 3.17l-2.59 2.59M12 10c1.87 0 3.61.65 5 1.73l-2.59 2.59A4.936 4.936 0 0 0 12 13.5c-.87 0-1.69.23-2.41.82l-2.59-2.59A6.935 6.935 0 0 1 12 10m0 5a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2z" />
-                                </svg>
+                                {clubIcon ? (
+                                    <img
+                                        src={clubIcon}
+                                        alt={siteName}
+                                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-white/30"
+                                    />
+                                ) : (
+                                    <svg className="w-10 h-10 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19 22H5v-2h14v2M17.16 8.26A8.92 8.92 0 0 0 12 6.5a8.92 8.92 0 0 0-5.16 1.76l-2.59-2.59C6.42 3.47 9.13 2.5 12 2.5s5.58.97 7.75 3.17l-2.59 2.59M12 10c1.87 0 3.61.65 5 1.73l-2.59 2.59A4.936 4.936 0 0 0 12 13.5c-.87 0-1.69.23-2.41.82l-2.59-2.59A6.935 6.935 0 0 1 12 10m0 5a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2z" />
+                                    </svg>
+                                )}
                                 <div>
                                     <h1 className="text-xl sm:text-2xl font-bold leading-tight">Chess League Tracker</h1>
                                     <p className="text-xs sm:text-sm text-gray-300">{siteName}</p>

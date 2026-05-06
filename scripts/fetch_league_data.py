@@ -573,6 +573,14 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
             cleaned_stats["timeouts"] = stats["timeouts"]
         cleaned_player_stats[username] = cleaned_stats
     
+    # Extract opponent club ID from the opponent team's @id URL
+    # e.g. "https://api.chess.com/pub/club/team-usa" → "team-usa"
+    opponent_club_id = None
+    if opponent_team_data:
+        opp_id_url = opponent_team_data.get("@id", "")
+        if "/club/" in opp_id_url:
+            opponent_club_id = opp_id_url.rstrip("/").split("/club/")[-1]
+
     result = {
         "round": round_str,
         "status": status,
@@ -586,6 +594,9 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
         "matchResult": match_result,
         "playerStats": cleaned_player_stats
     }
+
+    if opponent_club_id:
+        result["opponentClubId"] = opponent_club_id
     
     # Add minTeamPlayers for all matches
     # This can be used to detect possible forfeits in open matches 
@@ -962,7 +973,50 @@ def main():
     # Write JSON file
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
-    
+
+    # ── Build clubIcons.json ────────────────────────────────────────────────────
+    # Collect all unique opponent club IDs referenced across all rounds.
+    opponent_club_ids: set = set()
+    for league_data in leagues_output.values():
+        for sub_data in league_data.get("subLeagues", {}).values():
+            for round_data in sub_data.get("rounds", []):
+                cid = round_data.get("opponentClubId")
+                if cid:
+                    opponent_club_ids.add(cid)
+
+    # Load existing icons so we don't re-fetch clubs we already have.
+    club_icons_file = os.path.join(PROJECT_ROOT, "public", "data", args.site_key, "clubIcons.json")
+    existing_icons: dict = {}
+    if os.path.exists(club_icons_file):
+        try:
+            with open(club_icons_file, "r", encoding="utf-8") as f:
+                existing_icons = json.load(f)
+        except Exception:
+            existing_icons = {}
+
+    new_icons = dict(existing_icons)
+    clubs_to_fetch = [cid for cid in opponent_club_ids if cid not in new_icons]
+    print(f"\nFetching club icon data for {len(clubs_to_fetch)} new club(s) "
+          f"({len(opponent_club_ids) - len(clubs_to_fetch)} already cached)...")
+
+    for cid in clubs_to_fetch:
+        club_api_url = f"https://api.chess.com/pub/club/{cid}"
+        club_info = fetch_json(club_api_url)
+        if club_info:
+            new_icons[cid] = {
+                "name": club_info.get("name", cid),
+                "icon": club_info.get("icon", "")
+            }
+            print(f"  ✓ {cid}: {new_icons[cid]['name']}")
+        else:
+            new_icons[cid] = {"name": cid, "icon": ""}
+            print(f"  ✗ Could not fetch club info for: {cid}")
+        time.sleep(0.3)
+
+    with open(club_icons_file, "w", encoding="utf-8") as f:
+        json.dump(new_icons, f, indent=2, ensure_ascii=False)
+    print(f"✓ Club icons written to {club_icons_file} ({len(new_icons)} clubs)")
+
     print(f"\n{'='*60}")
     print(f"✓ Data successfully written to {OUTPUT_FILE}")
     print(f"{'='*60}")

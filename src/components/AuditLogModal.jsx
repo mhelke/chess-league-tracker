@@ -189,12 +189,18 @@ function AuditLogModal({ isOpen, onClose, matchName, history, ourTeamName = 'Our
 
                 {/* Header */}
                 <div className="flex justify-between items-start px-6 py-5 border-b border-gray-200 flex-shrink-0">
-                    <div>
+                    <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                             <span>📋</span>
                             Audit Log
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                BETA
+                            </span>
                         </h3>
-                        <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{matchName}</p>
+                        <p className="text-sm text-gray-600 mt-0.5 line-clamp-1">{matchName}</p>
+                        <p className="text-xs text-gray-500 mt-2">
+                            This audit log records when players were added or removed from a match. It does not track the reason for removal, which may vary (e.g., voluntary withdrawal, admin action, club removal, or account closure). This should be used as a reference guide only. It may not reflect the complete context.
+                        </p>
                     </div>
                     <button
                         onClick={onClose}

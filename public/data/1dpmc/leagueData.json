@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-05T03:14:59Z",
+  "lastUpdated": "2026-05-06T03:16:29Z",
   "leagues": {
     "1WL": {
       "subLeagues": {
@@ -208,8 +208,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "the-game-changers"
+              "opponentClubId": "the-game-changers",
+              "minTeamPlayers": 4
             },
             {
               "round": "R5",
@@ -246,8 +246,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "team-australia-brisbane-qld"
+              "opponentClubId": "team-australia-brisbane-qld",
+              "minTeamPlayers": 4
             }
           ],
           "leaderboard": [
@@ -2242,6 +2242,25 @@
               "playerStats": {},
               "minTeamPlayers": 4,
               "opponentClubId": "argentina-chess-club"
+            },
+            {
+              "round": "G3",
+              "status": "finished",
+              "matchId": "https://api.chess.com/pub/match/1901605",
+              "matchUrl": "https://api.chess.com/pub/match/1901605",
+              "matchWebUrl": "https://www.chess.com/club/matches/1901605",
+              "name": " 1WL 2026 1000-1200 Winter Experts G3: CTE - Chess to the end vs 1 day per move club",
+              "startTime": 1770537600,
+              "endTime": 1770537782,
+              "boards": 0,
+              "matchResult": {
+                "ourScore": 0,
+                "opponentScore": 0,
+                "result": "win by forfeit"
+              },
+              "playerStats": {},
+              "opponentClubId": "cte-chess-to-the-end",
+              "minTeamPlayers": 4
             }
           ],
           "leaderboard": [
@@ -2295,7 +2314,7 @@
             }
           ],
           "record": {
-            "wins": 4,
+            "wins": 5,
             "losses": 0,
             "draws": 0
           }
@@ -3335,7 +3354,7 @@
               "endTime": null,
               "boards": 20,
               "matchResult": {
-                "ourScore": 19,
+                "ourScore": 21,
                 "opponentScore": 18,
                 "result": "unknown"
               },
@@ -3437,6 +3456,12 @@
                   "draws": 0,
                   "losses": 2
                 },
+                "sirbabalot": {
+                  "games": 2,
+                  "wins": 2,
+                  "draws": 0,
+                  "losses": 0
+                },
                 "sushilramrakhyani": {
                   "games": 2,
                   "wins": 1,
@@ -3456,8 +3481,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 15,
-              "opponentClubId": "the-ge-winner"
+              "opponentClubId": "the-ge-winner",
+              "minTeamPlayers": 15
             },
             {
               "round": "R3",
@@ -3543,8 +3568,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 15,
-              "opponentClubId": "masters-of-the-squares"
+              "opponentClubId": "masters-of-the-squares",
+              "minTeamPlayers": 15
             },
             {
               "round": "R6",
@@ -3562,6 +3587,7 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "beautiful-romania",
               "minTeamPlayers": 15,
               "registrationData": {
                 "type": "roster",
@@ -3576,11 +3602,11 @@
                   },
                   {
                     "username": "lezama1972",
-                    "rating": 1642
+                    "rating": 1640
                   },
                   {
                     "username": "kyljys",
-                    "rating": 1626
+                    "rating": 1629
                   },
                   {
                     "username": "belgianking98",
@@ -3588,31 +3614,31 @@
                   },
                   {
                     "username": "mr_barsukov",
-                    "rating": 1571
+                    "rating": 1575
                   },
                   {
                     "username": "gidamacika",
-                    "rating": 1513
+                    "rating": 1521
                   },
                   {
                     "username": "mhe3430",
-                    "rating": 1443
+                    "rating": 1450
                   },
                   {
                     "username": "arni2808h",
-                    "rating": 1385
+                    "rating": 1389
                   },
                   {
                     "username": "plamen196565",
-                    "rating": 1326
-                  },
-                  {
-                    "username": "hectorcista",
                     "rating": 1320
                   },
                   {
                     "username": "persepolis46",
                     "rating": 1313
+                  },
+                  {
+                    "username": "hectorcista",
+                    "rating": 1312
                   },
                   {
                     "username": "haritutsav",
@@ -3632,7 +3658,7 @@
                   },
                   {
                     "username": "joedoan07",
-                    "rating": 1188
+                    "rating": 1200
                   },
                   {
                     "username": "kikifov",
@@ -3640,7 +3666,7 @@
                   },
                   {
                     "username": "bertfromaccntg",
-                    "rating": 1104
+                    "rating": 1091
                   },
                   {
                     "username": "augnado",
@@ -3648,7 +3674,7 @@
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 897
+                    "rating": 900
                   },
                   {
                     "username": "uduwudu2",
@@ -3657,20 +3683,20 @@
                 ],
                 "oppRoster": [
                   {
-                    "username": "dicualexandruion",
-                    "rating": 1536
-                  },
-                  {
                     "username": "alexandru_rad",
                     "rating": 1532
                   },
                   {
+                    "username": "dicualexandruion",
+                    "rating": 1530
+                  },
+                  {
                     "username": "robertmojo",
-                    "rating": 1514
+                    "rating": 1506
                   },
                   {
                     "username": "lvali40",
-                    "rating": 1360
+                    "rating": 1338
                   },
                   {
                     "username": "algrosu",
@@ -3686,7 +3712,7 @@
                   },
                   {
                     "username": "thiamarkos",
-                    "rating": 1112
+                    "rating": 1107
                   },
                   {
                     "username": "solitarul",
@@ -3698,7 +3724,6 @@
                 "our": 22,
                 "opponent": 9
               },
-              "opponentClubId": "beautiful-romania",
               "registrationHistory": [
                 {
                   "ts": "2026-05-03T03:18:43+00:00",
@@ -3776,6 +3801,14 @@
           "leaderboard": [
             {
               "username": "mikesexton21",
+              "games": 4,
+              "wins": 2,
+              "draws": 1,
+              "losses": 1,
+              "points": 2.5
+            },
+            {
+              "username": "sirbabalot",
               "games": 4,
               "wins": 2,
               "draws": 1,
@@ -3968,14 +4001,6 @@
             },
             {
               "username": "chillywarz",
-              "games": 2,
-              "wins": 0,
-              "draws": 1,
-              "losses": 1,
-              "points": 0.5
-            },
-            {
-              "username": "sirbabalot",
               "games": 2,
               "wins": 0,
               "draws": 1,
@@ -5885,8 +5910,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "france-deutschland-group"
+              "opponentClubId": "france-deutschland-group",
+              "minTeamPlayers": 10
             },
             {
               "round": "R4",
@@ -5899,8 +5924,8 @@
               "endTime": null,
               "boards": 60,
               "matchResult": {
-                "ourScore": 32.5,
-                "opponentScore": 18.5,
+                "ourScore": 33.5,
+                "opponentScore": 20.5,
                 "result": "unknown"
               },
               "playerStats": {
@@ -5957,6 +5982,12 @@
                   "wins": 2,
                   "draws": 0,
                   "losses": 0
+                },
+                "elefant82": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1
                 },
                 "fisch-brasil": {
                   "games": 2,
@@ -6049,14 +6080,14 @@
                   "losses": 1
                 },
                 "renabor": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 1,
                   "draws": 0,
-                  "losses": 0
+                  "losses": 1
                 },
                 "rmanica": {
-                  "games": 1,
-                  "wins": 1,
+                  "games": 2,
+                  "wins": 2,
                   "draws": 0,
                   "losses": 0
                 },
@@ -6067,8 +6098,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "promote-to-king"
+              "opponentClubId": "promote-to-king",
+              "minTeamPlayers": 10
             }
           ],
           "leaderboard": [
@@ -6449,6 +6480,14 @@
               "points": 2.0
             },
             {
+              "username": "rmanica",
+              "games": 2,
+              "wins": 2,
+              "draws": 0,
+              "losses": 0,
+              "points": 2.0
+            },
+            {
               "username": "av_kolchak",
               "games": 2,
               "wins": 1,
@@ -6466,10 +6505,10 @@
             },
             {
               "username": "elefant82",
-              "games": 2,
+              "games": 3,
               "wins": 1,
               "draws": 1,
-              "losses": 0,
+              "losses": 1,
               "points": 1.5
             },
             {
@@ -6487,22 +6526,6 @@
               "draws": 1,
               "losses": 2,
               "points": 1.5
-            },
-            {
-              "username": "renabor",
-              "games": 1,
-              "wins": 1,
-              "draws": 0,
-              "losses": 0,
-              "points": 1.0
-            },
-            {
-              "username": "rmanica",
-              "games": 1,
-              "wins": 1,
-              "draws": 0,
-              "losses": 0,
-              "points": 1.0
             },
             {
               "username": "mado64",
@@ -6634,6 +6657,14 @@
             },
             {
               "username": "randallpatrickmcmurphy",
+              "games": 2,
+              "wins": 1,
+              "draws": 0,
+              "losses": 1,
+              "points": 1.0
+            },
+            {
+              "username": "renabor",
               "games": 2,
               "wins": 1,
               "draws": 0,
@@ -6790,8 +6821,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "squadron-commandos"
+              "opponentClubId": "squadron-commandos",
+              "minTeamPlayers": 5
             },
             {
               "round": "R2",
@@ -6854,8 +6885,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "chess-team-europe"
+              "opponentClubId": "chess-team-europe",
+              "minTeamPlayers": 5
             },
             {
               "round": "R5",
@@ -7178,8 +7209,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "fc-barcelona"
+              "opponentClubId": "fc-barcelona",
+              "minTeamPlayers": 4
             },
             {
               "round": "R5",
@@ -7228,8 +7259,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "european-chess-players"
+              "opponentClubId": "european-chess-players",
+              "minTeamPlayers": 4
             }
           ],
           "leaderboard": [
@@ -18000,6 +18031,25 @@
               },
               "minTeamPlayers": 4,
               "opponentClubId": "syria-chess-team"
+            },
+            {
+              "round": "G3",
+              "status": "finished",
+              "matchId": "https://api.chess.com/pub/match/1813466",
+              "matchUrl": "https://api.chess.com/pub/match/1813466",
+              "matchWebUrl": "https://www.chess.com/club/matches/1813466",
+              "name": "1WL 2025 960 U1400 Summer Experts G3: Chess Quarters vs 1 day per move club",
+              "startTime": 1753599600,
+              "endTime": 1753599781,
+              "boards": 0,
+              "matchResult": {
+                "ourScore": 0,
+                "opponentScore": 0,
+                "result": "win by forfeit"
+              },
+              "playerStats": {},
+              "opponentClubId": "chess-quarters",
+              "minTeamPlayers": 4
             }
           ],
           "leaderboard": [
@@ -18085,7 +18135,7 @@
             }
           ],
           "record": {
-            "wins": 2,
+            "wins": 3,
             "losses": 1,
             "draws": 0
           }
@@ -18766,6 +18816,25 @@
               "opponentClubId": "premium-members"
             },
             {
+              "round": "NA-5",
+              "status": "finished",
+              "matchId": "https://api.chess.com/pub/match/1809826",
+              "matchUrl": "https://api.chess.com/pub/match/1809826",
+              "matchWebUrl": "https://www.chess.com/club/matches/1809826",
+              "name": "1WL 2025 960 1400+ Summer Candidates: 1 day per move club vs Chess Quarters",
+              "startTime": 1752994800,
+              "endTime": 1752994981,
+              "boards": 0,
+              "matchResult": {
+                "ourScore": 0,
+                "opponentScore": 0,
+                "result": "win by forfeit"
+              },
+              "playerStats": {},
+              "opponentClubId": "chess-quarters",
+              "minTeamPlayers": 3
+            },
+            {
               "round": "NA-4",
               "status": "finished",
               "matchId": "https://api.chess.com/pub/match/1809824",
@@ -18831,7 +18900,7 @@
             }
           ],
           "record": {
-            "wins": 4,
+            "wins": 5,
             "losses": 0,
             "draws": 0
           }
@@ -21213,8 +21282,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "chess-school-ukraine"
+              "opponentClubId": "chess-school-ukraine",
+              "minTeamPlayers": 4
             },
             {
               "round": "NA-4",
@@ -22211,8 +22280,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "eternals-superheroes"
+              "opponentClubId": "eternals-superheroes",
+              "minTeamPlayers": 4
             },
             {
               "round": "R5",
@@ -22249,8 +22318,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "caribbean-chess-union"
+              "opponentClubId": "caribbean-chess-union",
+              "minTeamPlayers": 4
             },
             {
               "round": "R6",
@@ -22268,6 +22337,7 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "one-world-league-players-lounge",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
@@ -22290,7 +22360,7 @@
                   },
                   {
                     "username": "bertfromaccntg",
-                    "rating": 1090
+                    "rating": 1088
                   },
                   {
                     "username": "crausker",
@@ -22302,7 +22372,7 @@
                   },
                   {
                     "username": "engelleik",
-                    "rating": 929
+                    "rating": 910
                   },
                   {
                     "username": "dchapman196",
@@ -22319,6 +22389,10 @@
                   {
                     "username": "benej_6",
                     "rating": 756
+                  },
+                  {
+                    "username": "sasaycudasay",
+                    "rating": 632
                   },
                   {
                     "username": "justanotherdisaster",
@@ -22341,10 +22415,9 @@
                 ]
               },
               "registeredPlayers": {
-                "our": 14,
+                "our": 15,
                 "opponent": 2
               },
-              "opponentClubId": "one-world-league-players-lounge",
               "registrationHistory": [
                 {
                   "ts": "2026-04-25T03:16:02+00:00",
@@ -22994,8 +23067,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "the-ge-winner"
+              "opponentClubId": "the-ge-winner",
+              "minTeamPlayers": 10
             },
             {
               "round": "R4",
@@ -23087,8 +23160,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "europe-dream-club"
+              "opponentClubId": "europe-dream-club",
+              "minTeamPlayers": 10
             },
             {
               "round": "R5",
@@ -23125,25 +23198,26 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "egypt-chess-club",
               "minTeamPlayers": 10,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "arni2808h",
-                    "rating": 1385
+                    "rating": 1389
                   },
                   {
                     "username": "ramos-m",
-                    "rating": 1383
-                  },
-                  {
-                    "username": "hectorcista",
-                    "rating": 1320
+                    "rating": 1388
                   },
                   {
                     "username": "persepolis46",
                     "rating": 1313
+                  },
+                  {
+                    "username": "hectorcista",
+                    "rating": 1312
                   },
                   {
                     "username": "forzatotti10",
@@ -23159,7 +23233,7 @@
                   },
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
                   },
                   {
                     "username": "emilchess5679",
@@ -23167,11 +23241,11 @@
                   },
                   {
                     "username": "aatn59",
-                    "rating": 1110
+                    "rating": 1114
                   },
                   {
                     "username": "bertfromaccntg",
-                    "rating": 1104
+                    "rating": 1091
                   },
                   {
                     "username": "augnado",
@@ -23179,7 +23253,7 @@
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 897
+                    "rating": 900
                   },
                   {
                     "username": "calq78",
@@ -23193,15 +23267,15 @@
                   },
                   {
                     "username": "o_selim",
-                    "rating": 1227
+                    "rating": 1233
                   },
                   {
                     "username": "nweer",
-                    "rating": 1156
+                    "rating": 1154
                   },
                   {
                     "username": "elghrabawi",
-                    "rating": 1092
+                    "rating": 1097
                   },
                   {
                     "username": "eslam30995",
@@ -23213,7 +23287,6 @@
                 "our": 14,
                 "opponent": 5
               },
-              "opponentClubId": "egypt-chess-club",
               "registrationHistory": [
                 {
                   "ts": "2026-05-01T03:18:17+00:00",
@@ -23750,8 +23823,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 7,
-              "opponentClubId": "peace-for-ukraine"
+              "opponentClubId": "peace-for-ukraine",
+              "minTeamPlayers": 7
             },
             {
               "round": "R3",
@@ -23800,8 +23873,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 7,
-              "opponentClubId": "beautiful-romania"
+              "opponentClubId": "beautiful-romania",
+              "minTeamPlayers": 7
             },
             {
               "round": "R5",
@@ -23832,8 +23905,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 7,
-              "opponentClubId": "promote-to-king"
+              "opponentClubId": "promote-to-king",
+              "minTeamPlayers": 7
             }
           ],
           "leaderboard": [
@@ -24090,8 +24163,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "clube-de-xadrez-brasil-cxbr"
+              "opponentClubId": "clube-de-xadrez-brasil-cxbr",
+              "minTeamPlayers": 10
             },
             {
               "round": "R2",
@@ -24188,8 +24261,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "the-royal-falcon-club"
+              "opponentClubId": "the-royal-falcon-club",
+              "minTeamPlayers": 10
             },
             {
               "round": "R3",
@@ -24293,8 +24366,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "asia-national-team"
+              "opponentClubId": "asia-national-team",
+              "minTeamPlayers": 10
             },
             {
               "round": "R5",
@@ -24307,14 +24380,14 @@
               "endTime": null,
               "boards": 15,
               "matchResult": {
-                "ourScore": 3.5,
+                "ourScore": 4.5,
                 "opponentScore": 5.5,
                 "result": "unknown"
               },
               "playerStats": {
                 "arni2808h": {
-                  "games": 1,
-                  "wins": 0,
+                  "games": 2,
+                  "wins": 1,
                   "draws": 0,
                   "losses": 1
                 },
@@ -24343,8 +24416,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "kings-and-queens-chess-club"
+              "opponentClubId": "kings-and-queens-chess-club",
+              "minTeamPlayers": 10
             }
           ],
           "leaderboard": [
@@ -24589,6 +24662,14 @@
               "points": 1.0
             },
             {
+              "username": "arni2808h",
+              "games": 2,
+              "wins": 1,
+              "draws": 0,
+              "losses": 1,
+              "points": 1.0
+            },
+            {
               "username": "hectorcista",
               "games": 2,
               "wins": 1,
@@ -24619,14 +24700,6 @@
               "draws": 1,
               "losses": 0,
               "points": 0.5
-            },
-            {
-              "username": "arni2808h",
-              "games": 1,
-              "wins": 0,
-              "draws": 0,
-              "losses": 1,
-              "points": 0.0
             },
             {
               "username": "nicky11s",
@@ -24760,8 +24833,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 7,
-              "opponentClubId": "eternals-superheroes"
+              "opponentClubId": "eternals-superheroes",
+              "minTeamPlayers": 7
             },
             {
               "round": "R2",
@@ -24804,8 +24877,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 7,
-              "opponentClubId": "space-travelers-1"
+              "opponentClubId": "space-travelers-1",
+              "minTeamPlayers": 7
             },
             {
               "round": "R3",
@@ -24854,8 +24927,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 7,
-              "opponentClubId": "the-ge-winner"
+              "opponentClubId": "the-ge-winner",
+              "minTeamPlayers": 7
             },
             {
               "round": "R4",
@@ -24892,8 +24965,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 7,
-              "opponentClubId": "fanatikclub"
+              "opponentClubId": "fanatikclub",
+              "minTeamPlayers": 7
             },
             {
               "round": "R5",
@@ -24911,6 +24984,7 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "vojvodina-tim",
               "minTeamPlayers": 7,
               "registrationData": {
                 "type": "roster",
@@ -24925,11 +24999,11 @@
                   },
                   {
                     "username": "lezama1972",
-                    "rating": 1642
+                    "rating": 1640
                   },
                   {
                     "username": "kyljys",
-                    "rating": 1626
+                    "rating": 1629
                   },
                   {
                     "username": "mastermatthew52",
@@ -24941,7 +25015,7 @@
                   },
                   {
                     "username": "puffin_09",
-                    "rating": 1506
+                    "rating": 1507
                   },
                   {
                     "username": "mikesexton21",
@@ -24953,29 +25027,33 @@
                   },
                   {
                     "username": "arni2808h",
-                    "rating": 1385
+                    "rating": 1389
                   },
                   {
                     "username": "josejesus3340",
-                    "rating": 1282
+                    "rating": 1277
                   },
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
+                  },
+                  {
+                    "username": "sasaycudasay",
+                    "rating": 950
                   }
                 ],
                 "oppRoster": [
                   {
                     "username": "amukare",
-                    "rating": 1808
+                    "rating": 1818
                   },
                   {
                     "username": "juni_91",
-                    "rating": 1805
+                    "rating": 1810
                   },
                   {
                     "username": "kovalski7",
-                    "rating": 1704
+                    "rating": 1706
                   },
                   {
                     "username": "vladalekic",
@@ -24991,15 +25069,15 @@
                   },
                   {
                     "username": "raspevak",
-                    "rating": 1375
+                    "rating": 1372
+                  },
+                  {
+                    "username": "budimir1",
+                    "rating": 1366
                   },
                   {
                     "username": "igor0230",
                     "rating": 1359
-                  },
-                  {
-                    "username": "budimir1",
-                    "rating": 1354
                   },
                   {
                     "username": "milanjworg",
@@ -25016,10 +25094,9 @@
                 ]
               },
               "registeredPlayers": {
-                "our": 12,
+                "our": 13,
                 "opponent": 12
               },
-              "opponentClubId": "vojvodina-tim",
               "registrationHistory": [
                 {
                   "ts": "2026-04-24T03:18:12+00:00",
@@ -25430,8 +25507,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 6,
-              "opponentClubId": "squadron-commandos"
+              "opponentClubId": "squadron-commandos",
+              "minTeamPlayers": 6
             },
             {
               "round": "R3",
@@ -25481,8 +25558,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 6,
-              "opponentClubId": "royal-wallachian-chess-club"
+              "opponentClubId": "royal-wallachian-chess-club",
+              "minTeamPlayers": 6
             },
             {
               "round": "R4",
@@ -25496,7 +25573,7 @@
               "boards": 7,
               "matchResult": {
                 "ourScore": 2.5,
-                "opponentScore": 2.5,
+                "opponentScore": 3.5,
                 "result": "unknown"
               },
               "playerStats": {
@@ -25517,10 +25594,16 @@
                   "wins": 2,
                   "draws": 0,
                   "losses": 0
+                },
+                "guztiekin": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1
                 }
               },
-              "minTeamPlayers": 6,
-              "opponentClubId": "europe-dream-club"
+              "opponentClubId": "europe-dream-club",
+              "minTeamPlayers": 6
             },
             {
               "round": "R5",
@@ -25538,21 +25621,26 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "team-asturias",
               "minTeamPlayers": 6,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "lezama1972",
-                    "rating": 1642
+                    "rating": 1640
                   },
                   {
                     "username": "kyljys",
-                    "rating": 1626
+                    "rating": 1629
                   },
                   {
                     "username": "belgianking98",
                     "rating": 1608
+                  },
+                  {
+                    "username": "puffin_09",
+                    "rating": 1507
                   },
                   {
                     "username": "vi30555",
@@ -25568,19 +25656,23 @@
                   },
                   {
                     "username": "arni2808h",
-                    "rating": 1385
+                    "rating": 1389
                   },
                   {
                     "username": "hectorcista",
-                    "rating": 1320
+                    "rating": 1312
                   },
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
                   },
                   {
                     "username": "jaypi_fromla",
-                    "rating": 1123
+                    "rating": 1127
+                  },
+                  {
+                    "username": "sasaycudasay",
+                    "rating": 950
                   }
                 ],
                 "oppRoster": [
@@ -25590,23 +25682,23 @@
                   },
                   {
                     "username": "humbertoddm",
-                    "rating": 1649
+                    "rating": 1644
                   },
                   {
                     "username": "antonio060668",
-                    "rating": 1468
+                    "rating": 1488
                   },
                   {
                     "username": "peoncolorado",
-                    "rating": 1342
+                    "rating": 1352
                   },
                   {
                     "username": "mvroglic",
-                    "rating": 1228
+                    "rating": 1210
                   },
                   {
                     "username": "ress_nullius",
-                    "rating": 1163
+                    "rating": 1161
                   },
                   {
                     "username": "vicente-alvarez",
@@ -25615,10 +25707,9 @@
                 ]
               },
               "registeredPlayers": {
-                "our": 10,
+                "our": 12,
                 "opponent": 7
               },
-              "opponentClubId": "team-asturias",
               "registrationHistory": [
                 {
                   "ts": "2026-04-24T03:18:12+00:00",
@@ -25818,6 +25909,14 @@
               "points": 0.5
             },
             {
+              "username": "guztiekin",
+              "games": 1,
+              "wins": 0,
+              "draws": 0,
+              "losses": 1,
+              "points": 0.0
+            },
+            {
               "username": "ninburg",
               "games": 2,
               "wins": 0,
@@ -26001,8 +26100,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "chess-com-deutsch"
+              "opponentClubId": "chess-com-deutsch",
+              "minTeamPlayers": 5
             },
             {
               "round": "R4",
@@ -26052,8 +26151,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "chess-team-europe"
+              "opponentClubId": "chess-team-europe",
+              "minTeamPlayers": 5
             },
             {
               "round": "R5",
@@ -26064,58 +26163,63 @@
               "name": "1WL 2026 Classic U1300 A R5: 1 day per move club vs Pawn Society",
               "startTime": 1778396400,
               "endTime": null,
-              "boards": 7,
+              "boards": 8,
               "matchResult": {
                 "ourScore": 0,
                 "opponentScore": 0,
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "pawn-society",
               "minTeamPlayers": 5,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
-                    "username": "djmchrist",
-                    "rating": 1289
-                  },
-                  {
                     "username": "chesswarrior48",
-                    "rating": 1267
+                    "rating": 1260
                   },
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
                   },
                   {
                     "username": "jaypi_fromla",
-                    "rating": 1123
+                    "rating": 1127
+                  },
+                  {
+                    "username": "sasaycudasay",
+                    "rating": 950
+                  },
+                  {
+                    "username": "gogsy1999",
+                    "rating": 886
                   },
                   {
                     "username": "calq78",
                     "rating": 878
                   },
                   {
-                    "username": "gogsy1999",
-                    "rating": 874
+                    "username": "reganxu",
+                    "rating": 855
                   },
                   {
-                    "username": "reganxu",
-                    "rating": 852
+                    "username": "djmchrist",
+                    "rating": null
                   }
                 ],
                 "oppRoster": [
                   {
-                    "username": "bunny55",
-                    "rating": 1288
+                    "username": "pawnp4wn",
+                    "rating": 1293
                   },
                   {
-                    "username": "pawnp4wn",
-                    "rating": 1284
+                    "username": "bunny55",
+                    "rating": 1278
                   },
                   {
                     "username": "gecse",
-                    "rating": 1213
+                    "rating": 1221
                   },
                   {
                     "username": "imnotgayatall",
@@ -26123,7 +26227,7 @@
                   },
                   {
                     "username": "rick1972",
-                    "rating": 1104
+                    "rating": 1109
                   },
                   {
                     "username": "lighthouse62",
@@ -26131,7 +26235,7 @@
                   },
                   {
                     "username": "vasilijj",
-                    "rating": 1015
+                    "rating": 1020
                   },
                   {
                     "username": "chessgf",
@@ -26143,15 +26247,14 @@
                   },
                   {
                     "username": "elementica",
-                    "rating": 906
+                    "rating": 916
                   }
                 ]
               },
               "registeredPlayers": {
-                "our": 7,
+                "our": 8,
                 "opponent": 10
               },
-              "opponentClubId": "pawn-society",
               "registrationHistory": [
                 {
                   "ts": "2026-04-24T03:18:12+00:00",
@@ -26967,8 +27070,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 15,
-              "opponentClubId": "chess-com-deutsch"
+              "opponentClubId": "chess-com-deutsch",
+              "minTeamPlayers": 15
             }
           ],
           "leaderboard": [
@@ -27230,8 +27333,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "promote-to-king"
+              "opponentClubId": "promote-to-king",
+              "minTeamPlayers": 4
             },
             {
               "round": "NA-3",
@@ -27401,8 +27504,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 7,
-              "opponentClubId": "the-ge-winner"
+              "opponentClubId": "the-ge-winner",
+              "minTeamPlayers": 7
             }
           ],
           "leaderboard": [
@@ -27551,7 +27654,7 @@
               "endTime": null,
               "boards": 8,
               "matchResult": {
-                "ourScore": 5.5,
+                "ourScore": 6.5,
                 "opponentScore": 8.5,
                 "result": "unknown"
               },
@@ -27575,8 +27678,8 @@
                   "losses": 0
                 },
                 "lampshadow": {
-                  "games": 1,
-                  "wins": 0,
+                  "games": 2,
+                  "wins": 1,
                   "draws": 0,
                   "losses": 1
                 },
@@ -27605,8 +27708,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 8,
-              "opponentClubId": "king-of-the-hill-team-1"
+              "opponentClubId": "king-of-the-hill-team-1",
+              "minTeamPlayers": 8
             },
             {
               "round": "NA-3",
@@ -27619,7 +27722,7 @@
               "endTime": null,
               "boards": 8,
               "matchResult": {
-                "ourScore": 9.5,
+                "ourScore": 10.5,
                 "opponentScore": 1.5,
                 "result": "unknown"
               },
@@ -27637,6 +27740,12 @@
                   "losses": 0
                 },
                 "lavendermojito": {
+                  "games": 1,
+                  "wins": 1,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "leon1956": {
                   "games": 1,
                   "wins": 1,
                   "draws": 0,
@@ -27661,8 +27770,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 8,
-              "opponentClubId": "chess-bombers"
+              "opponentClubId": "chess-bombers",
+              "minTeamPlayers": 8
             },
             {
               "round": "NA-4",
@@ -27730,8 +27839,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 8,
-              "opponentClubId": "chess-school-ukraine"
+              "opponentClubId": "chess-school-ukraine",
+              "minTeamPlayers": 8
             },
             {
               "round": "NA-5",
@@ -27798,8 +27907,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 8,
-              "opponentClubId": "masters-of-the-squares"
+              "opponentClubId": "masters-of-the-squares",
+              "minTeamPlayers": 8
             }
           ],
           "leaderboard": [
@@ -27908,6 +28017,14 @@
               "points": 1.5
             },
             {
+              "username": "leon1956",
+              "games": 1,
+              "wins": 1,
+              "draws": 0,
+              "losses": 0,
+              "points": 1.0
+            },
+            {
               "username": "tommyleebob",
               "games": 2,
               "wins": 1,
@@ -27917,6 +28034,14 @@
             },
             {
               "username": "ivan_ferreiro",
+              "games": 2,
+              "wins": 1,
+              "draws": 0,
+              "losses": 1,
+              "points": 1.0
+            },
+            {
+              "username": "lampshadow",
               "games": 2,
               "wins": 1,
               "draws": 0,
@@ -27956,14 +28081,6 @@
               "points": 0.5
             },
             {
-              "username": "lampshadow",
-              "games": 1,
-              "wins": 0,
-              "draws": 0,
-              "losses": 1,
-              "points": 0.0
-            },
-            {
               "username": "masterdean00",
               "games": 2,
               "wins": 0,
@@ -27999,7 +28116,7 @@
               "endTime": null,
               "boards": 17,
               "matchResult": {
-                "ourScore": 15.5,
+                "ourScore": 16.5,
                 "opponentScore": 3.5,
                 "result": "unknown"
               },
@@ -28019,6 +28136,12 @@
                 "capilupi": {
                   "games": 2,
                   "wins": 2,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "gmdingtangqiang": {
+                  "games": 1,
+                  "wins": 1,
                   "draws": 0,
                   "losses": 0
                 },
@@ -28065,8 +28188,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 12,
-              "opponentClubId": "king-of-the-hill-team-1"
+              "opponentClubId": "king-of-the-hill-team-1",
+              "minTeamPlayers": 12
             },
             {
               "round": "R2",
@@ -28079,11 +28202,23 @@
               "endTime": null,
               "boards": 31,
               "matchResult": {
-                "ourScore": 3,
-                "opponentScore": 1,
+                "ourScore": 4,
+                "opponentScore": 2,
                 "result": "unknown"
               },
               "playerStats": {
+                "221953gf": {
+                  "games": 1,
+                  "wins": 1,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "engelleik": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1
+                },
                 "hasuschach": {
                   "games": 2,
                   "wins": 1,
@@ -28097,8 +28232,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 12,
-              "opponentClubId": "chess-team-europe"
+              "opponentClubId": "chess-team-europe",
+              "minTeamPlayers": 12
             }
           ],
           "leaderboard": [
@@ -28175,6 +28310,22 @@
               "points": 1.0
             },
             {
+              "username": "gmdingtangqiang",
+              "games": 1,
+              "wins": 1,
+              "draws": 0,
+              "losses": 0,
+              "points": 1.0
+            },
+            {
+              "username": "221953gf",
+              "games": 1,
+              "wins": 1,
+              "draws": 0,
+              "losses": 0,
+              "points": 1.0
+            },
+            {
               "username": "hasuschach",
               "games": 2,
               "wins": 1,
@@ -28189,6 +28340,14 @@
               "draws": 1,
               "losses": 1,
               "points": 0.5
+            },
+            {
+              "username": "engelleik",
+              "games": 1,
+              "wins": 0,
+              "draws": 0,
+              "losses": 1,
+              "points": 0.0
             },
             {
               "username": "nepomny1973",
@@ -28394,8 +28553,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "chess-school-ukraine"
+              "opponentClubId": "chess-school-ukraine",
+              "minTeamPlayers": 4
             },
             {
               "round": "G2",
@@ -28469,8 +28628,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "team-match-chess"
+              "opponentClubId": "team-match-chess",
+              "minTeamPlayers": 4
             },
             {
               "round": "G2",
@@ -28525,8 +28684,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "team-pakistan"
+              "opponentClubId": "team-pakistan",
+              "minTeamPlayers": 4
             }
           ],
           "leaderboard": [
@@ -28691,8 +28850,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "total-960"
+              "opponentClubId": "total-960",
+              "minTeamPlayers": 4
             },
             {
               "round": "NA-3",
@@ -28723,8 +28882,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "promote-to-king"
+              "opponentClubId": "promote-to-king",
+              "minTeamPlayers": 4
             },
             {
               "round": "NA-4",
@@ -28737,7 +28896,7 @@
               "endTime": null,
               "boards": 9,
               "matchResult": {
-                "ourScore": 7.5,
+                "ourScore": 8.5,
                 "opponentScore": 3.5,
                 "result": "unknown"
               },
@@ -28773,8 +28932,8 @@
                   "losses": 1
                 },
                 "sakura_4": {
-                  "games": 1,
-                  "wins": 1,
+                  "games": 2,
+                  "wins": 2,
                   "draws": 0,
                   "losses": 0
                 },
@@ -28785,8 +28944,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "los-amigos-de-chanquete"
+              "opponentClubId": "los-amigos-de-chanquete",
+              "minTeamPlayers": 4
             },
             {
               "round": "NA-5",
@@ -28824,8 +28983,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "chess-school-ukraine"
+              "opponentClubId": "chess-school-ukraine",
+              "minTeamPlayers": 4
             }
           ],
           "leaderboard": [
@@ -28854,7 +29013,7 @@
               "points": 2.0
             },
             {
-              "username": "trimitziosp7",
+              "username": "sakura_4",
               "games": 2,
               "wins": 2,
               "draws": 0,
@@ -28862,12 +29021,12 @@
               "points": 2.0
             },
             {
-              "username": "sakura_4",
-              "games": 1,
-              "wins": 1,
+              "username": "trimitziosp7",
+              "games": 2,
+              "wins": 2,
               "draws": 0,
               "losses": 0,
-              "points": 1.0
+              "points": 2.0
             },
             {
               "username": "vystress",
@@ -28953,13 +29112,14 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "viktor-korchnoi-chess-club-1",
               "minTeamPlayers": 20,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "lavendermojito",
-                    "rating": 1859
+                    "rating": 1846
                   },
                   {
                     "username": "chelouk_pavek",
@@ -28970,12 +29130,12 @@
                     "rating": 1687
                   },
                   {
-                    "username": "andy67123",
-                    "rating": 1645
+                    "username": "lezama1972",
+                    "rating": 1640
                   },
                   {
-                    "username": "lezama1972",
-                    "rating": 1642
+                    "username": "andy67123",
+                    "rating": 1636
                   },
                   {
                     "username": "mastermatthew52",
@@ -28987,11 +29147,11 @@
                   },
                   {
                     "username": "mr_barsukov",
-                    "rating": 1571
+                    "rating": 1575
                   },
                   {
                     "username": "botw26",
-                    "rating": 1481
+                    "rating": 1473
                   },
                   {
                     "username": "mikesexton21",
@@ -28999,27 +29159,27 @@
                   },
                   {
                     "username": "arni2808h",
-                    "rating": 1385
+                    "rating": 1389
                   },
                   {
                     "username": "ramos-m",
-                    "rating": 1383
+                    "rating": 1388
                   },
                   {
                     "username": "benej_6",
-                    "rating": 1376
+                    "rating": 1370
                   },
                   {
                     "username": "plamen196565",
-                    "rating": 1326
-                  },
-                  {
-                    "username": "hectorcista",
                     "rating": 1320
                   },
                   {
                     "username": "persepolis46",
                     "rating": 1313
+                  },
+                  {
+                    "username": "hectorcista",
+                    "rating": 1312
                   },
                   {
                     "username": "johnparker1995",
@@ -29035,11 +29195,11 @@
                   },
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
                   },
                   {
                     "username": "bertfromaccntg",
-                    "rating": 1104
+                    "rating": 1091
                   },
                   {
                     "username": "augnado",
@@ -29047,11 +29207,11 @@
                   },
                   {
                     "username": "satchuation",
-                    "rating": 919
+                    "rating": 917
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 897
+                    "rating": 900
                   },
                   {
                     "username": "calq78",
@@ -29065,19 +29225,19 @@
                   },
                   {
                     "username": "mellancholia",
-                    "rating": 1682
+                    "rating": 1668
                   },
                   {
                     "username": "blackdog317",
-                    "rating": 1514
+                    "rating": 1521
                   },
                   {
                     "username": "fischer_mensfriend",
-                    "rating": 1484
+                    "rating": 1492
                   },
                   {
                     "username": "mb68",
-                    "rating": 1483
+                    "rating": 1475
                   },
                   {
                     "username": "tomorudovic",
@@ -29089,7 +29249,6 @@
                 "our": 25,
                 "opponent": 6
               },
-              "opponentClubId": "viktor-korchnoi-chess-club-1",
               "registrationHistory": [
                 {
                   "ts": "2026-05-01T03:18:17+00:00",
@@ -29238,8 +29397,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "schachgemeinschaft-deutschland"
+              "opponentClubId": "schachgemeinschaft-deutschland",
+              "minTeamPlayers": 4
             },
             {
               "round": "NA-2",
@@ -29252,8 +29411,8 @@
               "endTime": null,
               "boards": 17,
               "matchResult": {
-                "ourScore": 3,
-                "opponentScore": 4,
+                "ourScore": 5,
+                "opponentScore": 5,
                 "result": "unknown"
               },
               "playerStats": {
@@ -29269,6 +29428,18 @@
                   "draws": 0,
                   "losses": 0
                 },
+                "mrcahoon": {
+                  "games": 1,
+                  "wins": 1,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "peon-4-rey": {
+                  "games": 2,
+                  "wins": 1,
+                  "draws": 0,
+                  "losses": 1
+                },
                 "sushilramrakhyani": {
                   "games": 2,
                   "wins": 0,
@@ -29282,8 +29453,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "total-960"
+              "opponentClubId": "total-960",
+              "minTeamPlayers": 4
             },
             {
               "round": "NA-3",
@@ -29296,16 +29467,16 @@
               "endTime": null,
               "boards": 10,
               "matchResult": {
-                "ourScore": 5.5,
-                "opponentScore": 2.5,
+                "ourScore": 6.5,
+                "opponentScore": 3.5,
                 "result": "unknown"
               },
               "playerStats": {
                 "iraj6544": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 0,
                   "draws": 0,
-                  "losses": 1
+                  "losses": 2
                 },
                 "legit_chess411": {
                   "games": 2,
@@ -29320,8 +29491,8 @@
                   "losses": 0
                 },
                 "nihil92": {
-                  "games": 1,
-                  "wins": 0,
+                  "games": 2,
+                  "wins": 1,
                   "draws": 0,
                   "losses": 1
                 },
@@ -29332,8 +29503,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "chess-school-ukraine"
+              "opponentClubId": "chess-school-ukraine",
+              "minTeamPlayers": 4
             },
             {
               "round": "NA-4",
@@ -29388,8 +29559,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "promote-to-king"
+              "opponentClubId": "promote-to-king",
+              "minTeamPlayers": 4
             },
             {
               "round": "NA-5",
@@ -29457,8 +29628,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 4,
-              "opponentClubId": "europe-dream-club"
+              "opponentClubId": "europe-dream-club",
+              "minTeamPlayers": 4
             }
           ],
           "leaderboard": [
@@ -29519,12 +29690,28 @@
               "points": 2.0
             },
             {
+              "username": "peon-4-rey",
+              "games": 4,
+              "wins": 2,
+              "draws": 0,
+              "losses": 2,
+              "points": 2.0
+            },
+            {
               "username": "plamen196565",
               "games": 4,
               "wins": 2,
               "draws": 0,
               "losses": 2,
               "points": 2.0
+            },
+            {
+              "username": "mrcahoon",
+              "games": 1,
+              "wins": 1,
+              "draws": 0,
+              "losses": 0,
+              "points": 1.0
             },
             {
               "username": "willrenan",
@@ -29543,6 +29730,14 @@
               "points": 1.0
             },
             {
+              "username": "nihil92",
+              "games": 2,
+              "wins": 1,
+              "draws": 0,
+              "losses": 1,
+              "points": 1.0
+            },
+            {
               "username": "fikumdik",
               "games": 2,
               "wins": 1,
@@ -29551,28 +29746,12 @@
               "points": 1.0
             },
             {
-              "username": "peon-4-rey",
-              "games": 2,
-              "wins": 1,
-              "draws": 0,
-              "losses": 1,
-              "points": 1.0
-            },
-            {
               "username": "iraj6544",
-              "games": 3,
+              "games": 4,
               "wins": 1,
               "draws": 0,
-              "losses": 2,
+              "losses": 3,
               "points": 1.0
-            },
-            {
-              "username": "nihil92",
-              "games": 1,
-              "wins": 0,
-              "draws": 0,
-              "losses": 1,
-              "points": 0.0
             },
             {
               "username": "sirbabalot",
@@ -29631,13 +29810,14 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "chess-occitanie",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "newbmewb",
-                    "rating": 1177
+                    "rating": 1183
                   },
                   {
                     "username": "kikifov",
@@ -29645,19 +29825,19 @@
                   },
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
                   },
                   {
                     "username": "josepcdc",
-                    "rating": 1148
-                  },
-                  {
-                    "username": "jfitzurse",
-                    "rating": 1123
+                    "rating": 1150
                   },
                   {
                     "username": "aatn59",
-                    "rating": 1110
+                    "rating": 1114
+                  },
+                  {
+                    "username": "jfitzurse",
+                    "rating": 1113
                   },
                   {
                     "username": "hasuschach",
@@ -29667,15 +29847,15 @@
                 "oppRoster": [
                   {
                     "username": "cyreq",
-                    "rating": 1173
+                    "rating": 1182
                   },
                   {
                     "username": "plg31",
-                    "rating": 1167
+                    "rating": 1152
                   },
                   {
                     "username": "pierredemauduit",
-                    "rating": 1132
+                    "rating": 1110
                   },
                   {
                     "username": "landersletigre9",
@@ -29687,7 +29867,6 @@
                 "our": 7,
                 "opponent": 4
               },
-              "opponentClubId": "chess-occitanie",
               "registrationHistory": [
                 {
                   "ts": "2026-04-22T03:17:59+00:00",
@@ -29802,21 +29981,22 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "chess-team-europe",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
                   },
                   {
                     "username": "josepcdc",
-                    "rating": 1148
+                    "rating": 1150
                   },
                   {
                     "username": "aatn59",
-                    "rating": 1110
+                    "rating": 1114
                   },
                   {
                     "username": "hasuschach",
@@ -29826,15 +30006,11 @@
                 "oppRoster": [
                   {
                     "username": "pantera1965",
-                    "rating": 1178
+                    "rating": 1183
                   },
                   {
                     "username": "osquitar8",
                     "rating": 1173
-                  },
-                  {
-                    "username": "nebula_nomad615",
-                    "rating": 1161
                   },
                   {
                     "username": "e_savichev",
@@ -29846,19 +30022,23 @@
                   },
                   {
                     "username": "jarvis1810",
-                    "rating": 1149
-                  },
-                  {
-                    "username": "matadoregno",
-                    "rating": 1144
-                  },
-                  {
-                    "username": "stevev00",
-                    "rating": 1131
+                    "rating": 1152
                   },
                   {
                     "username": "andreagobbi",
-                    "rating": 1127
+                    "rating": 1151
+                  },
+                  {
+                    "username": "ac69-69",
+                    "rating": 1133
+                  },
+                  {
+                    "username": "matadoregno",
+                    "rating": 1128
+                  },
+                  {
+                    "username": "stevev00",
+                    "rating": 1121
                   },
                   {
                     "username": "hengest007",
@@ -29869,28 +30049,24 @@
                     "rating": 1118
                   },
                   {
-                    "username": "ac69-69",
-                    "rating": 1117
+                    "username": "bobixx1970",
+                    "rating": 1113
                   },
                   {
-                    "username": "bobixx1970",
-                    "rating": 1117
+                    "username": "kripaps2022",
+                    "rating": 1089
                   },
                   {
                     "username": "pdzchess",
                     "rating": 1082
                   },
                   {
-                    "username": "kripaps2022",
-                    "rating": 1081
-                  },
-                  {
                     "username": "greyrunner",
-                    "rating": 1076
+                    "rating": 1074
                   },
                   {
                     "username": "martinfitko",
-                    "rating": 1073
+                    "rating": 1067
                   },
                   {
                     "username": "dr_numb",
@@ -29898,7 +30074,7 @@
                   },
                   {
                     "username": "joachimhendrickx",
-                    "rating": 1031
+                    "rating": 1027
                   },
                   {
                     "username": "chispayepi",
@@ -29906,6 +30082,10 @@
                   },
                   {
                     "username": "kimkostas",
+                    "rating": null
+                  },
+                  {
+                    "username": "nebula_nomad615",
                     "rating": null
                   },
                   {
@@ -29922,7 +30102,6 @@
                 "our": 4,
                 "opponent": 23
               },
-              "opponentClubId": "chess-team-europe",
               "registrationHistory": [
                 {
                   "ts": "2026-04-23T03:17:12+00:00",
@@ -30019,6 +30198,7 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "diagonally-challenged-gentlemens-club",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
@@ -30029,15 +30209,15 @@
                   },
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
                   },
                   {
                     "username": "josepcdc",
-                    "rating": 1148
+                    "rating": 1150
                   },
                   {
                     "username": "aatn59",
-                    "rating": 1110
+                    "rating": 1114
                   },
                   {
                     "username": "hasuschach",
@@ -30051,15 +30231,15 @@
                   },
                   {
                     "username": "friedeggsof",
-                    "rating": 1181
+                    "rating": 1161
                   },
                   {
                     "username": "teemutheone",
-                    "rating": 1124
+                    "rating": 1132
                   },
                   {
                     "username": "wonderfolly",
-                    "rating": 1109
+                    "rating": 1108
                   },
                   {
                     "username": "navarro50",
@@ -30067,11 +30247,11 @@
                   },
                   {
                     "username": "rodstaff",
-                    "rating": 1080
+                    "rating": 1082
                   },
                   {
                     "username": "kenry785",
-                    "rating": 1052
+                    "rating": 1046
                   },
                   {
                     "username": "doodat",
@@ -30087,7 +30267,6 @@
                 "our": 5,
                 "opponent": 9
               },
-              "opponentClubId": "diagonally-challenged-gentlemens-club",
               "registrationHistory": [
                 {
                   "ts": "2026-04-23T03:17:12+00:00",
@@ -30158,6 +30337,7 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "chess-com-deutsch",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
@@ -30172,11 +30352,11 @@
                   },
                   {
                     "username": "josepcdc",
-                    "rating": 1148
+                    "rating": 1150
                   },
                   {
                     "username": "aatn59",
-                    "rating": 1110
+                    "rating": 1114
                   }
                 ],
                 "oppRoster": [
@@ -30186,11 +30366,11 @@
                   },
                   {
                     "username": "andreagobbi",
-                    "rating": 1127
+                    "rating": 1151
                   },
                   {
                     "username": "letsreachgm",
-                    "rating": 1123
+                    "rating": 1128
                   },
                   {
                     "username": "mike1604z",
@@ -30206,15 +30386,15 @@
                   },
                   {
                     "username": "pedroisaaco",
-                    "rating": 1091
-                  },
-                  {
-                    "username": "alexanderpfeifle",
-                    "rating": 1084
+                    "rating": 1096
                   },
                   {
                     "username": "urap-urap",
-                    "rating": 1073
+                    "rating": 1077
+                  },
+                  {
+                    "username": "alexanderpfeifle",
+                    "rating": 1076
                   },
                   {
                     "username": "twolf99",
@@ -30222,7 +30402,7 @@
                   },
                   {
                     "username": "brozzelbrizzel",
-                    "rating": 1038
+                    "rating": 1048
                   },
                   {
                     "username": "aorth123",
@@ -30234,7 +30414,6 @@
                 "our": 4,
                 "opponent": 12
               },
-              "opponentClubId": "chess-com-deutsch",
               "registrationHistory": [
                 {
                   "ts": "2026-04-24T03:18:12+00:00",
@@ -30295,13 +30474,14 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "the-great-british-empire",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "newbmewb",
-                    "rating": 1177
+                    "rating": 1183
                   },
                   {
                     "username": "sushilramrakhyani",
@@ -30313,11 +30493,11 @@
                   },
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
                   },
                   {
                     "username": "josepcdc",
-                    "rating": 1148
+                    "rating": 1150
                   },
                   {
                     "username": "forzatotti10",
@@ -30331,27 +30511,27 @@
                 "oppRoster": [
                   {
                     "username": "steadfast61",
-                    "rating": 1173
+                    "rating": 1170
                   },
                   {
                     "username": "kotov2000",
-                    "rating": 1156
+                    "rating": 1163
                   },
                   {
                     "username": "lostkiwi5",
-                    "rating": 1151
+                    "rating": 1153
                   },
                   {
                     "username": "cuddles65",
-                    "rating": 1129
+                    "rating": 1126
                   },
                   {
                     "username": "celvagio",
-                    "rating": 1113
+                    "rating": 1111
                   },
                   {
                     "username": "wonderfolly",
-                    "rating": 1109
+                    "rating": 1108
                   },
                   {
                     "username": "dharhans",
@@ -30375,7 +30555,6 @@
                 "our": 7,
                 "opponent": 10
               },
-              "opponentClubId": "the-great-british-empire",
               "registrationHistory": [
                 {
                   "ts": "2026-04-24T03:18:12+00:00",
@@ -30500,24 +30679,29 @@
               "name": "1WL 2026 U1000 Spring Masters: 1 day per move club vs Chess.com Deutsch",
               "startTime": 1778396400,
               "endTime": null,
-              "boards": 3,
+              "boards": 4,
               "matchResult": {
                 "ourScore": 0,
                 "opponentScore": 0,
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "chess-com-deutsch",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "lone_wolf_2006",
-                    "rating": 962
+                    "rating": 959
+                  },
+                  {
+                    "username": "sasaycudasay",
+                    "rating": 950
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 897
+                    "rating": 899
                   },
                   {
                     "username": "calq78",
@@ -30539,7 +30723,7 @@
                   },
                   {
                     "username": "thebowser64",
-                    "rating": 884
+                    "rating": 909
                   },
                   {
                     "username": "lumilou",
@@ -30551,7 +30735,11 @@
                   },
                   {
                     "username": "kakaobunker",
-                    "rating": 839
+                    "rating": 830
+                  },
+                  {
+                    "username": "caleb-gomer",
+                    "rating": 810
                   },
                   {
                     "username": "mischa_si",
@@ -30567,15 +30755,23 @@
                   },
                   {
                     "username": "mo3hr3",
-                    "rating": 662
+                    "rating": 673
                   },
                   {
                     "username": "nihei2013",
                     "rating": 562
                   },
                   {
+                    "username": "nihamax",
+                    "rating": 535
+                  },
+                  {
+                    "username": "khang-fish",
+                    "rating": 526
+                  },
+                  {
                     "username": "pavlo-75",
-                    "rating": 367
+                    "rating": 365
                   },
                   {
                     "username": "ruhanmusliu",
@@ -30588,10 +30784,9 @@
                 ]
               },
               "registeredPlayers": {
-                "our": 3,
-                "opponent": 15
+                "our": 4,
+                "opponent": 18
               },
-              "opponentClubId": "chess-com-deutsch",
               "registrationHistory": [
                 {
                   "ts": "2026-04-22T03:17:59+00:00",
@@ -30744,13 +30939,14 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "diagonally-challenged-gentlemens-club",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "alangoode108",
-                    "rating": 897
+                    "rating": 900
                   },
                   {
                     "username": "calq78",
@@ -30760,15 +30956,15 @@
                 "oppRoster": [
                   {
                     "username": "mika-lagome",
-                    "rating": 935
+                    "rating": 931
                   },
                   {
                     "username": "sarugumo",
-                    "rating": 904
+                    "rating": 898
                   },
                   {
                     "username": "tmeece63",
-                    "rating": 904
+                    "rating": 886
                   },
                   {
                     "username": "tweet7",
@@ -30780,7 +30976,6 @@
                 "our": 2,
                 "opponent": 4
               },
-              "opponentClubId": "diagonally-challenged-gentlemens-club",
               "registrationHistory": [
                 {
                   "ts": "2026-04-23T03:17:12+00:00",
@@ -30857,43 +31052,44 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "the-great-british-empire",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "alangoode108",
-                    "rating": 897
+                    "rating": 900
+                  },
+                  {
+                    "username": "gogsy1999",
+                    "rating": 886
                   },
                   {
                     "username": "calq78",
                     "rating": 878
-                  },
-                  {
-                    "username": "gogsy1999",
-                    "rating": 874
                   }
                 ],
                 "oppRoster": [
                   {
                     "username": "danaskew",
-                    "rating": 993
+                    "rating": 982
                   },
                   {
                     "username": "bobby197451",
-                    "rating": 968
+                    "rating": 973
                   },
                   {
                     "username": "elementica",
-                    "rating": 906
-                  },
-                  {
-                    "username": "tmeece63",
-                    "rating": 904
+                    "rating": 916
                   },
                   {
                     "username": "jefrodownunder",
                     "rating": 900
+                  },
+                  {
+                    "username": "tmeece63",
+                    "rating": 886
                   }
                 ]
               },
@@ -30901,7 +31097,6 @@
                 "our": 3,
                 "opponent": 5
               },
-              "opponentClubId": "the-great-british-empire",
               "registrationHistory": [
                 {
                   "ts": "2026-04-23T03:17:12+00:00",
@@ -30980,6 +31175,7 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "pawn-society",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
@@ -30987,19 +31183,19 @@
                 "oppRoster": [
                   {
                     "username": "amethystblue",
-                    "rating": 983
+                    "rating": 976
                   },
                   {
                     "username": "elementica",
-                    "rating": 906
+                    "rating": 916
                   },
                   {
                     "username": "sonnydub1878",
-                    "rating": 903
+                    "rating": 894
                   },
                   {
                     "username": "pavlo-75",
-                    "rating": 367
+                    "rating": 365
                   }
                 ]
               },
@@ -31007,7 +31203,6 @@
                 "our": 0,
                 "opponent": 4
               },
-              "opponentClubId": "pawn-society",
               "registrationHistory": [
                 {
                   "ts": "2026-04-24T03:18:12+00:00",
@@ -31074,30 +31269,39 @@
               "name": "1WL 2026 U1000 Spring Masters: Team USA Southeast vs 1 day per move club",
               "startTime": 1778396400,
               "endTime": null,
-              "boards": 1,
+              "boards": 2,
               "matchResult": {
                 "ourScore": 0,
                 "opponentScore": 0,
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "team-usa-southeast",
               "minTeamPlayers": 4,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
+                    "username": "sasaycudasay",
+                    "rating": 950
+                  },
+                  {
                     "username": "gogsy1999",
-                    "rating": 874
+                    "rating": 886
                   }
                 ],
                 "oppRoster": [
                   {
                     "username": "rubbercheck",
-                    "rating": 997
+                    "rating": 994
                   },
                   {
                     "username": "mdavalos85",
                     "rating": 983
+                  },
+                  {
+                    "username": "dreadthewizz",
+                    "rating": 963
                   },
                   {
                     "username": "taggso",
@@ -31108,16 +31312,8 @@
                     "rating": 948
                   },
                   {
-                    "username": "dreadthewizz",
-                    "rating": 945
-                  },
-                  {
                     "username": "solidanimal",
                     "rating": 911
-                  },
-                  {
-                    "username": "tmeece63",
-                    "rating": 904
                   },
                   {
                     "username": "dsmooth41",
@@ -31125,6 +31321,10 @@
                   },
                   {
                     "username": "shug88",
+                    "rating": 893
+                  },
+                  {
+                    "username": "tmeece63",
                     "rating": 893
                   },
                   {
@@ -31150,10 +31350,9 @@
                 ]
               },
               "registeredPlayers": {
-                "our": 1,
+                "our": 2,
                 "opponent": 14
               },
-              "opponentClubId": "team-usa-southeast",
               "registrationHistory": [
                 {
                   "ts": "2026-04-24T03:18:12+00:00",
@@ -31259,6 +31458,304 @@
                   }
                 }
               ]
+            }
+          ],
+          "leaderboard": [],
+          "record": {
+            "wins": 0,
+            "losses": 0,
+            "draws": 0
+          }
+        },
+        "Chess960 2026 Six4Us Spring Masters": {
+          "rounds": [
+            {
+              "round": "NA",
+              "status": "open",
+              "matchId": "https://api.chess.com/pub/match/1945041",
+              "matchUrl": "https://api.chess.com/pub/match/1945041",
+              "matchWebUrl": "https://www.chess.com/club/matches/1945041",
+              "name": "1WL 2026 960 Six4Us Spring Masters: Total 960 vs 1 day per move club",
+              "startTime": 1779606000,
+              "endTime": null,
+              "boards": 11,
+              "matchResult": {
+                "ourScore": 0,
+                "opponentScore": 0,
+                "result": "unknown"
+              },
+              "playerStats": {},
+              "opponentClubId": "total-960",
+              "minTeamPlayers": 6,
+              "registrationData": {
+                "type": "roster",
+                "ourRoster": [
+                  {
+                    "username": "persepolis46",
+                    "rating": 1469
+                  },
+                  {
+                    "username": "kyljys",
+                    "rating": 1396
+                  },
+                  {
+                    "username": "sinvergenza",
+                    "rating": 1323
+                  },
+                  {
+                    "username": "yao47",
+                    "rating": 1297
+                  },
+                  {
+                    "username": "apoorvdwivedi11",
+                    "rating": 1230
+                  },
+                  {
+                    "username": "narendra3000",
+                    "rating": 1154
+                  },
+                  {
+                    "username": "sushilramrakhyani",
+                    "rating": 1096
+                  },
+                  {
+                    "username": "joel_perc",
+                    "rating": 1016
+                  },
+                  {
+                    "username": "emilchess5679",
+                    "rating": 1001
+                  },
+                  {
+                    "username": "arni2808h",
+                    "rating": 810
+                  },
+                  {
+                    "username": "chelouk_pavek",
+                    "rating": 800
+                  },
+                  {
+                    "username": "benej_6",
+                    "rating": 756
+                  },
+                  {
+                    "username": "czec33",
+                    "rating": 400
+                  },
+                  {
+                    "username": "paclo_akainu",
+                    "rating": 400
+                  }
+                ],
+                "oppRoster": [
+                  {
+                    "username": "sacbutt",
+                    "rating": 1849
+                  },
+                  {
+                    "username": "lizzard63",
+                    "rating": 1560
+                  },
+                  {
+                    "username": "skrepka",
+                    "rating": 1556
+                  },
+                  {
+                    "username": "vaclav_rozsypal",
+                    "rating": 1401
+                  },
+                  {
+                    "username": "takestock",
+                    "rating": 1373
+                  },
+                  {
+                    "username": "nuberu",
+                    "rating": 1302
+                  },
+                  {
+                    "username": "knight-templar-1118",
+                    "rating": 1219
+                  },
+                  {
+                    "username": "mettoan",
+                    "rating": 1092
+                  },
+                  {
+                    "username": "coffee-pot",
+                    "rating": 1030
+                  },
+                  {
+                    "username": "mrw59",
+                    "rating": 1019
+                  },
+                  {
+                    "username": "knightguy",
+                    "rating": 1000
+                  }
+                ]
+              },
+              "registeredPlayers": {
+                "our": 14,
+                "opponent": 11
+              }
+            },
+            {
+              "round": "NA-2",
+              "status": "open",
+              "matchId": "https://api.chess.com/pub/match/1945103",
+              "matchUrl": "https://api.chess.com/pub/match/1945103",
+              "matchWebUrl": "https://www.chess.com/club/matches/1945103",
+              "name": "1WL 2026 960 Six4Us Spring Masters: 1 day per move club vs Chess.com Deutsch",
+              "startTime": 1779606000,
+              "endTime": null,
+              "boards": 11,
+              "matchResult": {
+                "ourScore": 0,
+                "opponentScore": 0,
+                "result": "unknown"
+              },
+              "playerStats": {},
+              "opponentClubId": "chess-com-deutsch",
+              "minTeamPlayers": 6,
+              "registrationData": {
+                "type": "roster",
+                "ourRoster": [
+                  {
+                    "username": "kyljys",
+                    "rating": 1396
+                  },
+                  {
+                    "username": "wansio",
+                    "rating": 1306
+                  },
+                  {
+                    "username": "narendra3000",
+                    "rating": 1154
+                  },
+                  {
+                    "username": "plamen196565",
+                    "rating": 1108
+                  },
+                  {
+                    "username": "sushilramrakhyani",
+                    "rating": 1096
+                  },
+                  {
+                    "username": "hectorcista",
+                    "rating": 1095
+                  },
+                  {
+                    "username": "luis1235813",
+                    "rating": 946
+                  },
+                  {
+                    "username": "jfitzurse",
+                    "rating": 813
+                  },
+                  {
+                    "username": "arni2808h",
+                    "rating": 810
+                  },
+                  {
+                    "username": "benej_6",
+                    "rating": 756
+                  },
+                  {
+                    "username": "czec33",
+                    "rating": 400
+                  }
+                ],
+                "oppRoster": [
+                  {
+                    "username": "dagent",
+                    "rating": 1762
+                  },
+                  {
+                    "username": "bengel91",
+                    "rating": 1626
+                  },
+                  {
+                    "username": "rgruen",
+                    "rating": 1476
+                  },
+                  {
+                    "username": "pit737",
+                    "rating": 1452
+                  },
+                  {
+                    "username": "jenshbr",
+                    "rating": 1183
+                  },
+                  {
+                    "username": "nagrach",
+                    "rating": 1071
+                  },
+                  {
+                    "username": "wlabay",
+                    "rating": 1071
+                  },
+                  {
+                    "username": "raskolnikofffff",
+                    "rating": 1065
+                  },
+                  {
+                    "username": "ljv1611",
+                    "rating": 1027
+                  },
+                  {
+                    "username": "gm_tacodealer",
+                    "rating": 915
+                  },
+                  {
+                    "username": "dwz1000",
+                    "rating": 908
+                  },
+                  {
+                    "username": "p-alik",
+                    "rating": 876
+                  },
+                  {
+                    "username": "falparsi",
+                    "rating": 762
+                  },
+                  {
+                    "username": "chessking131072",
+                    "rating": 741
+                  },
+                  {
+                    "username": "leonas-gg",
+                    "rating": 686
+                  },
+                  {
+                    "username": "adsha23",
+                    "rating": 603
+                  },
+                  {
+                    "username": "kenox17",
+                    "rating": 594
+                  },
+                  {
+                    "username": "saechsischerschachzwerg",
+                    "rating": 505
+                  },
+                  {
+                    "username": "lumilou",
+                    "rating": 400
+                  },
+                  {
+                    "username": "samsudan_88",
+                    "rating": 400
+                  },
+                  {
+                    "username": "schachnap",
+                    "rating": 400
+                  }
+                ]
+              },
+              "registeredPlayers": {
+                "our": 11,
+                "opponent": 21
+              }
             }
           ],
           "leaderboard": [],
@@ -32994,8 +33491,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "team-australia-perth-w-a"
+              "opponentClubId": "team-australia-perth-w-a",
+              "minTeamPlayers": 10
             },
             {
               "round": "R4",
@@ -33129,8 +33626,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "catholic-chess-club"
+              "opponentClubId": "catholic-chess-club",
+              "minTeamPlayers": 10
             }
           ],
           "leaderboard": [
@@ -36002,8 +36499,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 20,
-              "opponentClubId": "team-italia-doc"
+              "opponentClubId": "team-italia-doc",
+              "minTeamPlayers": 20
             },
             {
               "round": "R2",
@@ -36269,8 +36766,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 20,
-              "opponentClubId": "catholic-chess-club"
+              "opponentClubId": "catholic-chess-club",
+              "minTeamPlayers": 20
             },
             {
               "round": "R4",
@@ -36283,7 +36780,7 @@
               "endTime": null,
               "boards": 20,
               "matchResult": {
-                "ourScore": 15.5,
+                "ourScore": 16.5,
                 "opponentScore": 6.5,
                 "result": "unknown"
               },
@@ -36301,8 +36798,8 @@
                   "losses": 1
                 },
                 "botw26": {
-                  "games": 1,
-                  "wins": 1,
+                  "games": 2,
+                  "wins": 2,
                   "draws": 0,
                   "losses": 0
                 },
@@ -36368,8 +36865,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 20,
-              "opponentClubId": "exercitatio-artem-parat"
+              "opponentClubId": "exercitatio-artem-parat",
+              "minTeamPlayers": 20
             },
             {
               "round": "R5",
@@ -36382,21 +36879,33 @@
               "endTime": null,
               "boards": 50,
               "matchResult": {
-                "ourScore": 1,
-                "opponentScore": 8,
+                "ourScore": 4,
+                "opponentScore": 14,
                 "result": "unknown"
               },
               "playerStats": {
-                "fikumdik": {
+                "bertfromaccntg": {
                   "games": 1,
                   "wins": 0,
                   "draws": 0,
                   "losses": 1
                 },
-                "iamacpa": {
-                  "games": 1,
+                "fikumdik": {
+                  "games": 2,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 2
+                },
+                "fisch-brasil": {
+                  "games": 2,
                   "wins": 1,
                   "draws": 0,
+                  "losses": 1
+                },
+                "iamacpa": {
+                  "games": 2,
+                  "wins": 1,
+                  "draws": 1,
                   "losses": 0
                 },
                 "kikifov": {
@@ -36404,6 +36913,12 @@
                   "wins": 0,
                   "draws": 0,
                   "losses": 1
+                },
+                "kokodakec": {
+                  "games": 1,
+                  "wins": 1,
+                  "draws": 0,
+                  "losses": 0
                 },
                 "legit_chess411": {
                   "games": 1,
@@ -36424,15 +36939,21 @@
                   "losses": 2
                 },
                 "nabdus": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 0,
                   "draws": 0,
-                  "losses": 1,
-                  "timeouts": 1
+                  "losses": 2,
+                  "timeouts": 2
+                },
+                "ruhan369": {
+                  "games": 2,
+                  "wins": 0,
+                  "draws": 1,
+                  "losses": 1
                 }
               },
-              "minTeamPlayers": 20,
-              "opponentClubId": "sahovska-sekcija-tqm-aradac"
+              "opponentClubId": "sahovska-sekcija-tqm-aradac",
+              "minTeamPlayers": 20
             }
           ],
           "leaderboard": [
@@ -36677,6 +37198,14 @@
               "points": 2.0
             },
             {
+              "username": "botw26",
+              "games": 2,
+              "wins": 2,
+              "draws": 0,
+              "losses": 0,
+              "points": 2.0
+            },
+            {
               "username": "georgex88",
               "games": 2,
               "wins": 2,
@@ -36733,6 +37262,14 @@
               "points": 1.5
             },
             {
+              "username": "iamacpa",
+              "games": 2,
+              "wins": 1,
+              "draws": 1,
+              "losses": 0,
+              "points": 1.5
+            },
+            {
               "username": "lavendermojito",
               "games": 4,
               "wins": 1,
@@ -36750,14 +37287,6 @@
             },
             {
               "username": "mrcahoon",
-              "games": 1,
-              "wins": 1,
-              "draws": 0,
-              "losses": 0,
-              "points": 1.0
-            },
-            {
-              "username": "botw26",
               "games": 1,
               "wins": 1,
               "draws": 0,
@@ -36789,7 +37318,7 @@
               "points": 1.0
             },
             {
-              "username": "iamacpa",
+              "username": "kokodakec",
               "games": 1,
               "wins": 1,
               "draws": 0,
@@ -36845,6 +37374,14 @@
               "points": 1.0
             },
             {
+              "username": "fisch-brasil",
+              "games": 2,
+              "wins": 1,
+              "draws": 0,
+              "losses": 1,
+              "points": 1.0
+            },
+            {
               "username": "aljeron",
               "games": 2,
               "wins": 0,
@@ -36877,6 +37414,14 @@
               "points": 0.5
             },
             {
+              "username": "ruhan369",
+              "games": 2,
+              "wins": 0,
+              "draws": 1,
+              "losses": 1,
+              "points": 0.5
+            },
+            {
               "username": "masterdean00",
               "games": 4,
               "wins": 0,
@@ -36885,7 +37430,7 @@
               "points": 0.5
             },
             {
-              "username": "fikumdik",
+              "username": "bertfromaccntg",
               "games": 1,
               "wins": 0,
               "draws": 0,
@@ -36894,14 +37439,6 @@
             },
             {
               "username": "kikifov",
-              "games": 1,
-              "wins": 0,
-              "draws": 0,
-              "losses": 1,
-              "points": 0.0
-            },
-            {
-              "username": "nabdus",
               "games": 1,
               "wins": 0,
               "draws": 0,
@@ -36957,7 +37494,23 @@
               "points": 0.0
             },
             {
+              "username": "fikumdik",
+              "games": 2,
+              "wins": 0,
+              "draws": 0,
+              "losses": 2,
+              "points": 0.0
+            },
+            {
               "username": "mhe3430",
+              "games": 2,
+              "wins": 0,
+              "draws": 0,
+              "losses": 2,
+              "points": 0.0
+            },
+            {
+              "username": "nabdus",
               "games": 2,
               "wins": 0,
               "draws": 0,
@@ -37056,8 +37609,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "squadron-commandos"
+              "opponentClubId": "squadron-commandos",
+              "minTeamPlayers": 5
             },
             {
               "round": "R2",
@@ -37337,8 +37890,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "queens-and-kings-chess-club"
+              "opponentClubId": "queens-and-kings-chess-club",
+              "minTeamPlayers": 5
             },
             {
               "round": "R4",
@@ -37352,7 +37905,7 @@
               "boards": 35,
               "matchResult": {
                 "ourScore": 29,
-                "opponentScore": 27,
+                "opponentScore": 28,
                 "result": "unknown"
               },
               "playerStats": {
@@ -37435,10 +37988,10 @@
                   "losses": 1
                 },
                 "joedoan07": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 1,
                   "draws": 0,
-                  "losses": 0
+                  "losses": 1
                 },
                 "johnparker1995": {
                   "games": 2,
@@ -37537,8 +38090,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "hispano-chess-club"
+              "opponentClubId": "hispano-chess-club",
+              "minTeamPlayers": 5
             }
           ],
           "leaderboard": [
@@ -37735,14 +38288,6 @@
               "points": 1.0
             },
             {
-              "username": "joedoan07",
-              "games": 1,
-              "wins": 1,
-              "draws": 0,
-              "losses": 0,
-              "points": 1.0
-            },
-            {
               "username": "temonk",
               "games": 1,
               "wins": 1,
@@ -37840,6 +38385,14 @@
             },
             {
               "username": "jfitzurse",
+              "games": 2,
+              "wins": 1,
+              "draws": 0,
+              "losses": 1,
+              "points": 1.0
+            },
+            {
+              "username": "joedoan07",
               "games": 2,
               "wins": 1,
               "draws": 0,
@@ -38301,8 +38854,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 20,
-              "opponentClubId": "chess-players-without-borders"
+              "opponentClubId": "chess-players-without-borders",
+              "minTeamPlayers": 20
             }
           ],
           "leaderboard": [
@@ -38976,8 +39529,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "friends-uniting-against-mental-illness-chess-club"
+              "opponentClubId": "friends-uniting-against-mental-illness-chess-club",
+              "minTeamPlayers": 5
             }
           ],
           "leaderboard": [
@@ -39651,8 +40204,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "friends-uniting-against-mental-illness-chess-club"
+              "opponentClubId": "friends-uniting-against-mental-illness-chess-club",
+              "minTeamPlayers": 5
             },
             {
               "round": "R5",
@@ -41016,21 +41569,22 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "masters-of-the-squares",
               "minTeamPlayers": 10,
               "registrationData": {
                 "type": "roster",
                 "ourRoster": [
                   {
                     "username": "lavendermojito",
-                    "rating": 1859
-                  },
-                  {
-                    "username": "andy67123",
-                    "rating": 1645
+                    "rating": 1846
                   },
                   {
                     "username": "lezama1972",
-                    "rating": 1642
+                    "rating": 1640
+                  },
+                  {
+                    "username": "andy67123",
+                    "rating": 1636
                   },
                   {
                     "username": "mastermatthew52",
@@ -41042,11 +41596,11 @@
                   },
                   {
                     "username": "mr_barsukov",
-                    "rating": 1571
+                    "rating": 1575
                   },
                   {
                     "username": "narendra3000",
-                    "rating": 1543
+                    "rating": 1540
                   },
                   {
                     "username": "wansio",
@@ -41054,7 +41608,7 @@
                   },
                   {
                     "username": "mhe3430",
-                    "rating": 1443
+                    "rating": 1450
                   },
                   {
                     "username": "carambolx",
@@ -41070,27 +41624,27 @@
                   },
                   {
                     "username": "yao47",
-                    "rating": 1402
+                    "rating": 1406
                   },
                   {
                     "username": "arni2808h",
-                    "rating": 1385
+                    "rating": 1389
                   },
                   {
                     "username": "benej_6",
-                    "rating": 1376
-                  },
-                  {
-                    "username": "hectorcista",
-                    "rating": 1320
+                    "rating": 1370
                   },
                   {
                     "username": "persepolis46",
                     "rating": 1313
                   },
                   {
+                    "username": "hectorcista",
+                    "rating": 1312
+                  },
+                  {
                     "username": "evgenyi1420",
-                    "rating": 1189
+                    "rating": 1182
                   },
                   {
                     "username": "kikifov",
@@ -41098,15 +41652,15 @@
                   },
                   {
                     "username": "engelleik",
-                    "rating": 1155
+                    "rating": 1150
                   },
                   {
                     "username": "josepcdc",
-                    "rating": 1148
+                    "rating": 1150
                   },
                   {
                     "username": "aatn59",
-                    "rating": 1110
+                    "rating": 1114
                   },
                   {
                     "username": "augnado",
@@ -41114,7 +41668,7 @@
                   },
                   {
                     "username": "alangoode108",
-                    "rating": 897
+                    "rating": 900
                   }
                 ],
                 "oppRoster": [
@@ -41124,7 +41678,7 @@
                   },
                   {
                     "username": "ydebilloez",
-                    "rating": 1490
+                    "rating": 1493
                   },
                   {
                     "username": "sgreeven",
@@ -41140,7 +41694,7 @@
                   },
                   {
                     "username": "shdk1980",
-                    "rating": 1303
+                    "rating": 1264
                   },
                   {
                     "username": "rawkusmo",
@@ -41156,7 +41710,7 @@
                   },
                   {
                     "username": "psattva",
-                    "rating": 1122
+                    "rating": 1111
                   }
                 ]
               },
@@ -41164,7 +41718,6 @@
                 "our": 24,
                 "opponent": 10
               },
-              "opponentClubId": "masters-of-the-squares",
               "registrationHistory": [
                 {
                   "ts": "2026-05-01T03:18:17+00:00",
@@ -42307,8 +42860,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "team-italia"
+              "opponentClubId": "team-italia",
+              "minTeamPlayers": 10
             }
           ],
           "leaderboard": [
@@ -43654,8 +44207,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "kings-and-queens-chess-club"
+              "opponentClubId": "kings-and-queens-chess-club",
+              "minTeamPlayers": 5
             },
             {
               "round": "R4",
@@ -43874,8 +44427,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "beautiful-romania"
+              "opponentClubId": "beautiful-romania",
+              "minTeamPlayers": 5
             }
           ],
           "leaderboard": [
@@ -44691,8 +45244,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "team-italia"
+              "opponentClubId": "team-italia",
+              "minTeamPlayers": 5
             },
             {
               "round": "R4",
@@ -44813,8 +45366,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "the-royal-falcon-club"
+              "opponentClubId": "the-royal-falcon-club",
+              "minTeamPlayers": 5
             },
             {
               "round": "R5",
@@ -44941,8 +45494,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 5,
-              "opponentClubId": "beautiful-romania"
+              "opponentClubId": "beautiful-romania",
+              "minTeamPlayers": 5
             }
           ],
           "leaderboard": [
@@ -49302,8 +49855,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "kings-and-queens-chess-club"
+              "opponentClubId": "kings-and-queens-chess-club",
+              "minTeamPlayers": 10
             },
             {
               "round": "R4",
@@ -49454,8 +50007,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "the-great-british-empire"
+              "opponentClubId": "the-great-british-empire",
+              "minTeamPlayers": 10
             },
             {
               "round": "R5",
@@ -49549,8 +50102,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "the-celts"
+              "opponentClubId": "the-celts",
+              "minTeamPlayers": 10
             },
             {
               "round": "R6",
@@ -49780,8 +50333,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "promote-to-king"
+              "opponentClubId": "promote-to-king",
+              "minTeamPlayers": 10
             }
           ],
           "leaderboard": [
@@ -51960,8 +52513,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "pinoy-chess-philippines"
+              "opponentClubId": "pinoy-chess-philippines",
+              "minTeamPlayers": 10
             },
             {
               "round": "R2",
@@ -52149,8 +52702,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "north-america-united"
+              "opponentClubId": "north-america-united",
+              "minTeamPlayers": 10
             },
             {
               "round": "R3",
@@ -52236,8 +52789,8 @@
                   "losses": 1
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "bobby-fischer-random"
+              "opponentClubId": "bobby-fischer-random",
+              "minTeamPlayers": 10
             },
             {
               "round": "R4",
@@ -52317,8 +52870,8 @@
                   "losses": 2
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "chess-bombers"
+              "opponentClubId": "chess-bombers",
+              "minTeamPlayers": 10
             },
             {
               "round": "R5",
@@ -52336,6 +52889,7 @@
                 "result": "unknown"
               },
               "playerStats": {},
+              "opponentClubId": "team-australia-adelaide-sa",
               "minTeamPlayers": 10,
               "registrationData": {
                 "type": "roster",
@@ -52350,7 +52904,7 @@
                   },
                   {
                     "username": "iraj6544",
-                    "rating": 1349
+                    "rating": 1340
                   },
                   {
                     "username": "apoorvdwivedi11",
@@ -52366,7 +52920,7 @@
                   },
                   {
                     "username": "mrcahoon",
-                    "rating": 1057
+                    "rating": 1071
                   },
                   {
                     "username": "joel_perc",
@@ -52428,7 +52982,7 @@
                   },
                   {
                     "username": "gfca1",
-                    "rating": 1230
+                    "rating": 1205
                   },
                   {
                     "username": "danh09",
@@ -52448,7 +53002,6 @@
                 "our": 20,
                 "opponent": 5
               },
-              "opponentClubId": "team-australia-adelaide-sa",
               "registrationHistory": [
                 {
                   "ts": "2026-05-04T03:21:24+00:00",
@@ -53906,8 +54459,8 @@
                   "losses": 0
                 }
               },
-              "minTeamPlayers": 10,
-              "opponentClubId": "europe-dream-club"
+              "opponentClubId": "europe-dream-club",
+              "minTeamPlayers": 10
             }
           ],
           "leaderboard": [
@@ -54140,10 +54693,10 @@
     },
     {
       "username": "elefant82",
-      "games": 155,
+      "games": 156,
       "wins": 76,
       "draws": 32,
-      "losses": 47,
+      "losses": 48,
       "points": 92.0
     },
     {
@@ -54164,11 +54717,11 @@
     },
     {
       "username": "lampshadow",
-      "games": 122,
-      "wins": 70,
+      "games": 123,
+      "wins": 71,
       "draws": 18,
       "losses": 34,
-      "points": 79.0
+      "points": 80.0
     },
     {
       "username": "mastermatthew52",
@@ -54235,6 +54788,14 @@
       "points": 65.0
     },
     {
+      "username": "nihil92",
+      "games": 130,
+      "wins": 63,
+      "draws": 1,
+      "losses": 66,
+      "points": 63.5
+    },
+    {
       "username": "wyattwinter8",
       "games": 117,
       "wins": 57,
@@ -54243,12 +54804,12 @@
       "points": 62.5
     },
     {
-      "username": "nihil92",
-      "games": 129,
-      "wins": 62,
-      "draws": 1,
-      "losses": 66,
-      "points": 62.5
+      "username": "sirbabalot",
+      "games": 107,
+      "wins": 53,
+      "draws": 12,
+      "losses": 42,
+      "points": 59.0
     },
     {
       "username": "belgianking98",
@@ -54257,14 +54818,6 @@
       "draws": 2,
       "losses": 34,
       "points": 58.0
-    },
-    {
-      "username": "sirbabalot",
-      "games": 105,
-      "wins": 51,
-      "draws": 12,
-      "losses": 42,
-      "points": 57.0
     },
     {
       "username": "fluffy_i",
@@ -54292,11 +54845,11 @@
     },
     {
       "username": "mrcahoon",
-      "games": 99,
-      "wins": 48,
+      "games": 100,
+      "wins": 49,
       "draws": 3,
       "losses": 48,
-      "points": 49.5
+      "points": 50.5
     },
     {
       "username": "aljeron",
@@ -54324,10 +54877,10 @@
     },
     {
       "username": "engelleik",
-      "games": 96,
+      "games": 97,
       "wins": 38,
       "draws": 10,
-      "losses": 48,
+      "losses": 49,
       "points": 43.0
     },
     {
@@ -54452,10 +55005,10 @@
     },
     {
       "username": "iraj6544",
-      "games": 43,
+      "games": 44,
       "wins": 23,
       "draws": 4,
-      "losses": 16,
+      "losses": 17,
       "points": 25.0
     },
     {
@@ -54540,10 +55093,10 @@
     },
     {
       "username": "joedoan07",
-      "games": 37,
+      "games": 38,
       "wins": 19,
       "draws": 3,
-      "losses": 15,
+      "losses": 16,
       "points": 20.5
     },
     {
@@ -54569,6 +55122,14 @@
       "draws": 2,
       "losses": 12,
       "points": 19.0
+    },
+    {
+      "username": "peon-4-rey",
+      "games": 26,
+      "wins": 17,
+      "draws": 3,
+      "losses": 6,
+      "points": 18.5
     },
     {
       "username": "jonathanlau315",
@@ -54603,12 +55164,12 @@
       "points": 18.0
     },
     {
-      "username": "peon-4-rey",
-      "games": 24,
-      "wins": 16,
-      "draws": 3,
-      "losses": 5,
-      "points": 17.5
+      "username": "221953gf",
+      "games": 45,
+      "wins": 18,
+      "draws": 0,
+      "losses": 27,
+      "points": 18.0
     },
     {
       "username": "dagomontoya",
@@ -54632,14 +55193,6 @@
       "wins": 16,
       "draws": 2,
       "losses": 14,
-      "points": 17.0
-    },
-    {
-      "username": "221953gf",
-      "games": 44,
-      "wins": 17,
-      "draws": 0,
-      "losses": 27,
       "points": 17.0
     },
     {
@@ -54683,6 +55236,14 @@
       "points": 15.5
     },
     {
+      "username": "botw26",
+      "games": 22,
+      "wins": 14,
+      "draws": 2,
+      "losses": 6,
+      "points": 15.0
+    },
+    {
       "username": "oldsavage",
       "games": 28,
       "wins": 12,
@@ -54703,14 +55264,6 @@
       "games": 20,
       "wins": 14,
       "draws": 0,
-      "losses": 6,
-      "points": 14.0
-    },
-    {
-      "username": "botw26",
-      "games": 21,
-      "wins": 13,
-      "draws": 2,
       "losses": 6,
       "points": 14.0
     },
@@ -54747,6 +55300,14 @@
       "points": 14.0
     },
     {
+      "username": "rmanica",
+      "games": 16,
+      "wins": 13,
+      "draws": 1,
+      "losses": 2,
+      "points": 13.5
+    },
+    {
       "username": "netnazgul",
       "games": 19,
       "wins": 13,
@@ -54763,12 +55324,12 @@
       "points": 13.5
     },
     {
-      "username": "rmanica",
-      "games": 15,
-      "wins": 12,
-      "draws": 1,
-      "losses": 2,
-      "points": 12.5
+      "username": "gmdingtangqiang",
+      "games": 13,
+      "wins": 13,
+      "draws": 0,
+      "losses": 0,
+      "points": 13.0
     },
     {
       "username": "vitaliis_gorynych",
@@ -54793,14 +55354,6 @@
       "draws": 1,
       "losses": 8,
       "points": 12.5
-    },
-    {
-      "username": "gmdingtangqiang",
-      "games": 12,
-      "wins": 12,
-      "draws": 0,
-      "losses": 0,
-      "points": 12.0
     },
     {
       "username": "hzmos",
@@ -54859,6 +55412,22 @@
       "points": 11.5
     },
     {
+      "username": "leon1956",
+      "games": 19,
+      "wins": 11,
+      "draws": 1,
+      "losses": 7,
+      "points": 11.5
+    },
+    {
+      "username": "sakura_4",
+      "games": 12,
+      "wins": 11,
+      "draws": 0,
+      "losses": 1,
+      "points": 11.0
+    },
+    {
       "username": "zollana",
       "games": 18,
       "wins": 10,
@@ -54899,14 +55468,6 @@
       "points": 10.5
     },
     {
-      "username": "leon1956",
-      "games": 18,
-      "wins": 10,
-      "draws": 1,
-      "losses": 7,
-      "points": 10.5
-    },
-    {
       "username": "congmark",
       "games": 18,
       "wins": 10,
@@ -54936,14 +55497,6 @@
       "wins": 10,
       "draws": 0,
       "losses": 0,
-      "points": 10.0
-    },
-    {
-      "username": "sakura_4",
-      "games": 11,
-      "wins": 10,
-      "draws": 0,
-      "losses": 1,
       "points": 10.0
     },
     {
@@ -55139,6 +55692,14 @@
       "points": 7.5
     },
     {
+      "username": "arni2808h",
+      "games": 11,
+      "wins": 7,
+      "draws": 1,
+      "losses": 3,
+      "points": 7.5
+    },
+    {
       "username": "adamlrh",
       "games": 12,
       "wins": 7,
@@ -55225,14 +55786,6 @@
       "draws": 0,
       "losses": 9,
       "points": 7.0
-    },
-    {
-      "username": "arni2808h",
-      "games": 10,
-      "wins": 6,
-      "draws": 1,
-      "losses": 3,
-      "points": 6.5
     },
     {
       "username": "santornemhi",
@@ -55619,14 +56172,6 @@
       "points": 4.0
     },
     {
-      "username": "fikumdik",
-      "games": 7,
-      "wins": 4,
-      "draws": 0,
-      "losses": 3,
-      "points": 4.0
-    },
-    {
       "username": "officialjaychuks",
       "games": 7,
       "wins": 4,
@@ -55636,6 +56181,14 @@
     },
     {
       "username": "benej_6",
+      "games": 8,
+      "wins": 4,
+      "draws": 0,
+      "losses": 4,
+      "points": 4.0
+    },
+    {
+      "username": "fikumdik",
       "games": 8,
       "wins": 4,
       "draws": 0,
@@ -56219,6 +56772,14 @@
       "points": 2.0
     },
     {
+      "username": "fisch-brasil",
+      "games": 4,
+      "wins": 2,
+      "draws": 0,
+      "losses": 2,
+      "points": 2.0
+    },
+    {
       "username": "cheeseguy007",
       "games": 4,
       "wins": 2,
@@ -56363,6 +56924,14 @@
       "points": 1.5
     },
     {
+      "username": "iamacpa",
+      "games": 2,
+      "wins": 1,
+      "draws": 1,
+      "losses": 0,
+      "points": 1.5
+    },
+    {
       "username": "zeth444",
       "games": 2,
       "wins": 1,
@@ -56387,6 +56956,14 @@
       "points": 1.5
     },
     {
+      "username": "ruhan369",
+      "games": 4,
+      "wins": 1,
+      "draws": 1,
+      "losses": 2,
+      "points": 1.5
+    },
+    {
       "username": "liquidles",
       "games": 8,
       "wins": 1,
@@ -56403,14 +56980,6 @@
       "points": 1.0
     },
     {
-      "username": "renabor",
-      "games": 1,
-      "wins": 1,
-      "draws": 0,
-      "losses": 0,
-      "points": 1.0
-    },
-    {
       "username": "some0ne96o",
       "games": 1,
       "wins": 1,
@@ -56419,7 +56988,7 @@
       "points": 1.0
     },
     {
-      "username": "iamacpa",
+      "username": "kokodakec",
       "games": 1,
       "wins": 1,
       "draws": 0,
@@ -56475,7 +57044,7 @@
       "points": 1.0
     },
     {
-      "username": "fisch-brasil",
+      "username": "mrot202",
       "games": 2,
       "wins": 1,
       "draws": 0,
@@ -56483,7 +57052,7 @@
       "points": 1.0
     },
     {
-      "username": "mrot202",
+      "username": "renabor",
       "games": 2,
       "wins": 1,
       "draws": 0,
@@ -56579,14 +57148,6 @@
       "points": 1.0
     },
     {
-      "username": "ruhan369",
-      "games": 2,
-      "wins": 1,
-      "draws": 0,
-      "losses": 1,
-      "points": 1.0
-    },
-    {
       "username": "kksukhwani",
       "games": 2,
       "wins": 1,
@@ -56611,14 +57172,6 @@
       "points": 1.0
     },
     {
-      "username": "nabdus",
-      "games": 3,
-      "wins": 1,
-      "draws": 0,
-      "losses": 2,
-      "points": 1.0
-    },
-    {
       "username": "kikifov",
       "games": 3,
       "wins": 1,
@@ -56628,6 +57181,14 @@
     },
     {
       "username": "sternter",
+      "games": 4,
+      "wins": 1,
+      "draws": 0,
+      "losses": 3,
+      "points": 1.0
+    },
+    {
+      "username": "nabdus",
       "games": 4,
       "wins": 1,
       "draws": 0,
@@ -56707,15 +57268,15 @@
       "points": 0.5
     },
     {
-      "username": "guztiekin",
-      "games": 3,
+      "username": "seba89g",
+      "games": 4,
       "wins": 0,
       "draws": 1,
-      "losses": 2,
+      "losses": 3,
       "points": 0.5
     },
     {
-      "username": "seba89g",
+      "username": "guztiekin",
       "games": 4,
       "wins": 0,
       "draws": 1,
@@ -57036,10 +57597,10 @@
     },
     {
       "username": "bertfromaccntg",
-      "games": 10,
+      "games": 11,
       "wins": 0,
       "draws": 0,
-      "losses": 10,
+      "losses": 11,
       "points": 0.0
     }
   ]

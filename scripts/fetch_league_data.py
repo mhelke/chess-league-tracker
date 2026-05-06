@@ -749,6 +749,96 @@ def load_existing_match_ids() -> set:
         return set()
 
 
+def backfill_opponent_club_ids(site_key: str) -> None:
+    """Scan leagueData.json for rounds missing opponentClubId, fetch those match
+    endpoints to fill the gap, then update leagueData.json and clubIcons.json."""
+    league_data_file = os.path.join(PROJECT_ROOT, "public", "data", site_key, "leagueData.json")
+    club_icons_file  = os.path.join(PROJECT_ROOT, "public", "data", site_key, "clubIcons.json")
+
+    if not os.path.exists(league_data_file):
+        print(f"ERROR: leagueData.json not found at {league_data_file}", file=sys.stderr)
+        sys.exit(1)
+
+    with open(league_data_file, "r", encoding="utf-8") as f:
+        league_data = json.load(f)
+
+    existing_icons: dict = {}
+    if os.path.exists(club_icons_file):
+        with open(club_icons_file, "r", encoding="utf-8") as f:
+            existing_icons = json.load(f)
+
+    # Collect rounds that are missing opponentClubId
+    rounds_to_patch = []  # list of (round_dict reference, matchUrl)
+    for league in league_data.get("leagues", {}).values():
+        for sub in league.get("subLeagues", {}).values():
+            for round_data in sub.get("rounds", []):
+                if not round_data.get("opponentClubId"):
+                    match_url = round_data.get("matchUrl") or round_data.get("matchId")
+                    if match_url:
+                        rounds_to_patch.append((round_data, match_url))
+
+    if not rounds_to_patch:
+        print("All rounds already have opponentClubId — nothing to backfill.")
+        return
+
+    print(f"Backfilling opponentClubId for {len(rounds_to_patch)} round(s)...")
+    new_icons = dict(existing_icons)
+    patched = 0
+    failed  = 0
+
+    for i, (round_data, match_url) in enumerate(rounds_to_patch, 1):
+        print(f"  [{i}/{len(rounds_to_patch)}] {match_url}")
+        match_json = fetch_json(match_url)
+        if not match_json:
+            print(f"    ✗ Could not fetch match")
+            failed += 1
+            time.sleep(0.3)
+            continue
+
+        teams = match_json.get("teams", {})
+        opponent_club_id = None
+        for team_data in teams.values():
+            if isinstance(team_data, dict):
+                team_id_url = team_data.get("@id", "")
+                if "/club/" in team_id_url and CLUB_ID not in team_id_url:
+                    opponent_club_id = team_id_url.rstrip("/").split("/club/")[-1]
+                    break
+
+        if opponent_club_id:
+            round_data["opponentClubId"] = opponent_club_id
+            patched += 1
+            print(f"    ✓ opponentClubId = {opponent_club_id}")
+
+            # Fetch icon if not already known
+            if opponent_club_id not in new_icons:
+                club_info = fetch_json(f"https://api.chess.com/pub/club/{opponent_club_id}")
+                if club_info:
+                    new_icons[opponent_club_id] = {
+                        "name": club_info.get("name", opponent_club_id),
+                        "icon": club_info.get("icon", "")
+                    }
+                    print(f"    ✓ icon fetched for {opponent_club_id}")
+                else:
+                    new_icons[opponent_club_id] = {"name": opponent_club_id, "icon": ""}
+                    print(f"    ✗ could not fetch icon for {opponent_club_id}")
+                time.sleep(0.3)
+        else:
+            print(f"    ✗ Could not determine opponent club from match data")
+            failed += 1
+
+        time.sleep(0.3)
+
+    # Write patched leagueData.json
+    with open(league_data_file, "w", encoding="utf-8") as f:
+        json.dump(league_data, f, indent=2, ensure_ascii=False)
+    print(f"\n✓ leagueData.json updated ({patched} round(s) patched, {failed} failed)")
+
+    # Write updated clubIcons.json
+    with open(club_icons_file, "w", encoding="utf-8") as f:
+        json.dump(new_icons, f, indent=2, ensure_ascii=False)
+    print(f"✓ clubIcons.json updated ({len(new_icons)} clubs total)")
+
+
 def main():
     """Main execution function."""
     parser = argparse.ArgumentParser(
@@ -758,9 +848,31 @@ def main():
         "--site-key", required=True,
         help="Site key matching a directory under config/ (e.g. '1dpmc', 'teamusa')",
     )
+
+    # ── Developer / maintenance tools ─────────────────────────────────────────
+    # These flags are NOT used by the nightly CI/CD pipeline.
+    # Run them locally when needed to fix or backfill data.
+    dev_group = parser.add_argument_group(
+        "developer / maintenance tools (local use only, not for nightly builds)"
+    )
+    dev_group.add_argument(
+        "--backfill-icons",
+        action="store_true",
+        help=(
+            "Scan existing leagueData.json for rounds that are missing "
+            "'opponentClubId', fetch each match endpoint to fill the gap, "
+            "and update clubIcons.json. Run once after upgrading from a version "
+            "that did not record opponent club IDs. Do NOT include in nightly jobs."
+        ),
+    )
     args = parser.parse_args()
 
     load_config(args.site_key)
+
+    if args.backfill_icons:
+        print(f"=== Backfill mode: {args.site_key} ===")
+        backfill_opponent_club_ids(args.site_key)
+        return
 
     print(f"Fetching matches for club: {CLUB_ID} (site: {args.site_key})")
     

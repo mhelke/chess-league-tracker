@@ -12,6 +12,11 @@ const SITE_NAMES = {
     'teamusa': 'Team USA'
 }
 
+const MEMBER_CLUB_IDS = {
+    '1dpmc': '1dpmc',
+    'teamusa': 'tusa'
+}
+
 const NAV_LINKS = [
     { to: '/', label: 'Leagues' },
     { to: '/matches', label: 'All Matches' },
@@ -56,6 +61,14 @@ function App() {
                             {/* Desktop nav */}
                             <nav className="hidden sm:flex items-center space-x-1">
                                 {NAV_LINKS.map(l => <NavLink key={l.to} {...l} />)}
+                                <a
+                                    href={`https://www.chessteamdata.com/members?clubid=${MEMBER_CLUB_IDS[__SITE_KEY__] || __SITE_KEY__}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:text-chess-light hover:bg-white/10"
+                                >
+                                    Member Details ↗
+                                </a>
                             </nav>
 
                             {/* Hamburger button — mobile only */}
@@ -81,6 +94,15 @@ function App() {
                         {menuOpen && (
                             <nav className="sm:hidden mt-2 pb-1 border-t border-white/20 pt-2 flex flex-col gap-0.5">
                                 {NAV_LINKS.map(l => <NavLink key={l.to} {...l} onClick={() => setMenuOpen(false)} />)}
+                                <a
+                                    href={`https://www.chessteamdata.com/members?clubid=${MEMBER_CLUB_IDS[__SITE_KEY__] || __SITE_KEY__}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => setMenuOpen(false)}
+                                    className="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:text-chess-light hover:bg-white/10"
+                                >
+                                    Member Details ↗
+                                </a>
                             </nav>
                         )}
                     </div>

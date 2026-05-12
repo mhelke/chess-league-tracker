@@ -51,39 +51,109 @@ function sortSubLeagues(entries) {
 
 // ─── Open Match Card ─────────────────────────────────────────────────────────
 
-/** Urgency level for an open match based on roster vs minimum required */
-function getUrgency(rosterCount, minTeamPlayers, boards) {
-    const threshold = minTeamPlayers || boards
-    if (!threshold) return null
-    if (rosterCount < threshold) return 'critical'   // below required minimum
-    if (rosterCount < boards) return 'low'            // registered but under full boards
-    return null
-}
+const RATING_GAP_THRESHOLD = 150 // avg pts across board-matched pairs
 
-function UrgencyBadge({ level }) {
-    if (level === 'critical') {
-        return (
-            <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded px-1 py-0.5 flex-shrink-0" title="Players needed — below minimum">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>
-                Need players
-            </span>
-        )
+/**
+ * Compute all urgency signals for an open match.
+ * Returns { belowMin, playerGap, ratingGap }
+ *   belowMin  – we are below the required minimum player count
+ *   playerGap – opponent has >3 more players AND neither team is capped
+ *   ratingGap – opponent's board-matched avg rating exceeds ours by ≥ threshold
+ */
+function getMatchWarnings(round) {
+    const ourRoster = round.registrationData?.ourRoster ?? []
+    const oppRoster = round.registrationData?.oppRoster ?? []
+    const boards = round.boards ?? 0
+    const minPlayers = round.minTeamPlayers ?? 0
+    const cap = boards || minPlayers
+
+    const ourCount = ourRoster.length
+    const oppCount = oppRoster.length
+
+    // 1. Below minimum
+    const belowMin = cap > 0 && ourCount < minPlayers
+
+    // 2. Player gap — skip if both teams have hit the board cap
+    const bothCapped = cap > 0 && ourCount >= cap && oppCount >= cap
+    const playerGap = !bothCapped && (oppCount - ourCount) > 3
+        ? oppCount - ourCount
+        : null
+
+    // 3. Rating imbalance — board-matched pairs (both rosters already sorted desc)
+    let ratingGap = null
+    const pairCount = Math.min(ourCount, oppCount, boards || Infinity)
+    if (pairCount >= 2) {
+        let totalDiff = 0
+        for (let i = 0; i < pairCount; i++) {
+            totalDiff += (oppRoster[i].rating ?? 0) - (ourRoster[i].rating ?? 0)
+        }
+        const avgDiff = Math.round(totalDiff / pairCount)
+        if (avgDiff >= RATING_GAP_THRESHOLD) ratingGap = avgDiff
     }
-    return null
+
+    return { belowMin, playerGap, ratingGap }
 }
 
-function OpenMatchCard({ round, leagueName, subLeagueName }) {
-    const opponent = parseOpponent(round.name)
-    const roster = round.registrationData?.ourRoster ?? []
-    const rosterCount = roster.length
+function WarningBadges({ belowMin, playerGap, ratingGap }) {
+    if (!belowMin && !playerGap && !ratingGap) return null
+    return (
+        <div className="flex flex-col items-center gap-0.5 mt-0.5">
+            {belowMin && (
+                <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded px-1 py-0.5" title="Below required minimum — players needed">
+                    <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>
+                    Need players
+                </span>
+            )}
+            {playerGap && (
+                <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded px-1 py-0.5" title={`Opponent has ${playerGap} more players registered`}>
+                    <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 1 1 6 0 3 3 0 0 1-6 0zM17 17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1zM3 8a2 2 0 1 1 4 0 2 2 0 0 1-4 0zM1 15a1 1 0 0 1-1-1v-.5A3.5 3.5 0 0 1 3.5 10H5a1 1 0 0 1 0 2h-1.5A1.5 1.5 0 0 0 2 13.5V14a1 1 0 0 1-1 1z" /></svg>
+                    +{playerGap} opp players
+                </span>
+            )}
+            {ratingGap && (
+                <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-orange-700 bg-orange-50 border border-orange-200 rounded px-1 py-0.5" title={`Opponent averages ~${ratingGap} pts higher per board`}>
+                    <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M12 7a1 1 0 01-1 1H9v1h2a1 1 0 010 2H9v1h2a1 1 0 010 2H8a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 011 1zM5 4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1H5zm0-2h10a3 3 0 013 3v10a3 3 0 01-3 3H5a3 3 0 01-3-3V5a3 3 0 013-3z" clipRule="evenodd" /></svg>
+                    ~{ratingGap}pt outrated
+                </span>
+            )}
+        </div>
+    )
+}
+
+function TeamLogo({ icon, name, boards }) {
+    return (
+        <div className="flex flex-col items-center gap-0.5 min-w-0">
+            {icon ? (
+                <img src={icon} alt={name} className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-200 flex-shrink-0" />
+            ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2m0 12c5.33 0 8 2.67 8 4v2H4v-2c0-1.33 2.67-4 8-4z" />
+                    </svg>
+                </div>
+            )}
+            <span className="text-xs font-bold text-gray-700">{boards}b</span>
+        </div>
+    )
+}
+
+function OpenMatchCard({ round, leagueName, subLeagueName, clubIcons, ourClubIcon }) {
+    const ourRoster = round.registrationData?.ourRoster ?? []
+    const rosterCount = ourRoster.length
     const boards = round.boards ?? 0
     const minTeamPlayers = round.minTeamPlayers ?? 0
     const startDate = round.startTime ? formatDate(round.startTime) : null
     const matchUrl = round.matchWebUrl || round.matchUrl
-    const urgency = getUrgency(rosterCount, minTeamPlayers, boards)
 
-    const borderColor = urgency === 'critical' ? 'border-red-300' : 'border-green-200'
-    const bgColor = urgency === 'critical' ? 'bg-red-50' : 'bg-white'
+    const { belowMin, playerGap, ratingGap } = getMatchWarnings(round)
+    const hasWarning = belowMin || playerGap || ratingGap
+
+    const oppClub = clubIcons?.[round.opponentClubId]
+    const oppIcon = oppClub?.icon ?? null
+    const oppName = oppClub?.name ?? parseOpponent(round.name)
+
+    const borderColor = belowMin ? 'border-red-300' : hasWarning ? 'border-amber-300' : 'border-green-200'
+    const bgColor = belowMin ? 'bg-red-50' : hasWarning ? 'bg-amber-50' : 'bg-white'
 
     return (
         <a
@@ -92,19 +162,25 @@ function OpenMatchCard({ round, leagueName, subLeagueName }) {
             rel="noopener noreferrer"
             className={`block ${bgColor} border ${borderColor} rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
         >
-            <div className="flex items-start justify-between gap-1.5 mb-0.5">
-                <p className="text-xs font-semibold text-gray-900 truncate leading-tight flex-1" title={opponent}>
-                    vs {opponent}
-                </p>
-                {urgency && <UrgencyBadge level={urgency} />}
+            {/* Matchup row */}
+            <div className="flex items-center gap-2 mb-1">
+                <TeamLogo icon={ourClubIcon} name="Us" boards={boards} />
+                <div className="flex-1 min-w-0 text-center">
+                    <p className="text-xs text-gray-400 font-medium">vs</p>
+                    <WarningBadges belowMin={belowMin} playerGap={playerGap} ratingGap={ratingGap} />
+                </div>
+                <TeamLogo icon={oppIcon} name={oppName} boards={boards} />
             </div>
-            <p className="text-xs text-gray-500 truncate mb-1">
+            {/* Opponent name */}
+            <p className="text-xs font-semibold text-gray-900 truncate text-center leading-tight" title={oppName}>
+                {oppName}
+            </p>
+            <p className="text-xs text-gray-500 truncate text-center mb-1">
                 {leagueName} · {subLeagueName}{round.round && round.round !== 'NA' ? ` · ${round.round}` : ''}
             </p>
-            <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-gray-400">
-                <span>{boards}b</span>
+            <div className="flex justify-center flex-wrap gap-x-2 gap-y-0.5 text-xs text-gray-400">
                 {rosterCount > 0 && (
-                    <span className={urgency === 'critical' ? 'text-red-500 font-medium' : ''}>
+                    <span className={belowMin ? 'text-red-500 font-medium' : ''}>
                         {rosterCount}/{minTeamPlayers || boards} registered
                     </span>
                 )}
@@ -113,6 +189,7 @@ function OpenMatchCard({ round, leagueName, subLeagueName }) {
         </a>
     )
 }
+
 
 // ─── Sub-league Summary Card ─────────────────────────────────────────────────
 
@@ -178,15 +255,26 @@ function SectionHeader({ children }) {
 
 function EmbedLeagueOverview() {
     const [data, setData] = useState(null)
+    const [clubIcons, setClubIcons] = useState({})
+    const [ourClubIcon, setOurClubIcon] = useState(null)
     const [loading, setLoading] = useState(true)
     const [searchParams] = useSearchParams()
     const isEmbed = searchParams.get('embed') === '1'
 
     useEffect(() => {
-        fetch('/data/leagueData.json')
-            .then(r => r.json())
-            .then(d => { setData(d); setLoading(false) })
-            .catch(() => setLoading(false))
+        const apiId = { '1dpmc': '1-day-per-move-club', 'teamusa': 'team-usa' }[__SITE_KEY__]
+        Promise.all([
+            fetch('/data/leagueData.json').then(r => r.json()),
+            fetch('/data/clubIcons.json').then(r => r.json()).catch(() => ({})),
+            apiId
+                ? fetch(`https://api.chess.com/pub/club/${apiId}`).then(r => r.json()).catch(() => null)
+                : Promise.resolve(null),
+        ]).then(([leagueJson, iconsJson, clubJson]) => {
+            setData(leagueJson)
+            setClubIcons(iconsJson || {})
+            if (clubJson?.icon) setOurClubIcon(clubJson.icon)
+            setLoading(false)
+        }).catch(() => setLoading(false))
     }, [])
 
     if (loading) {
@@ -258,6 +346,8 @@ function EmbedLeagueOverview() {
                                 round={round}
                                 leagueName={leagueName}
                                 subLeagueName={subLeagueName}
+                                clubIcons={clubIcons}
+                                ourClubIcon={ourClubIcon}
                             />
                         ))}
                     </div>

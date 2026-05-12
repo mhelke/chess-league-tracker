@@ -171,10 +171,6 @@ function OpenMatchCard({ round, leagueName, subLeagueName, clubIcons, ourClubIco
                 </div>
                 <TeamLogo icon={oppIcon} name={oppName} boards={boards} />
             </div>
-            {/* Opponent name */}
-            <p className="text-xs font-semibold text-gray-900 truncate text-center leading-tight" title={oppName}>
-                {oppName}
-            </p>
             <p className="text-xs text-gray-500 truncate text-center mb-1">
                 {leagueName} · {subLeagueName}{round.round && round.round !== 'NA' ? ` · ${round.round}` : ''}
             </p>

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T03:19:29Z",
+  "generatedAt": "2026-05-18T03:21:19Z",
   "riskThresholdPercent": 15.0,
   "riskConfig": {
     "highTimeoutPct": 50.0,
@@ -38,7 +38,7 @@
     },
     "adevese": {
       "timeoutPercent": 12.0,
-      "dailyRating": 1012,
+      "dailyRating": 1015,
       "rating960": 800,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -62,8 +62,8 @@
     },
     "alangoode108": {
       "timeoutPercent": 0.0,
-      "dailyRating": 894,
-      "rating960": 713,
+      "dailyRating": 906,
+      "rating960": 728,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -108,33 +108,9 @@
       "riskLevel": "LOW",
       "riskReason": "Low risk: timeout ratio 20%, no recent sub-league timeouts, only 1 recent daily timeout(s)."
     },
-    "aljunied": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1718,
-      "rating960": null,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "andreamarras": {
       "timeoutPercent": 0.0,
-      "dailyRating": 932,
+      "dailyRating": 931,
       "rating960": 987,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -158,7 +134,7 @@
     },
     "andy67123": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1622,
+      "dailyRating": 1628,
       "rating960": null,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -181,15 +157,15 @@
       "riskReason": null
     },
     "apoorvdwivedi11": {
-      "timeoutPercent": 2.0,
+      "timeoutPercent": 100.0,
       "dailyRating": 1157,
-      "rating960": 1230,
+      "rating960": 1113,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
         "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
+          "count": 5,
+          "lastTimeoutDate": "2026-05-17"
         },
         "2day": {
           "count": 0,
@@ -200,9 +176,9 @@
           "lastTimeoutDate": null
         }
       },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
+      "riskFlag": true,
+      "riskLevel": "MEDIUM",
+      "riskReason": "Medium risk: timeout ratio 100%, 5 recent daily timeout(s)."
     },
     "arni2808h": {
       "timeoutPercent": 0.0,
@@ -252,62 +228,10 @@
       "riskLevel": "MEDIUM",
       "riskReason": "Medium risk: timeout ratio 50%, 17 recent daily timeout(s)."
     },
-    "belgianking98": {
-      "timeoutPercent": 5.0,
-      "dailyRating": 1607,
-      "rating960": 781,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {
-        "TCMAC": {
-          "Phoenix Tournament 2026": 1
-        }
-      },
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "benej_6": {
       "timeoutPercent": 0.0,
       "dailyRating": 1388,
-      "rating960": 990,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "bertfromaccntg": {
-      "timeoutPercent": 11.0,
-      "dailyRating": 1104,
-      "rating960": 1087,
+      "rating960": 899,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -354,32 +278,8 @@
     },
     "bohicagambit": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1695,
+      "dailyRating": 1711,
       "rating960": null,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "botw26": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1468,
-      "rating960": 1184,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -402,7 +302,7 @@
     },
     "btl0009": {
       "timeoutPercent": 10.0,
-      "dailyRating": 1441,
+      "dailyRating": 1445,
       "rating960": 613,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -426,8 +326,8 @@
     },
     "calq78": {
       "timeoutPercent": 0.0,
-      "dailyRating": 876,
-      "rating960": 770,
+      "dailyRating": 868,
+      "rating960": 797,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -497,7 +397,7 @@
       "riskReason": null
     },
     "chief-blackhawk": {
-      "timeoutPercent": 7.0,
+      "timeoutPercent": 8.0,
       "dailyRating": 1766,
       "rating960": null,
       "totalLeagueTimeouts90Days": 0,
@@ -520,33 +420,9 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "cichociemnyj": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1141,
-      "rating960": 1183,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "cnolop": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1067,
+      "dailyRating": 1066,
       "rating960": 884,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -616,38 +492,10 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "dagomontoya": {
-      "timeoutPercent": 20.0,
-      "dailyRating": 1598,
-      "rating960": 1139,
-      "totalLeagueTimeouts90Days": 2,
-      "subLeagueTimeouts": {
-        "1WL": {
-          "2026 Swiss4All": 2
-        }
-      },
-      "dailyTimeouts": {
-        "1day": {
-          "count": 2,
-          "lastTimeoutDate": "2026-05-10"
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": true,
-      "riskLevel": "MEDIUM",
-      "riskReason": "Medium risk: timeout ratio 20%, 2 sub-league timeout(s), 2 recent daily timeout(s)."
-    },
-    "danielmyers713": {
+    "elefant82": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1741,
-      "rating960": 1111,
+      "dailyRating": 1655,
+      "rating960": 1627,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -667,54 +515,6 @@
       "riskFlag": false,
       "riskLevel": null,
       "riskReason": null
-    },
-    "dukeofsannox": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1206,
-      "rating960": null,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "dunnce1": {
-      "timeoutPercent": 43.0,
-      "dailyRating": 1538,
-      "rating960": 1505,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 3,
-          "lastTimeoutDate": "2026-05-12"
-        }
-      },
-      "riskFlag": true,
-      "riskLevel": "MEDIUM",
-      "riskReason": "Medium risk: timeout ratio 43%, 3 recent daily timeout(s)."
     },
     "emilchess5679": {
       "timeoutPercent": 12.0,
@@ -744,34 +544,10 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "emiliocba": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1959,
-      "rating960": null,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "engelleik": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1134,
-      "rating960": 885,
+      "dailyRating": 1136,
+      "rating960": 896,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -819,7 +595,7 @@
     "evgenyi1420": {
       "timeoutPercent": 0.0,
       "dailyRating": 1190,
-      "rating960": 910,
+      "rating960": 915,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -842,7 +618,7 @@
     },
     "fftl_alpha": {
       "timeoutPercent": 26.0,
-      "dailyRating": 975,
+      "dailyRating": 983,
       "rating960": null,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -867,7 +643,7 @@
     "fikumdik": {
       "timeoutPercent": 0.0,
       "dailyRating": 1547,
-      "rating960": 1186,
+      "rating960": 1195,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -936,30 +712,6 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "forzatotti10": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1262,
-      "rating960": 1011,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "fullerton46": {
       "timeoutPercent": 0.0,
       "dailyRating": 1341,
@@ -986,32 +738,8 @@
     },
     "gandalf": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1473,
+      "dailyRating": 1475,
       "rating960": 1412,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "ghost_scarface": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1687,
-      "rating960": 1208,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -1056,32 +784,8 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "gmdingtangqiang": {
-      "timeoutPercent": 14.0,
-      "dailyRating": 1845,
-      "rating960": 1925,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "guzoder_840": {
-      "timeoutPercent": 13.0,
+      "timeoutPercent": 14.0,
       "dailyRating": 996,
       "rating960": 436,
       "totalLeagueTimeouts90Days": 0,
@@ -1104,33 +808,9 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "haritutsav": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1274,
-      "rating960": 1062,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "hasuschach": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1217,
+      "dailyRating": 1227,
       "rating960": 1028,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -1154,7 +834,7 @@
     },
     "hectorcista": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1368,
+      "dailyRating": 1374,
       "rating960": 1118,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -1226,8 +906,8 @@
     },
     "iraj6544": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1382,
-      "rating960": 1358,
+      "dailyRating": 1391,
+      "rating960": 1361,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -1250,32 +930,8 @@
     },
     "isugamer": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1149,
+      "dailyRating": 1143,
       "rating960": 919,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "ivan_ferreiro": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1849,
-      "rating960": null,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -1298,7 +954,7 @@
     },
     "jaypi_fromla": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1167,
+      "dailyRating": 1160,
       "rating960": 1014,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -1346,7 +1002,7 @@
     },
     "jfitzurse": {
       "timeoutPercent": 2.0,
-      "dailyRating": 1143,
+      "dailyRating": 1145,
       "rating960": 813,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -1370,32 +1026,8 @@
     },
     "joedoan07": {
       "timeoutPercent": 4.0,
-      "dailyRating": 1201,
+      "dailyRating": 1192,
       "rating960": 1003,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "joeh1957": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1535,
-      "rating960": 1292,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -1420,30 +1052,6 @@
       "timeoutPercent": 0.0,
       "dailyRating": 1255,
       "rating960": 1016,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "johnparker1995": {
-      "timeoutPercent": 2.0,
-      "dailyRating": 1289,
-      "rating960": null,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -1538,7 +1146,7 @@
     },
     "kirstencharmed": {
       "timeoutPercent": 2.0,
-      "dailyRating": 1229,
+      "dailyRating": 1218,
       "rating960": null,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -1562,7 +1170,7 @@
     },
     "kyljys": {
       "timeoutPercent": 17.0,
-      "dailyRating": 1629,
+      "dailyRating": 1624,
       "rating960": 1406,
       "totalLeagueTimeouts90Days": 4,
       "subLeagueTimeouts": {
@@ -1591,58 +1199,10 @@
       "riskLevel": "HIGH",
       "riskReason": "High risk: 27 recent daily timeouts, 3 sub-league timeouts."
     },
-    "lampshadow": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1813,
-      "rating960": 1670,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "lavendermojito": {
       "timeoutPercent": 8.0,
-      "dailyRating": 1856,
+      "dailyRating": 1864,
       "rating960": 1841,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "lazker": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1736,
-      "rating960": 1509,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -1665,8 +1225,8 @@
     },
     "lezama1972": {
       "timeoutPercent": 15.0,
-      "dailyRating": 1658,
-      "rating960": 1671,
+      "dailyRating": 1661,
+      "rating960": 1669,
       "totalLeagueTimeouts90Days": 2,
       "subLeagueTimeouts": {
         "1WL": {
@@ -1692,82 +1252,10 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "luckyleftydetroit": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1426,
-      "rating960": 1394,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "lucy_a_queen": {
-      "timeoutPercent": 33.0,
-      "dailyRating": 2055,
-      "rating960": 2012,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 2,
-          "lastTimeoutDate": "2026-05-09"
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 1,
-          "lastTimeoutDate": "2026-05-12"
-        }
-      },
-      "riskFlag": true,
-      "riskLevel": "MEDIUM",
-      "riskReason": "Medium risk: timeout ratio 33%, 3 recent daily timeout(s)."
-    },
     "luis1235813": {
-      "timeoutPercent": 6.0,
+      "timeoutPercent": 7.0,
       "dailyRating": 1069,
       "rating960": 951,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "masterdean00": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1791,
-      "rating960": 1765,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -1812,81 +1300,9 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "mhe3430": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1462,
-      "rating960": null,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "mikesexton21": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1435,
-      "rating960": 1079,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "mouse-slip-gm": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1777,
-      "rating960": 2000,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "mpho190815": {
       "timeoutPercent": 2.0,
-      "dailyRating": 1127,
+      "dailyRating": 1126,
       "rating960": 564,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -1910,7 +1326,7 @@
     },
     "mr_barsukov": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1524,
+      "dailyRating": 1532,
       "rating960": null,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -1958,8 +1374,8 @@
     },
     "narendra3000": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1536,
-      "rating960": 1173,
+      "dailyRating": 1549,
+      "rating960": 1213,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -2006,7 +1422,7 @@
     },
     "newbmewb": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1183,
+      "dailyRating": 1206,
       "rating960": 813,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2030,7 +1446,7 @@
     },
     "ngellabastida": {
       "timeoutPercent": 0.0,
-      "dailyRating": 941,
+      "dailyRating": 935,
       "rating960": 879,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2076,33 +1492,9 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "nn0499": {
-      "timeoutPercent": 13.0,
-      "dailyRating": 1994,
-      "rating960": 1292,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "nova5streets": {
       "timeoutPercent": 8.0,
-      "dailyRating": 1581,
+      "dailyRating": 1585,
       "rating960": 1199,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2126,32 +1518,8 @@
     },
     "paclo_akainu": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1423,
+      "dailyRating": 1405,
       "rating960": null,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "pbazior": {
-      "timeoutPercent": 9.0,
-      "dailyRating": 1532,
-      "rating960": 1133,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -2197,9 +1565,9 @@
       "riskReason": null
     },
     "persepolis46": {
-      "timeoutPercent": 84.0,
+      "timeoutPercent": 78.0,
       "dailyRating": 1315,
-      "rating960": 1469,
+      "rating960": 1539,
       "totalLeagueTimeouts90Days": 2,
       "subLeagueTimeouts": {
         "TCMAC": {
@@ -2222,11 +1590,11 @@
       },
       "riskFlag": true,
       "riskLevel": "HIGH",
-      "riskReason": "High risk: timeout ratio 84%, 36 recent daily timeouts, 2 sub-league timeouts."
+      "riskReason": "High risk: timeout ratio 78%, 36 recent daily timeouts, 2 sub-league timeouts."
     },
     "pesenka_hello": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1084,
+      "dailyRating": 1091,
       "rating960": 431,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2250,7 +1618,7 @@
     },
     "plamen196565": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1298,
+      "dailyRating": 1295,
       "rating960": 1123,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2272,63 +1640,15 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "puffin_09": {
-      "timeoutPercent": 4.0,
-      "dailyRating": 1503,
-      "rating960": 919,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "ramos-m": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1325,
-      "rating960": null,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "reganxu": {
-      "timeoutPercent": 36.0,
+      "timeoutPercent": 37.0,
       "dailyRating": 733,
       "rating960": null,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
         "1day": {
-          "count": 32,
+          "count": 34,
           "lastTimeoutDate": "2026-05-17"
         },
         "2day": {
@@ -2342,59 +1662,7 @@
       },
       "riskFlag": true,
       "riskLevel": "MEDIUM",
-      "riskReason": "Medium risk: timeout ratio 36%, 38 recent daily timeout(s)."
-    },
-    "robin0606": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1274,
-      "rating960": null,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {
-        "TCMAC": {
-          "U1400 LEGIONARIO S4 2025\\2026 GB": 2
-        }
-      },
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "rounaknaphade": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1544,
-      "rating960": null,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
+      "riskReason": "Medium risk: timeout ratio 37%, 40 recent daily timeout(s)."
     },
     "rubialm": {
       "timeoutPercent": 0.0,
@@ -2446,7 +1714,7 @@
     },
     "rxmarxmallow": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1418,
+      "dailyRating": 1431,
       "rating960": null,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2470,7 +1738,7 @@
     },
     "sachamr": {
       "timeoutPercent": 4.0,
-      "dailyRating": 1658,
+      "dailyRating": 1661,
       "rating960": 1430,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2518,7 +1786,7 @@
     },
     "satanchg": {
       "timeoutPercent": 15.0,
-      "dailyRating": 1126,
+      "dailyRating": 1129,
       "rating960": 978,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2638,7 +1906,7 @@
     },
     "snappypawn": {
       "timeoutPercent": 0.0,
-      "dailyRating": 945,
+      "dailyRating": 948,
       "rating960": 621,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2659,6 +1927,30 @@
       "riskFlag": false,
       "riskLevel": null,
       "riskReason": null
+    },
+    "some0ne96o": {
+      "timeoutPercent": 20.0,
+      "dailyRating": 1369,
+      "rating960": 1398,
+      "totalLeagueTimeouts90Days": 0,
+      "subLeagueTimeouts": {},
+      "dailyTimeouts": {
+        "1day": {
+          "count": 5,
+          "lastTimeoutDate": "2026-05-15"
+        },
+        "2day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "3day": {
+          "count": 4,
+          "lastTimeoutDate": "2026-05-15"
+        }
+      },
+      "riskFlag": true,
+      "riskLevel": "LOW",
+      "riskReason": "Low risk: timeout ratio 20%, no recent sub-league timeouts, only 9 recent daily timeout(s)."
     },
     "stalvan": {
       "timeoutPercent": 0.0,
@@ -2686,7 +1978,7 @@
     },
     "stubbywombat": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1175,
+      "dailyRating": 1178,
       "rating960": 1012,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2734,8 +2026,8 @@
     },
     "sylar4": {
       "timeoutPercent": 2.0,
-      "dailyRating": 1381,
-      "rating960": 1264,
+      "dailyRating": 1384,
+      "rating960": 1270,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -2758,7 +2050,7 @@
     },
     "teck611": {
       "timeoutPercent": 2.0,
-      "dailyRating": 1202,
+      "dailyRating": 1200,
       "rating960": 828,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2828,33 +2120,9 @@
       "riskLevel": null,
       "riskReason": null
     },
-    "trimitziosp7": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 2119,
-      "rating960": 1921,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
     "uduwudu2": {
       "timeoutPercent": 0.0,
-      "dailyRating": 722,
+      "dailyRating": 720,
       "rating960": 481,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2878,7 +2146,7 @@
     },
     "vi30555": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1401,
+      "dailyRating": 1402,
       "rating960": 1019,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2903,7 +2171,7 @@
     "vystress": {
       "timeoutPercent": 0.0,
       "dailyRating": 1727,
-      "rating960": 1612,
+      "rating960": 1620,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -2950,7 +2218,7 @@
     },
     "willrenan": {
       "timeoutPercent": 0.0,
-      "dailyRating": 1328,
+      "dailyRating": 1338,
       "rating960": 1208,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2974,7 +2242,7 @@
     },
     "wots40": {
       "timeoutPercent": 0.0,
-      "dailyRating": 712,
+      "dailyRating": 723,
       "rating960": 887,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -2999,7 +2267,7 @@
     "wyattwinter8": {
       "timeoutPercent": 21.0,
       "dailyRating": 1403,
-      "rating960": 1264,
+      "rating960": 1265,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -3021,8 +2289,8 @@
       "riskReason": "Low risk: timeout ratio 21%, no recent sub-league timeouts, only 2 recent daily timeout(s)."
     },
     "yao47": {
-      "timeoutPercent": 6.0,
-      "dailyRating": 1386,
+      "timeoutPercent": 7.0,
+      "dailyRating": 1389,
       "rating960": 1312,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
@@ -3047,31 +2315,7 @@
     "zarion11": {
       "timeoutPercent": 0.0,
       "dailyRating": 1765,
-      "rating960": 1809,
-      "totalLeagueTimeouts90Days": 0,
-      "subLeagueTimeouts": {},
-      "dailyTimeouts": {
-        "1day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "2day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        },
-        "3day": {
-          "count": 0,
-          "lastTimeoutDate": null
-        }
-      },
-      "riskFlag": false,
-      "riskLevel": null,
-      "riskReason": null
-    },
-    "zugzwangxx754": {
-      "timeoutPercent": 0.0,
-      "dailyRating": 1948,
-      "rating960": 1384,
+      "rating960": 1813,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {

@@ -258,19 +258,24 @@ function EmbedLeagueOverview() {
     const isEmbed = searchParams.get('embed') === '1'
 
     useEffect(() => {
-        const apiId = { '1dpmc': '1-day-per-move-club', 'teamusa': 'team-usa' }[__SITE_KEY__]
-        Promise.all([
-            fetch('/data/leagueData.json').then(r => r.json()),
-            fetch('/data/clubIcons.json').then(r => r.json()).catch(() => ({})),
-            apiId
-                ? fetch(`https://api.chess.com/pub/club/${apiId}`).then(r => r.json()).catch(() => null)
-                : Promise.resolve(null),
-        ]).then(([leagueJson, iconsJson, clubJson]) => {
-            setData(leagueJson)
-            setClubIcons(iconsJson || {})
-            if (clubJson?.icon) setOurClubIcon(clubJson.icon)
-            setLoading(false)
-        }).catch(() => setLoading(false))
+        fetch('/data/leagueData.json')
+            .then(r => r.json())
+            .then(leagueJson => {
+                const clubId = leagueJson.clubId
+                return Promise.all([
+                    Promise.resolve(leagueJson),
+                    fetch('/data/clubIcons.json').then(r => r.json()).catch(() => ({})),
+                    clubId
+                        ? fetch(`https://api.chess.com/pub/club/${clubId}`).then(r => r.json()).catch(() => null)
+                        : Promise.resolve(null),
+                ])
+            })
+            .then(([leagueJson, iconsJson, clubJson]) => {
+                setData(leagueJson)
+                setClubIcons(iconsJson || {})
+                if (clubJson?.icon) setOurClubIcon(clubJson.icon)
+                setLoading(false)
+            }).catch(() => setLoading(false))
     }, [])
 
     if (loading) {

@@ -1198,6 +1198,7 @@ def main():
     # Final output structure
     output = {
         "lastUpdated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "clubId": CLUB_ID,
         "leagues": leagues_output,
         "globalLeaderboard": global_leaderboard
     }

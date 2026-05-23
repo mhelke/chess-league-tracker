@@ -65,7 +65,7 @@ function getMatchWarnings(round) {
     const oppRoster = round.registrationData?.oppRoster ?? []
     const boards = round.boards ?? 0
     const minPlayers = round.minTeamPlayers ?? 0
-    const cap = boards || minPlayers
+    const cap = round.maxTeamPlayers || boards || minPlayers
 
     const ourCount = ourRoster.length
     const oppCount = oppRoster.length
@@ -139,9 +139,11 @@ function TeamLogo({ icon, name, boards }) {
 
 function OpenMatchCard({ round, leagueName, subLeagueName, clubIcons, ourClubIcon }) {
     const ourRoster = round.registrationData?.ourRoster ?? []
+    const oppRoster = round.registrationData?.oppRoster ?? []
     const rosterCount = ourRoster.length
     const boards = round.boards ?? 0
     const minTeamPlayers = round.minTeamPlayers ?? 0
+    const maxTeamPlayers = round.maxTeamPlayers ?? 0
     const startDate = round.startTime ? formatDate(round.startTime) : null
     const matchUrl = round.matchWebUrl || round.matchUrl
 
@@ -155,6 +157,11 @@ function OpenMatchCard({ round, leagueName, subLeagueName, clubIcons, ourClubIco
     const borderColor = belowMin ? 'border-red-300' : hasWarning ? 'border-amber-300' : 'border-green-200'
     const bgColor = belowMin ? 'bg-red-50' : hasWarning ? 'bg-amber-50' : 'bg-white'
 
+    // When a per-team cap is set, show the cap as the board count (it's what gets played).
+    // Otherwise show each team's actual registered count.
+    const ourBoardDisplay = maxTeamPlayers || rosterCount
+    const oppBoardDisplay = maxTeamPlayers || oppRoster.length
+
     return (
         <a
             href={matchUrl}
@@ -164,21 +171,27 @@ function OpenMatchCard({ round, leagueName, subLeagueName, clubIcons, ourClubIco
         >
             {/* Matchup row */}
             <div className="flex items-center gap-2 mb-1">
-                <TeamLogo icon={ourClubIcon} name="Us" boards={boards} />
+                <TeamLogo icon={ourClubIcon} name="Us" boards={ourBoardDisplay} />
                 <div className="flex-1 min-w-0 text-center">
                     <p className="text-xs text-gray-400 font-medium">vs</p>
                     <WarningBadges belowMin={belowMin} playerGap={playerGap} ratingGap={ratingGap} />
                 </div>
-                <TeamLogo icon={oppIcon} name={oppName} boards={boards} />
+                <TeamLogo icon={oppIcon} name={oppName} boards={oppBoardDisplay} />
             </div>
             <p className="text-xs text-gray-500 truncate text-center mb-1">
                 {leagueName} · {subLeagueName}{round.round && round.round !== 'NA' ? ` · ${round.round}` : ''}
             </p>
             <div className="flex justify-center flex-wrap gap-x-2 gap-y-0.5 text-xs text-gray-400">
                 {rosterCount > 0 && (
-                    <span className={belowMin ? 'text-red-500 font-medium' : ''}>
-                        {rosterCount}/{(minTeamPlayers && rosterCount < minTeamPlayers) ? minTeamPlayers : (boards || minTeamPlayers)} registered
-                    </span>
+                    maxTeamPlayers ? (
+                        <span className={belowMin ? 'text-red-500 font-medium' : ''}>
+                            {rosterCount}/{maxTeamPlayers} registered
+                        </span>
+                    ) : (
+                        <span className={belowMin ? 'text-red-500 font-medium' : ''}>
+                            {rosterCount}/{minTeamPlayers || boards}{minTeamPlayers && !maxTeamPlayers ? '+' : ''} registered
+                        </span>
+                    )
                 )}
                 {startDate && <span>{startDate}</span>}
             </div>

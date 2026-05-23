@@ -445,9 +445,10 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
     opponent_score = opponent_team_data.get("score", 0) if opponent_team_data else 0
     our_result = our_team_data.get("result", "unknown")
     
-    # Get minimum required players from match settings (for all matches)
+    # Get minimum/maximum required players from match settings (for all matches)
     settings = match_data.get("settings", {})
     min_team_players = settings.get("min_team_players") if isinstance(settings, dict) else None
+    max_team_players = settings.get("max_team_players") if isinstance(settings, dict) else None
     
     # Get player lists for both teams (for all matches)
     opponent_players = opponent_team_data.get("players", []) if opponent_team_data else []
@@ -605,7 +606,9 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
     # and track projected winners in in-progress matches based on current player counts.
     if min_team_players is not None:
         result["minTeamPlayers"] = min_team_players
-    
+    if max_team_players is not None:
+        result["maxTeamPlayers"] = max_team_players
+
     # Add registration data if available for open matches
     if boards_data:
         if isinstance(boards_data, dict) and boards_data.get("type") == "roster":

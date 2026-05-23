@@ -177,7 +177,7 @@ function OpenMatchCard({ round, leagueName, subLeagueName, clubIcons, ourClubIco
             <div className="flex justify-center flex-wrap gap-x-2 gap-y-0.5 text-xs text-gray-400">
                 {rosterCount > 0 && (
                     <span className={belowMin ? 'text-red-500 font-medium' : ''}>
-                        {rosterCount}/{minTeamPlayers || boards} registered
+                        {rosterCount}/{(minTeamPlayers && rosterCount < minTeamPlayers) ? minTeamPlayers : (boards || minTeamPlayers)} registered
                     </span>
                 )}
                 {startDate && <span>{startDate}</span>}

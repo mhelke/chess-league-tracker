@@ -158,10 +158,9 @@ function OpenMatchCard({ round, leagueName, subLeagueName, clubIcons, ourClubIco
     const borderColor = belowMin ? 'border-red-300' : hasWarning ? 'border-amber-300' : 'border-green-200'
     const bgColor = belowMin ? 'bg-red-50' : hasWarning ? 'bg-amber-50' : 'bg-white'
 
-    // When a per-team cap is set, show the cap as the board count (it's what gets played).
-    // Otherwise show each team's actual registered count.
-    const ourBoardDisplay = maxTeamPlayers || rosterCount
-    const oppBoardDisplay = maxTeamPlayers || oppRoster.length
+    // Show the cap when a team has met/exceeded it, otherwise show their actual count
+    const ourBoardDisplay = maxTeamPlayers && rosterCount >= maxTeamPlayers ? maxTeamPlayers : rosterCount
+    const oppBoardDisplay = maxTeamPlayers && oppRoster.length >= maxTeamPlayers ? maxTeamPlayers : oppRoster.length
 
     return (
         <a

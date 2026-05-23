@@ -106,8 +106,13 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
             {/* Warning Banner / Registration Status */}
             {round.status === 'open' && round.registeredPlayers && (() => {
                 const minRequired = round.minTeamPlayers || 0
+                const maxAllowed = round.maxTeamPlayers || 0
                 const ourCount = round.registeredPlayers.our || 0
                 const needsAttention = minRequired > 0 && ourCount < minRequired
+
+                const denominator = maxAllowed
+                    ? `/${maxAllowed}`
+                    : minRequired > 0 ? `/${minRequired}+` : ''
 
                 return (
                     <div className={`-mx-6 -mt-6 mb-6 p-4 border-b-2 text-sm font-medium ${needsAttention
@@ -119,7 +124,7 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
                                 {needsAttention ? '⚠️ Registration Incomplete' : '📝 Open for Registration'}
                             </span>
                             <span>
-                                {ourCount}{minRequired > 0 ? `/${minRequired}` : ''} registered
+                                {ourCount}{denominator} registered
                             </span>
                         </div>
                     </div>
@@ -308,8 +313,9 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
 
             {
                 round.registrationData && round.registrationData.type === 'roster' && (() => {
-                    const ourRatings = round.registrationData.ourRoster?.map(p => p.rating).filter(r => r) || []
-                    const oppRatings = round.registrationData.oppRoster?.map(p => p.rating).filter(r => r) || []
+                    const cap = round.maxTeamPlayers || 0
+                    const ourRatings = (cap ? round.registrationData.ourRoster?.slice(0, cap) : round.registrationData.ourRoster)?.map(p => p.rating).filter(r => r) || []
+                    const oppRatings = (cap ? round.registrationData.oppRoster?.slice(0, cap) : round.registrationData.oppRoster)?.map(p => p.rating).filter(r => r) || []
                     const ourAvg = ourRatings.length > 0 ? (ourRatings.reduce((a, b) => a + b, 0) / ourRatings.length).toFixed(0) : 0
                     const oppAvg = oppRatings.length > 0 ? (oppRatings.reduce((a, b) => a + b, 0) / oppRatings.length).toFixed(0) : 0
                     const avgDiff = ourAvg - oppAvg

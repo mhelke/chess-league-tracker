@@ -149,11 +149,13 @@ function AllMatches() {
         const minNotMet = minRequired > 0 && ourCount < minRequired
 
         // Calculate rating differential for registration matches
+        // If a per-team cap is set, only compare the top N players (board-matched order)
         let avgDiff = 0
         let ratingDisadvantage = false
         if (match.registrationData && match.registrationData.type === 'roster') {
-            const ourRatings = match.registrationData.ourRoster?.map(p => p.rating).filter(r => r) || []
-            const oppRatings = match.registrationData.oppRoster?.map(p => p.rating).filter(r => r) || []
+            const cap = match.maxTeamPlayers || 0
+            const ourRatings = (cap ? match.registrationData.ourRoster?.slice(0, cap) : match.registrationData.ourRoster)?.map(p => p.rating).filter(r => r) || []
+            const oppRatings = (cap ? match.registrationData.oppRoster?.slice(0, cap) : match.registrationData.oppRoster)?.map(p => p.rating).filter(r => r) || []
             const ourAvg = ourRatings.length > 0 ? (ourRatings.reduce((a, b) => a + b, 0) / ourRatings.length) : 0
             const oppAvg = oppRatings.length > 0 ? (oppRatings.reduce((a, b) => a + b, 0) / oppRatings.length) : 0
             avgDiff = ourAvg - oppAvg
@@ -435,8 +437,9 @@ function AllMatches() {
                 })()}
 
                 {match.registrationData && match.registrationData.type === 'roster' && (() => {
-                    const ourRatings = match.registrationData.ourRoster?.map(p => p.rating).filter(r => r) || []
-                    const oppRatings = match.registrationData.oppRoster?.map(p => p.rating).filter(r => r) || []
+                    const cap = match.maxTeamPlayers || 0
+                    const ourRatings = (cap ? match.registrationData.ourRoster?.slice(0, cap) : match.registrationData.ourRoster)?.map(p => p.rating).filter(r => r) || []
+                    const oppRatings = (cap ? match.registrationData.oppRoster?.slice(0, cap) : match.registrationData.oppRoster)?.map(p => p.rating).filter(r => r) || []
                     const ourAvg = ourRatings.length > 0 ? (ourRatings.reduce((a, b) => a + b, 0) / ourRatings.length).toFixed(0) : 0
                     const oppAvg = oppRatings.length > 0 ? (oppRatings.reduce((a, b) => a + b, 0) / oppRatings.length).toFixed(0) : 0
                     const avgDiff = ourAvg - oppAvg

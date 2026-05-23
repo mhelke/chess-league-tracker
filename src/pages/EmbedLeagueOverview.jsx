@@ -80,8 +80,9 @@ function getMatchWarnings(round) {
         : null
 
     // 3. Rating imbalance — board-matched pairs (both rosters already sorted desc)
+    // Cap to maxTeamPlayers when set, so extra registered players don't skew the average
     let ratingGap = null
-    const pairCount = Math.min(ourCount, oppCount, boards || Infinity)
+    const pairCount = Math.min(ourCount, oppCount, round.maxTeamPlayers || boards || Infinity)
     if (pairCount >= 2) {
         let totalDiff = 0
         for (let i = 0; i < pairCount; i++) {

@@ -5,6 +5,7 @@
 🌐 **Live Sites:**
 - [https://1dpmc.chessteamdata.com](https://1dpmc.chessteamdata.com) — 1 Day Per Move Club
 - [https://teamusa.chessteamdata.com](https://teamusa.chessteamdata.com) — Team USA
+- [https://mn.chessteamdata.com](https://mn.chessteamdata.com) — Team Minnesota
 
 ---
 
@@ -99,6 +100,9 @@ across all sites.
 │                                                         │
 │ python scripts/fetch_league_data.py --site-key teamusa  │
 │ python scripts/enrich_timeouts.py  --site-key teamusa   │
+│                                                         │
+│ python scripts/fetch_league_data.py --site-key mn       │
+│ python scripts/enrich_timeouts.py  --site-key mn        │
 └────────┬────────────────────────────────────────────────┘
          │
          ▼
@@ -106,6 +110,7 @@ across all sites.
 │ public/data/     │  ← Static JSON committed to repo
 │   1dpmc/         │     leagueData.json, timeoutData.json
 │   teamusa/       │     leagueData.json, timeoutData.json
+│   mn/            │     leagueData.json, timeoutData.json
 └────────┬────────┘
          │
          ▼
@@ -117,6 +122,9 @@ across all sites.
 │                                              │
 │  Project B: npm run build:teamusa → dist/    │
 │    Domain:  teamusa.chessteamdata.com         │
+│                                              │
+│  Project C: npm run build:mn → dist/         │
+│    Domain:  mn.chessteamdata.com              │
 └──────────────────────────────────────────────┘
 ```
 

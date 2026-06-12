@@ -1,0 +1,12 @@
+{
+  "clubId": "team-minnesota",
+  "leagues": [
+    {"root_pattern": "\\bUSTCL\\b", "name": "USTCL"}
+  ],
+  "subleague_normalization": [
+    ["\\bDiv\\.?\\s*2\\b|\\bDivision\\s*2\\b|\\bD2\\b|\\bDiv2\\b", "Div 2"],
+    ["\\bDiv\\.?\\s*1\\b|\\bDivision\\s*1\\b|\\bD1\\b|\\bDiv1\\b", "Div 1"],
+    ["[|/,]+", ""],
+    ["\\s{2,}", " "]
+  ]
+}

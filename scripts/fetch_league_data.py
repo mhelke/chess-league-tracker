@@ -36,14 +36,15 @@ CLUB_ID: str           = ""
 CLUB_MATCHES_URL: str  = ""
 OUTPUT_FILE: str       = ""
 REG_HISTORY_CACHE_FILE: str = ""
-LEAGUE_CONFIG: list    = []
-VARIANT_PATTERNS: list = []
-USER_AGENT: str        = "ChessLeagueTracker/1.0"
+LEAGUE_CONFIG: list          = []
+VARIANT_PATTERNS: list       = []
+SUBLEAGUE_NORMALIZATION: list = []
+USER_AGENT: str              = "ChessLeagueTracker/1.0"
 
 
 def load_config(site_key: str) -> None:
     """Load per-site and shared config files from `config/` and set globals."""
-    global CLUB_ID, CLUB_MATCHES_URL, OUTPUT_FILE, REG_HISTORY_CACHE_FILE, LEAGUE_CONFIG, VARIANT_PATTERNS, USER_AGENT
+    global CLUB_ID, CLUB_MATCHES_URL, OUTPUT_FILE, REG_HISTORY_CACHE_FILE, LEAGUE_CONFIG, VARIANT_PATTERNS, SUBLEAGUE_NORMALIZATION, USER_AGENT
 
     config_dir = os.path.join(PROJECT_ROOT, "config", site_key)
 
@@ -55,9 +56,10 @@ def load_config(site_key: str) -> None:
     with open(league_config_path, "r", encoding="utf-8") as f:
         league_cfg = json.load(f)
 
-    CLUB_ID          = league_cfg["clubId"]
-    LEAGUE_CONFIG    = league_cfg.get("leagues", [])
-    CLUB_MATCHES_URL = f"https://api.chess.com/pub/club/{CLUB_ID}/matches"
+    CLUB_ID                 = league_cfg["clubId"]
+    LEAGUE_CONFIG           = league_cfg.get("leagues", [])
+    SUBLEAGUE_NORMALIZATION = league_cfg.get("subleague_normalization", [])
+    CLUB_MATCHES_URL        = f"https://api.chess.com/pub/club/{CLUB_ID}/matches"
 
     # ── variant_patterns.json (shared, optional)
     # Prefer config/shared to keep all inputs together; fall back to
@@ -201,6 +203,12 @@ def parse_match_title(title: str) -> Optional[Dict[str, str]]:
     remaining = re.sub(r"\s+", " ", working).strip(" -:")
     parts = variants + ([year] if year else []) + ([remaining] if remaining else [])
     sub_league = " ".join(parts) if parts else "main"
+
+    # ── 6. Apply site-specific sub-league normalization ────────────────────────
+    # Patterns from league_config.json "subleague_normalization" field.
+    # Each entry is [regex_pattern, replacement] applied in order.
+    for norm_pattern, norm_replacement in SUBLEAGUE_NORMALIZATION:
+        sub_league = re.sub(norm_pattern, norm_replacement, sub_league, flags=re.IGNORECASE).strip()
 
     # ── Ambiguous case ─────────────────────────────────────────────────────────
     # No colon and no round token → team1's name has bled into sub_league.

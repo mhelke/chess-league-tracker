@@ -10,17 +10,20 @@ import EmbedLeagueOverview from './pages/EmbedLeagueOverview'
 
 const SITE_NAMES = {
     '1dpmc': '1 Day Per Move Club',
-    'teamusa': 'Team USA'
+    'teamusa': 'Team USA',
+    'mn': 'Team Minnesota'
 }
 
 const MEMBER_CLUB_IDS = {
     '1dpmc': '1dpmc',
-    'teamusa': 'tusa'
+    'teamusa': 'tusa',
+    'mn': 'mn'
 }
 
 const CLUB_API_IDS = {
     '1dpmc': '1-day-per-move-club',
-    'teamusa': 'team-usa'
+    'teamusa': 'team-usa',
+    'mn': 'team-minnesota'
 }
 
 const NAV_LINKS = [

@@ -49,6 +49,15 @@ jobs:
       - name: Detect early resignations — teamusa
         run: python scripts/detect_early_resignations.py --site-key teamusa --threshold 4
 
+      - name: Fetch league data — mn
+        run: python scripts/fetch_league_data.py --site-key mn
+
+      - name: Enrich timeout data — mn
+        run: python scripts/enrich_timeouts.py --site-key mn
+
+      - name: Detect early resignations — mn
+        run: python scripts/detect_early_resignations.py --site-key mn --threshold 4
+
       - name: Check for changes
         id: check_changes
         run: |

@@ -115,16 +115,16 @@ across all sites.
          │
          ▼
 ┌──────────────────────────────────────────────┐
-│ Deploy (two projects)              │
+│ Deploy (three projects)                      │
 │                                              │
 │  Project A: npm run build:1dpmc  → dist/     │
-│    Domain:  1dpmc.chessteamdata.com           │
+│    Domain:  1dpmc.chessteamdata.com          │
 │                                              │
 │  Project B: npm run build:teamusa → dist/    │
-│    Domain:  teamusa.chessteamdata.com         │
+│    Domain:  teamusa.chessteamdata.com        │
 │                                              │
 │  Project C: npm run build:mn → dist/         │
-│    Domain:  mn.chessteamdata.com              │
+│    Domain:  mn.chessteamdata.com             │
 └──────────────────────────────────────────────┘
 ```
 

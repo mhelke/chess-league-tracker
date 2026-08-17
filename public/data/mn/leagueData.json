@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-16T02:34:28Z",
+  "lastUpdated": "2026-08-17T02:33:28Z",
   "clubId": "team-minnesota",
   "leagues": {
     "USTCL": {
@@ -14437,18 +14437,18 @@
           "rounds": [
             {
               "round": "R1",
-              "status": "in_progress",
+              "status": "finished",
               "matchId": "https://api.chess.com/pub/match/1937289",
               "matchUrl": "https://api.chess.com/pub/match/1937289",
               "matchWebUrl": "https://www.chess.com/club/matches/1937289",
               "name": "USTCL 2026 Offseason Chess960 R1: Minnesota vs Arizona",
               "startTime": 1777600982,
-              "endTime": null,
+              "endTime": 1786878361,
               "boards": 29,
               "matchResult": {
-                "ourScore": 27.5,
+                "ourScore": 29.5,
                 "opponentScore": 28.5,
-                "result": "unknown"
+                "result": "win"
               },
               "playerStats": {
                 "1828rule": {
@@ -14474,6 +14474,12 @@
                   "wins": 0,
                   "draws": 0,
                   "losses": 2
+                },
+                "chessicalmoves": {
+                  "games": 2,
+                  "wins": 2,
+                  "draws": 0,
+                  "losses": 0
                 },
                 "co2n2r": {
                   "games": 2,
@@ -15053,6 +15059,14 @@
               "points": 2.5
             },
             {
+              "username": "chessicalmoves",
+              "games": 2,
+              "wins": 2,
+              "draws": 0,
+              "losses": 0,
+              "points": 2.0
+            },
+            {
               "username": "dingdingdoo",
               "games": 2,
               "wins": 2,
@@ -15278,7 +15292,7 @@
             }
           ],
           "record": {
-            "wins": 0,
+            "wins": 1,
             "losses": 0,
             "draws": 0
           }
@@ -15296,8 +15310,8 @@
               "endTime": null,
               "boards": 61,
               "matchResult": {
-                "ourScore": 22.5,
-                "opponentScore": 40.5,
+                "ourScore": 23,
+                "opponentScore": 43,
                 "result": "unknown"
               },
               "playerStats": {
@@ -15376,9 +15390,9 @@
                   "losses": 1
                 },
                 "droppedthirdstrike": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 0,
-                  "draws": 0,
+                  "draws": 1,
                   "losses": 1
                 },
                 "geoid83": {
@@ -15418,10 +15432,11 @@
                   "losses": 2
                 },
                 "nicholas-matton": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 0,
                   "draws": 0,
-                  "losses": 1
+                  "losses": 2,
+                  "timeouts": 1
                 },
                 "notjeffatwork": {
                   "games": 2,
@@ -15430,10 +15445,10 @@
                   "losses": 1
                 },
                 "paulmorphyfisher": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 0,
                   "draws": 0,
-                  "losses": 1
+                  "losses": 2
                 },
                 "paulo-s": {
                   "games": 1,
@@ -16213,6 +16228,14 @@
               "points": 1.0
             },
             {
+              "username": "droppedthirdstrike",
+              "games": 2,
+              "wins": 0,
+              "draws": 1,
+              "losses": 1,
+              "points": 0.5
+            },
+            {
               "username": "1828rule",
               "games": 1,
               "wins": 0,
@@ -16237,31 +16260,7 @@
               "points": 0.0
             },
             {
-              "username": "droppedthirdstrike",
-              "games": 1,
-              "wins": 0,
-              "draws": 0,
-              "losses": 1,
-              "points": 0.0
-            },
-            {
               "username": "geoid83",
-              "games": 1,
-              "wins": 0,
-              "draws": 0,
-              "losses": 1,
-              "points": 0.0
-            },
-            {
-              "username": "nicholas-matton",
-              "games": 1,
-              "wins": 0,
-              "draws": 0,
-              "losses": 1,
-              "points": 0.0
-            },
-            {
-              "username": "paulmorphyfisher",
               "games": 1,
               "wins": 0,
               "draws": 0,
@@ -16326,6 +16325,22 @@
             },
             {
               "username": "microdose1469",
+              "games": 2,
+              "wins": 0,
+              "draws": 0,
+              "losses": 2,
+              "points": 0.0
+            },
+            {
+              "username": "nicholas-matton",
+              "games": 2,
+              "wins": 0,
+              "draws": 0,
+              "losses": 2,
+              "points": 0.0
+            },
+            {
+              "username": "paulmorphyfisher",
               "games": 2,
               "wins": 0,
               "draws": 0,
@@ -16457,10 +16472,10 @@
     },
     {
       "username": "paulmorphyfisher",
-      "games": 39,
+      "games": 40,
       "wins": 28,
       "draws": 0,
-      "losses": 11,
+      "losses": 12,
       "points": 28.0
     },
     {
@@ -16472,20 +16487,20 @@
       "points": 27.5
     },
     {
+      "username": "droppedthirdstrike",
+      "games": 36,
+      "wins": 26,
+      "draws": 2,
+      "losses": 8,
+      "points": 27.0
+    },
+    {
       "username": "christophernagy",
       "games": 44,
       "wins": 26,
       "draws": 2,
       "losses": 16,
       "points": 27.0
-    },
-    {
-      "username": "droppedthirdstrike",
-      "games": 35,
-      "wins": 26,
-      "draws": 1,
-      "losses": 8,
-      "points": 26.5
     },
     {
       "username": "spottedgiraffefish",
@@ -16913,10 +16928,10 @@
     },
     {
       "username": "nicholas-matton",
-      "games": 7,
+      "games": 8,
       "wins": 5,
       "draws": 0,
-      "losses": 2,
+      "losses": 3,
       "points": 5.0
     },
     {
@@ -17529,6 +17544,14 @@
     },
     {
       "username": "zweb",
+      "games": 2,
+      "wins": 2,
+      "draws": 0,
+      "losses": 0,
+      "points": 2.0
+    },
+    {
+      "username": "chessicalmoves",
       "games": 2,
       "wins": 2,
       "draws": 0,

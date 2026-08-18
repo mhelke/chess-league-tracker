@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-17T02:33:28Z",
+  "lastUpdated": "2026-08-18T02:33:33Z",
   "clubId": "team-minnesota",
   "leagues": {
     "USTCL": {
@@ -1404,18 +1404,18 @@
             },
             {
               "round": "R9",
-              "status": "in_progress",
+              "status": "finished",
               "matchId": "https://api.chess.com/pub/match/1917985",
               "matchUrl": "https://api.chess.com/pub/match/1917985",
               "matchWebUrl": "https://www.chess.com/club/matches/1917985",
               "name": "USTCL 2026 R9: Minnesota vs South Dakota",
               "startTime": 1773540245,
-              "endTime": null,
+              "endTime": 1786995362,
               "boards": 24,
               "matchResult": {
-                "ourScore": 39,
-                "opponentScore": 8,
-                "result": "unknown"
+                "ourScore": 39.5,
+                "opponentScore": 8.5,
+                "result": "win"
               },
               "playerStats": {
                 "a-blunderful-life": {
@@ -1557,9 +1557,9 @@
                   "losses": 0
                 },
                 "zildjian_graham": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 0,
-                  "draws": 0,
+                  "draws": 1,
                   "losses": 1
                 }
               },
@@ -1625,6 +1625,14 @@
               "points": 12.5
             },
             {
+              "username": "zildjian_graham",
+              "games": 18,
+              "wins": 11,
+              "draws": 1,
+              "losses": 6,
+              "points": 11.5
+            },
+            {
               "username": "newmanlon",
               "games": 12,
               "wins": 11,
@@ -1646,14 +1654,6 @@
               "wins": 11,
               "draws": 0,
               "losses": 3,
-              "points": 11.0
-            },
-            {
-              "username": "zildjian_graham",
-              "games": 17,
-              "wins": 11,
-              "draws": 0,
-              "losses": 6,
               "points": 11.0
             },
             {
@@ -2130,7 +2130,7 @@
             }
           ],
           "record": {
-            "wins": 8,
+            "wins": 9,
             "losses": 0,
             "draws": 0
           }
@@ -15311,7 +15311,7 @@
               "boards": 61,
               "matchResult": {
                 "ourScore": 23,
-                "opponentScore": 43,
+                "opponentScore": 45,
                 "result": "unknown"
               },
               "playerStats": {
@@ -15431,6 +15431,12 @@
                   "draws": 0,
                   "losses": 2
                 },
+                "mnplyr": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1
+                },
                 "nicholas-matton": {
                   "games": 2,
                   "wins": 0,
@@ -15499,10 +15505,10 @@
                   "losses": 2
                 },
                 "theomondio": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 0,
                   "draws": 0,
-                  "losses": 1
+                  "losses": 2
                 },
                 "troynthompson": {
                   "games": 2,
@@ -15862,11 +15868,24 @@
               "endTime": null,
               "boards": 25,
               "matchResult": {
-                "ourScore": 0,
-                "opponentScore": 0,
+                "ourScore": 1,
+                "opponentScore": 2,
                 "result": "unknown"
               },
-              "playerStats": {},
+              "playerStats": {
+                "grenadechomper69": {
+                  "games": 1,
+                  "wins": 1,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "theomondio": {
+                  "games": 2,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 2
+                }
+              },
               "opponentClubId": "team-ontario",
               "minTeamPlayers": 15,
               "registrationHistory": [
@@ -16180,6 +16199,14 @@
               "points": 1.0
             },
             {
+              "username": "grenadechomper69",
+              "games": 1,
+              "wins": 1,
+              "draws": 0,
+              "losses": 0,
+              "points": 1.0
+            },
+            {
               "username": "bpd161",
               "games": 2,
               "wins": 1,
@@ -16268,7 +16295,7 @@
               "points": 0.0
             },
             {
-              "username": "theomondio",
+              "username": "mnplyr",
               "games": 1,
               "wins": 0,
               "draws": 0,
@@ -16393,6 +16420,14 @@
               "wins": 0,
               "draws": 0,
               "losses": 2,
+              "points": 0.0
+            },
+            {
+              "username": "theomondio",
+              "games": 4,
+              "wins": 0,
+              "draws": 0,
+              "losses": 4,
               "points": 0.0
             }
           ],
@@ -16592,11 +16627,11 @@
     },
     {
       "username": "zildjian_graham",
-      "games": 23,
+      "games": 24,
       "wins": 15,
-      "draws": 0,
+      "draws": 1,
       "losses": 8,
-      "points": 15.0
+      "points": 15.5
     },
     {
       "username": "uncleluke305",
@@ -16759,6 +16794,14 @@
       "points": 8.0
     },
     {
+      "username": "grenadechomper69",
+      "games": 11,
+      "wins": 7,
+      "draws": 1,
+      "losses": 3,
+      "points": 7.5
+    },
+    {
       "username": "markfromark",
       "games": 14,
       "wins": 7,
@@ -16820,14 +16863,6 @@
       "wins": 6,
       "draws": 1,
       "losses": 1,
-      "points": 6.5
-    },
-    {
-      "username": "grenadechomper69",
-      "games": 10,
-      "wins": 6,
-      "draws": 1,
-      "losses": 3,
       "points": 6.5
     },
     {
@@ -16967,19 +17002,19 @@
       "points": 4.5
     },
     {
-      "username": "theomondio",
-      "games": 7,
-      "wins": 4,
-      "draws": 1,
-      "losses": 2,
-      "points": 4.5
-    },
-    {
       "username": "roundknights",
       "games": 8,
       "wins": 4,
       "draws": 1,
       "losses": 3,
+      "points": 4.5
+    },
+    {
+      "username": "theomondio",
+      "games": 10,
+      "wins": 4,
+      "draws": 1,
+      "losses": 5,
       "points": 4.5
     },
     {
@@ -17439,14 +17474,6 @@
       "points": 2.0
     },
     {
-      "username": "mnplyr",
-      "games": 2,
-      "wins": 2,
-      "draws": 0,
-      "losses": 0,
-      "points": 2.0
-    },
-    {
       "username": "discipulus_6",
       "games": 2,
       "wins": 2,
@@ -17584,6 +17611,14 @@
     },
     {
       "username": "geoid83",
+      "games": 3,
+      "wins": 2,
+      "draws": 0,
+      "losses": 1,
+      "points": 2.0
+    },
+    {
+      "username": "mnplyr",
       "games": 3,
       "wins": 2,
       "draws": 0,

@@ -5,6 +5,7 @@ import TimeoutModal from '../components/TimeoutModal'
 import EarlyResignModal from '../components/EarlyResignModal'
 import AuditLogModal from '../components/AuditLogModal'
 import { buildEarlyResignIndex, getModalPlayersForMatch } from '../utils/earlyResignUtils'
+import { computeMatchupRatings } from '../utils/ratingUtils'
 
 function AllMatches() {
     const [data, setData] = useState(null)
@@ -149,16 +150,13 @@ function AllMatches() {
         const minNotMet = minRequired > 0 && ourCount < minRequired
 
         // Calculate rating differential for registration matches
-        // If a per-team cap is set, only compare the top N players (board-matched order)
+        // Only boards that actually have a matchup (rank-paired, capped by the smaller roster) are compared
         let avgDiff = 0
         let ratingDisadvantage = false
         if (match.registrationData && match.registrationData.type === 'roster') {
             const cap = match.maxTeamPlayers || 0
-            const ourRatings = (cap ? match.registrationData.ourRoster?.slice(0, cap) : match.registrationData.ourRoster)?.map(p => p.rating).filter(r => r) || []
-            const oppRatings = (cap ? match.registrationData.oppRoster?.slice(0, cap) : match.registrationData.oppRoster)?.map(p => p.rating).filter(r => r) || []
-            const ourAvg = ourRatings.length > 0 ? (ourRatings.reduce((a, b) => a + b, 0) / ourRatings.length) : 0
-            const oppAvg = oppRatings.length > 0 ? (oppRatings.reduce((a, b) => a + b, 0) / oppRatings.length) : 0
-            avgDiff = ourAvg - oppAvg
+            const matchup = computeMatchupRatings(match.registrationData.ourRoster, match.registrationData.oppRoster, cap)
+            avgDiff = matchup.avgDiff
             ratingDisadvantage = avgDiff < -50  // More than 50 points behind
         }
 
@@ -438,10 +436,9 @@ function AllMatches() {
 
                 {match.registrationData && match.registrationData.type === 'roster' && (() => {
                     const cap = match.maxTeamPlayers || 0
-                    const ourRatings = (cap ? match.registrationData.ourRoster?.slice(0, cap) : match.registrationData.ourRoster)?.map(p => p.rating).filter(r => r) || []
-                    const oppRatings = (cap ? match.registrationData.oppRoster?.slice(0, cap) : match.registrationData.oppRoster)?.map(p => p.rating).filter(r => r) || []
-                    const ourAvg = ourRatings.length > 0 ? (ourRatings.reduce((a, b) => a + b, 0) / ourRatings.length).toFixed(0) : 0
-                    const oppAvg = oppRatings.length > 0 ? (oppRatings.reduce((a, b) => a + b, 0) / oppRatings.length).toFixed(0) : 0
+                    const { ourRatings, oppRatings, ourAvg: ourAvgNum, oppAvg: oppAvgNum } = computeMatchupRatings(match.registrationData.ourRoster, match.registrationData.oppRoster, cap)
+                    const ourAvg = ourAvgNum.toFixed(0)
+                    const oppAvg = oppAvgNum.toFixed(0)
                     const avgDiff = ourAvg - oppAvg
 
                     // Distribution by rating cohorts (100-point ranges)

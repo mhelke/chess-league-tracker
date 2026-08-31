@@ -5,6 +5,7 @@ import TimeoutModal from './TimeoutModal'
 import EarlyResignModal from './EarlyResignModal'
 import AuditLogModal from './AuditLogModal'
 import { getModalPlayersForMatch } from '../utils/earlyResignUtils'
+import { computeMatchupRatings } from '../utils/ratingUtils'
 
 function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignIndex, clubIcons }) {
     const [showTimeoutModal, setShowTimeoutModal] = useState(false)
@@ -314,10 +315,9 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
             {
                 round.registrationData && round.registrationData.type === 'roster' && (() => {
                     const cap = round.maxTeamPlayers || 0
-                    const ourRatings = (cap ? round.registrationData.ourRoster?.slice(0, cap) : round.registrationData.ourRoster)?.map(p => p.rating).filter(r => r) || []
-                    const oppRatings = (cap ? round.registrationData.oppRoster?.slice(0, cap) : round.registrationData.oppRoster)?.map(p => p.rating).filter(r => r) || []
-                    const ourAvg = ourRatings.length > 0 ? (ourRatings.reduce((a, b) => a + b, 0) / ourRatings.length).toFixed(0) : 0
-                    const oppAvg = oppRatings.length > 0 ? (oppRatings.reduce((a, b) => a + b, 0) / oppRatings.length).toFixed(0) : 0
+                    const { ourAvg: ourAvgNum, oppAvg: oppAvgNum } = computeMatchupRatings(round.registrationData.ourRoster, round.registrationData.oppRoster, cap)
+                    const ourAvg = ourAvgNum.toFixed(0)
+                    const oppAvg = oppAvgNum.toFixed(0)
                     const avgDiff = ourAvg - oppAvg
                     const ourCount = round.registeredPlayers?.our || 0
                     const oppCount = round.registeredPlayers?.opponent || 0

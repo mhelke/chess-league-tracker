@@ -51,7 +51,7 @@ function sortSubLeagues(entries) {
 
 // ─── Open Match Card ─────────────────────────────────────────────────────────
 
-const RATING_GAP_THRESHOLD = 150 // avg pts across board-matched pairs
+const RATING_GAP_THRESHOLD = 100 // avg pts across board-matched pairs
 
 /**
  * Compute all urgency signals for an open match.

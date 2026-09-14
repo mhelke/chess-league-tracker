@@ -193,9 +193,6 @@ function AuditLogModal({ isOpen, onClose, matchName, history, ourTeamName = 'Our
                         <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                             <span>📋</span>
                             Audit Log
-                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                                BETA
-                            </span>
                         </h3>
                         <p className="text-sm text-gray-600 mt-0.5 line-clamp-1">{matchName}</p>
                         <p className="text-xs text-gray-500 mt-2">

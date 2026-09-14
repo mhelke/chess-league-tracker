@@ -15,6 +15,13 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
     const [earlyResignPlayers, setEarlyResignPlayers] = useState([])
     const [showHistoryModal, setShowHistoryModal] = useState(false)
 
+    const SITE_NAMES = {
+        '1dpmc': '1 Day Per Move Club',
+        'teamusa': 'Team USA',
+        'mn': 'Team Minnesota'
+    }
+    const ourSiteName = SITE_NAMES[__SITE_KEY__] || 'Our Team'
+
     const formatDate = (timestamp) => {
         if (!timestamp) return null
         return new Date(timestamp * 1000).toLocaleDateString()
@@ -414,7 +421,7 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
                 onClose={() => setShowHistoryModal(false)}
                 matchName={round.name || round.round || 'Match'}
                 history={round.registrationHistory ?? []}
-                ourTeamName="1DPMC"
+                ourTeamName={ourSiteName}
                 oppTeamName={clubIcons?.[round.opponentClubId]?.name || 'Opponent'}
             />
         </div >

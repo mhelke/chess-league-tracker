@@ -24,6 +24,13 @@ function AllMatches() {
     const [collapsedLeagues, setCollapsedLeagues] = useState({})
     const [searchQuery, setSearchQuery] = useState('')
 
+    const SITE_NAMES = {
+        '1dpmc': '1 Day Per Move Club',
+        'teamusa': 'Team USA',
+        'mn': 'Team Minnesota'
+    }
+    const ourSiteName = SITE_NAMES[__SITE_KEY__] || 'Our Team'
+
     // Build early resignation index — must be before any early return (Rules of Hooks)
     const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData), [earlyResignData])
 
@@ -744,7 +751,7 @@ function AllMatches() {
                 onClose={() => { setShowHistoryModal(false); setHistoryModalMatch(null) }}
                 matchName={historyModalMatch?.name || historyModalMatch?.round || 'Match'}
                 history={historyModalMatch?.registrationHistory ?? []}
-                ourTeamName="1DPMC"
+                ourTeamName={ourSiteName}
                 oppTeamName={clubIcons?.[historyModalMatch?.opponentClubId]?.name || 'Opponent'}
             />
         </div>

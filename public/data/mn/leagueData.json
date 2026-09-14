@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-13T02:35:23Z",
+  "lastUpdated": "2026-09-14T02:38:06Z",
   "clubId": "team-minnesota",
   "leagues": {
     "USTCL": {
@@ -14636,18 +14636,18 @@
             },
             {
               "round": "R2",
-              "status": "in_progress",
+              "status": "finished",
               "matchId": "https://api.chess.com/pub/match/1945625",
               "matchUrl": "https://api.chess.com/pub/match/1945625",
               "matchWebUrl": "https://www.chess.com/club/matches/1945625",
               "name": "USTCL 2026 Offseason Chess960 R2: Minnesota vs South Dakota",
               "startTime": 1778897042,
-              "endTime": null,
+              "endTime": 1789325285,
               "boards": 22,
               "matchResult": {
-                "ourScore": 28,
-                "opponentScore": 15,
-                "result": "unknown"
+                "ourScore": 28.5,
+                "opponentScore": 15.5,
+                "result": "win"
               },
               "playerStats": {
                 "03generalzod51": {
@@ -14675,9 +14675,9 @@
                   "losses": 0
                 },
                 "dislesik": {
-                  "games": 1,
+                  "games": 2,
                   "wins": 0,
-                  "draws": 0,
+                  "draws": 1,
                   "losses": 1
                 },
                 "droppedthirdstrike": {
@@ -15091,6 +15091,14 @@
               "points": 2.5
             },
             {
+              "username": "dislesik",
+              "games": 5,
+              "wins": 2,
+              "draws": 1,
+              "losses": 2,
+              "points": 2.5
+            },
+            {
               "username": "chessicalmoves",
               "games": 2,
               "wins": 2,
@@ -15136,14 +15144,6 @@
               "wins": 2,
               "draws": 0,
               "losses": 1,
-              "points": 2.0
-            },
-            {
-              "username": "dislesik",
-              "games": 4,
-              "wins": 2,
-              "draws": 0,
-              "losses": 2,
               "points": 2.0
             },
             {
@@ -15316,7 +15316,7 @@
             }
           ],
           "record": {
-            "wins": 1,
+            "wins": 2,
             "losses": 0,
             "draws": 0
           }
@@ -15972,7 +15972,7 @@
               "endTime": null,
               "boards": 25,
               "matchResult": {
-                "ourScore": 17,
+                "ourScore": 18,
                 "opponentScore": 4,
                 "result": "unknown"
               },
@@ -15980,6 +15980,12 @@
                 "alyssahn": {
                   "games": 2,
                   "wins": 2,
+                  "draws": 0,
+                  "losses": 0
+                },
+                "beanycrocker": {
+                  "games": 1,
+                  "wins": 1,
                   "draws": 0,
                   "losses": 0
                 },
@@ -16314,11 +16320,11 @@
                   },
                   {
                     "username": "zildjian_graham",
-                    "rating": 1708
+                    "rating": 1732
                   },
                   {
                     "username": "zanbato17",
-                    "rating": 1701
+                    "rating": 1702
                   },
                   {
                     "username": "beanycrocker",
@@ -16337,12 +16343,12 @@
                     "rating": 1580
                   },
                   {
-                    "username": "dingdingdoo",
-                    "rating": 1577
-                  },
-                  {
                     "username": "tack_5",
                     "rating": 1567
+                  },
+                  {
+                    "username": "dingdingdoo",
+                    "rating": 1561
                   },
                   {
                     "username": "spottedgiraffefish",
@@ -16401,6 +16407,10 @@
                     "rating": 1334
                   },
                   {
+                    "username": "alyssahn",
+                    "rating": 1332
+                  },
+                  {
                     "username": "bpd161",
                     "rating": 1327
                   },
@@ -16434,7 +16444,7 @@
                   },
                   {
                     "username": "notjeffatwork",
-                    "rating": 1172
+                    "rating": 1174
                   },
                   {
                     "username": "midwestj",
@@ -16459,6 +16469,10 @@
                   {
                     "username": "zanefshhh",
                     "rating": 1046
+                  },
+                  {
+                    "username": "firstrob",
+                    "rating": 1043
                   },
                   {
                     "username": "troynthompson",
@@ -16498,7 +16512,7 @@
                   },
                   {
                     "username": "connorsoneal",
-                    "rating": 750
+                    "rating": 746
                   },
                   {
                     "username": "microdose1469",
@@ -16540,7 +16554,7 @@
                   },
                   {
                     "username": "leathermaaan",
-                    "rating": 1555
+                    "rating": 1560
                   },
                   {
                     "username": "thatraisintho",
@@ -16661,7 +16675,7 @@
                 ]
               },
               "registeredPlayers": {
-                "our": 50,
+                "our": 52,
                 "opponent": 38
               },
               "registrationHistory": [
@@ -16904,6 +16918,20 @@
                     "added": [],
                     "removed": []
                   }
+                },
+                {
+                  "ts": "2026-09-14T02:38:00Z",
+                  "our": {
+                    "added": [
+                      "alyssahn",
+                      "firstrob"
+                    ],
+                    "removed": []
+                  },
+                  "opp": {
+                    "added": [],
+                    "removed": []
+                  }
                 }
               ]
             }
@@ -17039,6 +17067,14 @@
             },
             {
               "username": "co2n2r",
+              "games": 1,
+              "wins": 1,
+              "draws": 0,
+              "losses": 0,
+              "points": 1.0
+            },
+            {
+              "username": "beanycrocker",
               "games": 1,
               "wins": 1,
               "draws": 0,
@@ -17482,11 +17518,11 @@
     },
     {
       "username": "beanycrocker",
-      "games": 38,
-      "wins": 18,
+      "games": 39,
+      "wins": 19,
       "draws": 4,
       "losses": 16,
-      "points": 20.0
+      "points": 21.0
     },
     {
       "username": "co2n2r",
@@ -18321,6 +18357,14 @@
       "points": 2.5
     },
     {
+      "username": "dislesik",
+      "games": 5,
+      "wins": 2,
+      "draws": 1,
+      "losses": 2,
+      "points": 2.5
+    },
+    {
       "username": "phant0mshadow",
       "games": 6,
       "wins": 2,
@@ -18562,14 +18606,6 @@
     },
     {
       "username": "bobkraemer",
-      "games": 4,
-      "wins": 2,
-      "draws": 0,
-      "losses": 2,
-      "points": 2.0
-    },
-    {
-      "username": "dislesik",
       "games": 4,
       "wins": 2,
       "draws": 0,

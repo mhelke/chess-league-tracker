@@ -23,6 +23,7 @@ function AllMatches() {
     const [historyModalMatch, setHistoryModalMatch] = useState(null)
     const [collapsedLeagues, setCollapsedLeagues] = useState({})
     const [searchQuery, setSearchQuery] = useState('')
+    const [selectedLeague, setSelectedLeague] = useState('')
 
     const SITE_NAMES = {
         '1dpmc': '1 Day Per Move Club',
@@ -33,6 +34,30 @@ function AllMatches() {
 
     // Build early resignation index — must be before any early return (Rules of Hooks)
     const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData), [earlyResignData])
+
+    // List of available top-level leagues for quick filtering
+    const leagueOptions = useMemo(() => {
+        if (!data?.leagues) return []
+        return Object.keys(data.leagues).sort()
+    }, [data])
+
+    // Per-league counts for each section (open, in_progress, finished)
+    const leagueCounts = useMemo(() => {
+        const out = {}
+        if (!data?.leagues) return out
+        Object.entries(data.leagues).forEach(([leagueName, leagueData]) => {
+            const counts = { open: 0, in_progress: 0, finished: 0 }
+            Object.values(leagueData.subLeagues || {}).forEach(sub => {
+                (sub.rounds || []).forEach(r => {
+                    if (r.status === 'open') counts.open++
+                    else if (r.status === 'in_progress') counts.in_progress++
+                    else if (r.status === 'finished') counts.finished++
+                })
+            })
+            out[leagueName] = counts
+        })
+        return out
+    }, [data])
 
     useEffect(() => {
         Promise.all([
@@ -687,6 +712,32 @@ function AllMatches() {
                 </div>
             </div>
 
+            {/* Quick league filters */}
+            <div className="mb-4">
+                <div className="flex gap-2 flex-wrap">
+                    <button
+                        onClick={() => setSelectedLeague('')}
+                        className={`px-3 py-1 rounded text-sm font-medium ${selectedLeague === '' ? 'bg-chess-green text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    >
+                        All
+                    </button>
+                    {leagueOptions.map(league => (
+                        <button
+                            key={league}
+                            onClick={() => setSelectedLeague(league)}
+                            className={`px-3 py-1 rounded text-sm font-medium inline-flex items-center gap-2 ${selectedLeague === league ? 'bg-chess-green text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                        >
+                            <span>{league}</span>
+                            <span className="inline-flex items-center gap-1">
+                                <span className="text-[10px] bg-blue-100 text-blue-800 px-1 rounded-full">{leagueCounts[league]?.open || 0}</span>
+                                <span className="text-[10px] bg-yellow-100 text-yellow-800 px-1 rounded-full">{leagueCounts[league]?.in_progress || 0}</span>
+                                <span className="text-[10px] bg-gray-100 text-gray-800 px-1 rounded-full">{leagueCounts[league]?.finished || 0}</span>
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* Tabs */}
             <div className="mb-6">
                 <div className="border-b border-gray-200">
@@ -723,9 +774,15 @@ function AllMatches() {
             </div>
 
             {/* Tab Content */}
-            {activeTab === 'open' && renderMatches(allMatches.open, 'No matches open for registration')}
-            {activeTab === 'in_progress' && renderMatches(allMatches.in_progress, 'No matches in progress')}
-            {activeTab === 'finished' && renderMatches(allMatches.finished, 'No finished matches')}
+            {activeTab === 'open' && renderMatches(
+                selectedLeague ? allMatches.open.filter(m => m.leagueName === selectedLeague) : allMatches.open,
+                'No matches open for registration')}
+            {activeTab === 'in_progress' && renderMatches(
+                selectedLeague ? allMatches.in_progress.filter(m => m.leagueName === selectedLeague) : allMatches.in_progress,
+                'No matches in progress')}
+            {activeTab === 'finished' && renderMatches(
+                selectedLeague ? allMatches.finished.filter(m => m.leagueName === selectedLeague) : allMatches.finished,
+                'No finished matches')}
 
             {/* Timeout Modal */}
             <TimeoutModal
@@ -753,6 +810,8 @@ function AllMatches() {
                 history={historyModalMatch?.registrationHistory ?? []}
                 ourTeamName={ourSiteName}
                 oppTeamName={clubIcons?.[historyModalMatch?.opponentClubId]?.name || 'Opponent'}
+                ourRoster={historyModalMatch?.registrationData?.ourRoster ?? []}
+                oppRoster={historyModalMatch?.registrationData?.oppRoster ?? []}
             />
         </div>
     )

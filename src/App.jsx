@@ -5,6 +5,7 @@ import LeagueView from './pages/LeagueView'
 import SubLeagueView from './pages/SubLeagueView'
 import GlobalLeaderboard from './pages/GlobalLeaderboard'
 import AllMatches from './pages/AllMatches'
+import ActionItems from './pages/ActionItems'
 import NotFound from './pages/NotFound'
 import EmbedLeagueOverview from './pages/EmbedLeagueOverview'
 
@@ -28,6 +29,7 @@ const CLUB_API_IDS = {
 
 const NAV_LINKS = [
     { to: '/', label: 'Leagues' },
+    { to: '/action-items', label: 'Action Items' },
     { to: '/matches', label: 'All Matches' },
     { to: '/league-overview', label: 'Overview' },
     { to: '/global', label: 'Global Leaderboard' },
@@ -141,6 +143,7 @@ function AppContent() {
             <main>
                 <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/action-items" element={<ActionItems />} />
                     <Route path="/matches" element={<AllMatches />} />
                     <Route path="/league/:leagueName" element={<LeagueView />} />
                     <Route path="/league/:leagueName/:subLeagueName" element={<SubLeagueView />} />

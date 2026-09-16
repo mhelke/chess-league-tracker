@@ -7,7 +7,7 @@ import AuditLogModal from './AuditLogModal'
 import { getModalPlayersForMatch } from '../utils/earlyResignUtils'
 import { computeMatchupRatings } from '../utils/ratingUtils'
 
-function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignIndex, clubIcons }) {
+function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignIndex, clubIcons, onViewDetails }) {
     const [showTimeoutModal, setShowTimeoutModal] = useState(false)
     const [modalTitle, setModalTitle] = useState('')
     const [modalPlayers, setModalPlayers] = useState([])
@@ -375,12 +375,21 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
             {
                 round.status === 'open' && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
-                        <Link
-                            to="/matches"
-                            className="text-sm text-chess-dark hover:text-chess-green font-medium inline-flex items-center gap-1"
-                        >
-                            View full details →
-                        </Link>
+                        {onViewDetails ? (
+                            <button
+                                onClick={() => onViewDetails(round)}
+                                className="text-sm text-chess-dark hover:text-chess-green font-medium inline-flex items-center gap-1"
+                            >
+                                View full details →
+                            </button>
+                        ) : (
+                            <Link
+                                to="/matches"
+                                className="text-sm text-chess-dark hover:text-chess-green font-medium inline-flex items-center gap-1"
+                            >
+                                View full details →
+                            </Link>
+                        )}
                     </div>
                 )
             }

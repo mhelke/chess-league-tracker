@@ -6,6 +6,7 @@ function LeagueView() {
     const { leagueName } = useParams()
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [subLeagueSearch, setSubLeagueSearch] = useState('')
 
     useEffect(() => {
         fetch('/data/leagueData.json')
@@ -84,6 +85,11 @@ function LeagueView() {
         })
     }
 
+    const normalizedSubLeagueSearch = subLeagueSearch.trim().toLowerCase()
+    const visibleSubLeagues = sortSubLeagues(Object.entries(league.subLeagues || {})).filter(([subLeagueName]) =>
+        subLeagueName.toLowerCase().includes(normalizedSubLeagueSearch)
+    )
+
     return (
         <div className="page-container">
             {/* Breadcrumb */}
@@ -101,9 +107,40 @@ function LeagueView() {
                 </p>
             </div>
 
+            <div className="mb-6 max-w-md">
+                <label htmlFor="sub-league-search" className="block text-sm font-medium text-gray-700 mb-1">
+                    Find a sub-league
+                </label>
+                <div className="relative">
+                    <input
+                        id="sub-league-search"
+                        type="search"
+                        value={subLeagueSearch}
+                        onChange={(event) => setSubLeagueSearch(event.target.value)}
+                        placeholder="Search sub-leagues by name"
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm shadow-sm outline-none transition focus:border-chess-green focus:ring-2 focus:ring-chess-green/20"
+                    />
+                    {subLeagueSearch && (
+                        <button
+                            type="button"
+                            onClick={() => setSubLeagueSearch('')}
+                            className="absolute inset-y-0 right-2 px-2 text-sm text-gray-500 hover:text-gray-800"
+                            aria-label="Clear sub-league search"
+                        >
+                            ×
+                        </button>
+                    )}
+                </div>
+                {normalizedSubLeagueSearch && (
+                    <p className="mt-2 text-sm text-gray-500">
+                        {visibleSubLeagues.length} sub-league{visibleSubLeagues.length === 1 ? '' : 's'} found
+                    </p>
+                )}
+            </div>
+
             {/* Sub-league Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {sortSubLeagues(Object.entries(league.subLeagues || {})).map(([subLeagueName, subLeagueData]) => {
+                {visibleSubLeagues.map(([subLeagueName, subLeagueData]) => {
                     const stats = getSubLeagueStats(subLeagueData)
                     const topPlayer = subLeagueData.leaderboard[0]
 
@@ -159,6 +196,12 @@ function LeagueView() {
                     )
                 })}
             </div>
+
+            {visibleSubLeagues.length === 0 && (
+                <div className="rounded-lg border border-dashed border-gray-300 bg-white px-4 py-8 text-center text-gray-600">
+                    No sub-leagues match “{subLeagueSearch.trim()}”. Try a different name.
+                </div>
+            )}
         </div>
     )
 }

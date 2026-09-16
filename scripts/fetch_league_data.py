@@ -760,9 +760,23 @@ def save_registration_history_cache(cache: Dict) -> None:
         print(f"Warning: Could not save registration history cache: {e}", file=sys.stderr)
 
 
-def _diff_roster(old_names: set, new_names: set):
-    """Return (added, removed) sorted lists from two username sets."""
-    return sorted(new_names - old_names), sorted(old_names - new_names)
+def _diff_roster(old_ratings: Dict[str, Optional[int]], new_ratings: Dict[str, Optional[int]]):
+    """Return (added, removed) sorted lists of {"username", "rating"} dicts.
+
+    Ratings are taken from the roster the username belongs to at the time of
+    the event (new roster for adds, old roster for removes) so a player's
+    rating remains visible in the history even after they leave the roster.
+    """
+    added = sorted(set(new_ratings) - set(old_ratings))
+    removed = sorted(set(old_ratings) - set(new_ratings))
+    return (
+        [{"username": u, "rating": new_ratings.get(u)} for u in added],
+        [{"username": u, "rating": old_ratings.get(u)} for u in removed],
+    )
+
+
+def _ratings_by_username(roster: List[Dict]) -> Dict[str, Optional[int]]:
+    return {p["username"].lower(): p.get("rating") for p in roster if p.get("username")}
 
 
 def update_registration_history(
@@ -778,10 +792,10 @@ def update_registration_history(
 
     On the first run for a match, all current players are recorded as 'added'.
     Subsequent runs only append an entry if at least one player joined or left.
-    Only usernames are stored (not ratings) to keep snapshots small.
+    Each added/removed entry carries the player's rating at the time of the event.
     """
-    our_names = {p["username"].lower() for p in our_roster if p.get("username")}
-    opp_names = {p["username"].lower() for p in opp_roster if p.get("username")}
+    our_ratings = _ratings_by_username(our_roster)
+    opp_ratings = _ratings_by_username(opp_roster)
 
     entry = cache["matches"].get(match_url)
 
@@ -789,23 +803,28 @@ def update_registration_history(
         # First time seeing this match — initialise snapshot and record all as added.
         cache["matches"][match_url] = {
             "snapshot": {
-                "our": sorted(our_names),
-                "opp": sorted(opp_names),
+                "our": our_ratings,
+                "opp": opp_ratings,
             },
             "history": [
                 {
                     "ts": run_ts,
-                    "our": {"added": sorted(our_names), "removed": []},
-                    "opp": {"added": sorted(opp_names), "removed": []},
+                    "our": {"added": [{"username": u, "rating": r} for u, r in sorted(our_ratings.items())], "removed": []},
+                    "opp": {"added": [{"username": u, "rating": r} for u, r in sorted(opp_ratings.items())], "removed": []},
                 }
             ],
         }
     else:
-        old_our = set(entry["snapshot"]["our"])
-        old_opp = set(entry["snapshot"]["opp"])
+        # Backward compat: older cache entries stored snapshots as plain username lists.
+        old_our = entry["snapshot"]["our"]
+        old_opp = entry["snapshot"]["opp"]
+        if isinstance(old_our, list):
+            old_our = {u: None for u in old_our}
+        if isinstance(old_opp, list):
+            old_opp = {u: None for u in old_opp}
 
-        our_added, our_removed = _diff_roster(old_our, our_names)
-        opp_added, opp_removed = _diff_roster(old_opp, opp_names)
+        our_added, our_removed = _diff_roster(old_our, our_ratings)
+        opp_added, opp_removed = _diff_roster(old_opp, opp_ratings)
 
         if our_added or our_removed or opp_added or opp_removed:
             entry["history"].append(
@@ -816,8 +835,8 @@ def update_registration_history(
                 }
             )
             # Update snapshot to reflect current state.
-            entry["snapshot"]["our"] = sorted(our_names)
-            entry["snapshot"]["opp"] = sorted(opp_names)
+            entry["snapshot"]["our"] = our_ratings
+            entry["snapshot"]["opp"] = opp_ratings
 
     return cache["matches"][match_url]["history"]
 

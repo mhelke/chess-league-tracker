@@ -432,6 +432,8 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
                 history={round.registrationHistory ?? []}
                 ourTeamName={ourSiteName}
                 oppTeamName={clubIcons?.[round.opponentClubId]?.name || 'Opponent'}
+                ourRoster={round.registrationData?.ourRoster ?? []}
+                oppRoster={round.registrationData?.oppRoster ?? []}
             />
         </div >
     )

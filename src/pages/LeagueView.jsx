@@ -2,11 +2,22 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 
+const STATUS_FILTERS = [
+    { key: 'open', label: 'Open', color: 'text-green-700', activeColor: 'bg-green-50 border-green-200' },
+    { key: 'in_progress', label: 'In progress', color: 'text-blue-700', activeColor: 'bg-blue-50 border-blue-200' },
+    { key: 'finished', label: 'Finished', color: 'text-gray-700', activeColor: 'bg-gray-50 border-gray-200' },
+]
+
 function LeagueView() {
     const { leagueName } = useParams()
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [subLeagueSearch, setSubLeagueSearch] = useState('')
+    const [visibleStatuses, setVisibleStatuses] = useState({
+        open: true,
+        in_progress: true,
+        finished: true,
+    })
 
     useEffect(() => {
         fetch('/data/leagueData.json')
@@ -20,6 +31,10 @@ function LeagueView() {
                 setLoading(false)
             })
     }, [])
+
+    useEffect(() => {
+        setVisibleStatuses({ open: true, in_progress: true, finished: true })
+    }, [leagueName])
 
     if (loading) {
         return (
@@ -86,9 +101,25 @@ function LeagueView() {
     }
 
     const normalizedSubLeagueSearch = subLeagueSearch.trim().toLowerCase()
-    const visibleSubLeagues = sortSubLeagues(Object.entries(league.subLeagues || {})).filter(([subLeagueName]) =>
-        subLeagueName.toLowerCase().includes(normalizedSubLeagueSearch)
-    )
+    const subLeagueEntries = Object.entries(league.subLeagues || {})
+    const statusSubLeagueCounts = STATUS_FILTERS.reduce((counts, status) => {
+        counts[status.key] = subLeagueEntries.filter(([, subLeagueData]) =>
+            subLeagueData.rounds.some(round => round.status === status.key)
+        ).length
+        return counts
+    }, {})
+    const anyStatusVisible = Object.values(visibleStatuses).some(Boolean)
+    const visibleSubLeagues = sortSubLeagues(subLeagueEntries).filter(([subLeagueName, subLeagueData]) => {
+        const matchesSearch = subLeagueName.toLowerCase().includes(normalizedSubLeagueSearch)
+        const matchesStatus = anyStatusVisible && Object.entries(visibleStatuses).some(([status, visible]) =>
+            visible && subLeagueData.rounds.some(round => round.status === status)
+        )
+        return matchesSearch && matchesStatus
+    })
+
+    const toggleStatus = (status) => {
+        setVisibleStatuses(current => ({ ...current, [status]: !current[status] }))
+    }
 
     return (
         <div className="page-container">
@@ -133,9 +164,36 @@ function LeagueView() {
                 </div>
                 {normalizedSubLeagueSearch && (
                     <p className="mt-2 text-sm text-gray-500">
-                        {visibleSubLeagues.length} sub-league{visibleSubLeagues.length === 1 ? '' : 's'} found
+                        {visibleSubLeagues.length} sub-league{visibleSubLeagues.length === 1 ? '' : 's'} shown
                     </p>
                 )}
+            </div>
+
+            <div className="mb-5 flex flex-wrap items-center gap-2 text-sm">
+                <span className="font-semibold text-gray-700 mr-1">Show:</span>
+                {STATUS_FILTERS.map(status => (
+                    <label
+                        key={status.key}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 cursor-pointer transition-colors ${visibleStatuses[status.key] ? status.activeColor : 'bg-white border-gray-200 opacity-60'}`}
+                    >
+                        <input
+                            type="checkbox"
+                            checked={visibleStatuses[status.key]}
+                            onChange={() => toggleStatus(status.key)}
+                            className="h-3.5 w-3.5 rounded border-gray-300 text-chess-green focus:ring-chess-green"
+                        />
+                        <span className={`font-medium ${status.color}`}>{status.label}</span>
+                        <span className="text-xs text-gray-500">{statusSubLeagueCounts[status.key]}</span>
+                    </label>
+                ))}
+                <span className="hidden sm:inline text-gray-300">|</span>
+                <button
+                    type="button"
+                    onClick={() => setVisibleStatuses({ open: true, in_progress: true, finished: true })}
+                    className="text-xs font-medium text-chess-green hover:underline"
+                >
+                    All
+                </button>
             </div>
 
             {/* Sub-league Cards */}
@@ -199,7 +257,9 @@ function LeagueView() {
 
             {visibleSubLeagues.length === 0 && (
                 <div className="rounded-lg border border-dashed border-gray-300 bg-white px-4 py-8 text-center text-gray-600">
-                    No sub-leagues match “{subLeagueSearch.trim()}”. Try a different name.
+                    {!anyStatusVisible
+                        ? 'All status filters are hidden. Select a status above to show sub-leagues.'
+                        : `No sub-leagues match “${subLeagueSearch.trim()}” with the selected statuses.`}
                 </div>
             )}
         </div>

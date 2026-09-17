@@ -18,6 +18,7 @@ function LeagueView() {
         in_progress: true,
         finished: true,
     })
+    const [diagnosticsCopied, setDiagnosticsCopied] = useState(false)
 
     useEffect(() => {
         fetch('/data/leagueData.json')
@@ -34,6 +35,7 @@ function LeagueView() {
 
     useEffect(() => {
         setVisibleStatuses({ open: true, in_progress: true, finished: true })
+        setDiagnosticsCopied(false)
     }, [leagueName])
 
     if (loading) {
@@ -102,6 +104,28 @@ function LeagueView() {
 
     const normalizedSubLeagueSearch = subLeagueSearch.trim().toLowerCase()
     const subLeagueEntries = Object.entries(league.subLeagues || {})
+    const diagnosticEntries = subLeagueEntries.map(([subLeagueName, subLeagueData]) => {
+        const diagnostics = subLeagueData.diagnostics || {}
+        return {
+            subLeagueName,
+            mergedFrom: Array.isArray(diagnostics.mergedFrom) ? diagnostics.mergedFrom : [],
+            dateResolvedMatches: Array.isArray(diagnostics.dateResolvedMatches) ? diagnostics.dateResolvedMatches : [],
+            ambiguousMatches: Array.isArray(diagnostics.ambiguousMatches) ? diagnostics.ambiguousMatches : [],
+            missingRounds: Array.isArray(diagnostics.missingRounds) ? diagnostics.missingRounds : [],
+        }
+    })
+    const diagnosticSummary = diagnosticEntries.reduce((summary, entry) => ({
+        merged: summary.merged + entry.mergedFrom.length,
+        dateResolved: summary.dateResolved + entry.dateResolvedMatches.length,
+        ambiguous: summary.ambiguous + entry.ambiguousMatches.length,
+        missingRounds: summary.missingRounds + entry.missingRounds.length,
+    }), { merged: 0, dateResolved: 0, ambiguous: 0, missingRounds: 0 })
+    const diagnosticIssues = diagnosticEntries.filter(entry =>
+        entry.ambiguousMatches.length > 0 || entry.missingRounds.length > 0
+    )
+    const diagnosticActivity = diagnosticEntries.filter(entry =>
+        entry.mergedFrom.length > 0 || entry.dateResolvedMatches.length > 0
+    )
     const statusSubLeagueCounts = STATUS_FILTERS.reduce((counts, status) => {
         counts[status.key] = subLeagueEntries.filter(([, subLeagueData]) =>
             subLeagueData.rounds.some(round => round.status === status.key)
@@ -119,6 +143,32 @@ function LeagueView() {
 
     const toggleStatus = (status) => {
         setVisibleStatuses(current => ({ ...current, [status]: !current[status] }))
+    }
+
+    const copyDiagnosticsReport = async () => {
+        const lines = [
+            `League diagnostics: ${leagueName}`,
+            `Merges: ${diagnosticSummary.merged}; date-resolved matches: ${diagnosticSummary.dateResolved}; ambiguous matches: ${diagnosticSummary.ambiguous}; missing rounds: ${diagnosticSummary.missingRounds}`,
+        ]
+        diagnosticActivity.forEach(entry => {
+            if (entry.mergedFrom.length > 0) {
+                lines.push(`${entry.subLeagueName}: merged ${entry.mergedFrom.join(', ')}`)
+            }
+        })
+        diagnosticIssues.forEach(entry => {
+            if (entry.missingRounds.length > 0) {
+                lines.push(`${entry.subLeagueName}: missing ${entry.missingRounds.join(', ')}`)
+            }
+            entry.ambiguousMatches.forEach(match => {
+                lines.push(`${entry.subLeagueName}: ${match.matchId || 'unknown match'} - ${match.reason}`)
+            })
+        })
+        try {
+            await navigator.clipboard.writeText(lines.join('\n'))
+            setDiagnosticsCopied(true)
+        } catch (error) {
+            console.error('Unable to copy diagnostics report:', error)
+        }
     }
 
     return (
@@ -195,6 +245,59 @@ function LeagueView() {
                     All
                 </button>
             </div>
+
+            <details className="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm font-semibold text-gray-700">
+                    <span>Admin diagnostics</span>
+                    <span className="text-xs font-normal text-gray-500">
+                        {diagnosticSummary.ambiguous + diagnosticSummary.missingRounds > 0
+                            ? `${diagnosticSummary.ambiguous} ambiguous · ${diagnosticSummary.missingRounds} missing`
+                            : 'No unresolved issues'}
+                    </span>
+                </summary>
+                <div className="border-t border-gray-100 px-3 py-3 text-xs text-gray-600">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <span>Merges: <strong>{diagnosticSummary.merged}</strong></span>
+                        <span>Date-resolved: <strong>{diagnosticSummary.dateResolved}</strong></span>
+                        <span>Ambiguous: <strong>{diagnosticSummary.ambiguous}</strong></span>
+                        <span>Missing rounds: <strong>{diagnosticSummary.missingRounds}</strong></span>
+                    </div>
+                    {diagnosticIssues.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                            {diagnosticIssues.map(entry => (
+                                <div key={entry.subLeagueName} className="rounded border border-amber-200 bg-amber-50 px-2 py-1.5">
+                                    <div className="font-semibold text-gray-800">{entry.subLeagueName}</div>
+                                    {entry.missingRounds.length > 0 && (
+                                        <div>Missing: {entry.missingRounds.join(', ')}</div>
+                                    )}
+                                    {entry.ambiguousMatches.map((match, index) => (
+                                        <div key={`${match.matchId || match.name}-${index}`}>
+                                            Ambiguous: {match.matchId || match.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={copyDiagnosticsReport}
+                            className="rounded border border-gray-300 px-2 py-1 font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                            {diagnosticsCopied ? 'Copied' : 'Copy report'}
+                        </button>
+                        <a
+                            href="https://www.chess.com/member/MasterMatthew52"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-chess-green hover:underline"
+                        >
+                            Contact MasterMatthew52
+                        </a>
+                    </div>
+                </div>
+            </details>
 
             {/* Sub-league Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

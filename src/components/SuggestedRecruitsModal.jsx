@@ -130,7 +130,16 @@ function SuggestedRecruitsModal({ isOpen, onClose, data, timeoutData, leagueName
                                             </tr>
                                         ) : candidates.map((candidate, idx) => (
                                             <tr key={candidate.username} className={`border-b border-gray-100 ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
-                                                <td className="py-2.5 px-3 font-medium text-gray-800 truncate">{candidate.username}</td>
+                                                <td className="py-2.5 px-3 font-medium truncate">
+                                                    <a
+                                                        href={`https://www.chess.com/member/${candidate.username}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-chess-green hover:text-green-700 hover:underline"
+                                                    >
+                                                        {candidate.username}
+                                                    </a>
+                                                </td>
                                                 <td className="py-2.5 px-3 text-center text-gray-700">{candidate.rating}</td>
                                                 <td className="py-2.5 px-3 text-center">
                                                     <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${SOURCE_BADGE_STYLES[candidate.source]}`}>

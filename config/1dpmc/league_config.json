@@ -1,5 +1,8 @@
 {
   "clubId": "1-day-per-move-club",
+  "subleague_rules": [
+    {"pattern": "\\bU1800\\b", "max_rating": 1800}
+  ],
   "leagues": [
     {"root_pattern": "\\b1WL\\b", "name": "1WL"},
     {"root_pattern": "\\bTCMAC\\b", "name": "TCMAC"},

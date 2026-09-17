@@ -36,7 +36,7 @@ function TierColumns() {
     )
 }
 
-function SuggestedRecruitsModal({ isOpen, onClose, data, timeoutData, leagueName, subLeagueName, round, tiers, existingUsernames }) {
+function SuggestedRecruitsModal({ isOpen, onClose, data, playerRatings, leagueName, subLeagueName, round, tiers, existingUsernames }) {
     const [loading, setLoading] = useState(true)
     const [candidatesByTier, setCandidatesByTier] = useState({})
 
@@ -62,12 +62,12 @@ function SuggestedRecruitsModal({ isOpen, onClose, data, timeoutData, leagueName
             tiersHighestFirst.forEach(tier => {
                 const candidates = findRecruitCandidatesForTier(
                     data,
-                    timeoutData,
                     leagueName,
                     subLeagueName,
                     round,
                     parseTierThreshold(tier),
                     [...(existingUsernames || []), ...claimedUsernames],
+                    playerRatings,
                 )
                 candidates.forEach(candidate => claimedUsernames.add(candidate.username.toLowerCase()))
                 result[tier] = candidates
@@ -77,7 +77,7 @@ function SuggestedRecruitsModal({ isOpen, onClose, data, timeoutData, leagueName
         }, 0)
         return () => clearTimeout(timer)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, tiers, round, leagueName, subLeagueName])
+    }, [isOpen, tiers, round, leagueName, subLeagueName, playerRatings])
 
     if (!isOpen) return null
 

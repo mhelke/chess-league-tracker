@@ -7,6 +7,9 @@ export interface RosterPlayer {
 export interface RoundLike {
     matchId?: string
     name?: string
+    status?: string
+    startTime?: number | null
+    playerStats?: { [username: string]: unknown }
     apiMetadata?: {
         rules?: string | null
         [key: string]: unknown
@@ -34,16 +37,16 @@ export interface LeagueDataLike {
     [key: string]: unknown
 }
 
-export interface PlayerRiskLike {
-    dailyRating?: number | null
-    rating960?: number | null
-    riskFlag?: boolean
-    [key: string]: unknown
-}
-
-export interface TimeoutDataLike {
-    players?: { [username: string]: PlayerRiskLike }
-    [key: string]: unknown
+export interface PlayerRatingsLike {
+    membershipStatus?: 'verified' | 'unverified'
+    membershipVerifiedAt?: string | null
+    players?: {
+        [username: string]: {
+            dailyRating?: number | null
+            rating960?: number | null
+            fetchedAt?: string | null
+        }
+    }
 }
 
 export type MatchVariant = 'chess960' | 'daily'
@@ -56,6 +59,7 @@ export interface RecruitCandidate {
 
 const MAX_CANDIDATES_PER_TIER = 5
 const RECENT_ROUND_WINDOW_DAYS = 180
+const MAX_CACHE_AGE_MS = 36 * 60 * 60 * 1000
 
 /**
  * Chess960 matches are identified by the API's authoritative `apiMetadata.rules` field.
@@ -69,6 +73,7 @@ export function detectMatchVariant(matchName: string | null | undefined, apiRule
 
 /** Rounds without a startTime can't be aged, so they're treated as recent rather than excluded. */
 function isRecentRound(round: RoundLike): boolean {
+    if (round.status === 'open' || round.status === 'in_progress') return true
     const startTime = round.startTime as number | null | undefined
     if (!Number.isFinite(startTime)) return true
     const ageDays = (Date.now() / 1000 - (startTime as number)) / 86400
@@ -76,49 +81,50 @@ function isRecentRound(round: RoundLike): boolean {
 }
 
 /**
- * Resolves the appropriate rating for a candidate based on the match variant.
- * Only the matching variant's rating from timeoutData is used; the other variant's
- * rating is never substituted since a chess960 rating is not comparable to a daily one.
- * The roster snapshot rating is only trusted as a fallback when it was itself captured
- * from a round of the same variant; otherwise it's a different rating type and unusable.
+ * Collects roster candidates from rounds whose own variant matches `variant`. Roster
+ * snapshots are refreshed on every fetch of an open match, so a same-variant snapshot
+ * is both fresh and guaranteed to be the correct rating type — no other source needed.
  */
-function resolveVariantRating(
+function isFreshTimestamp(value: string | null | undefined): boolean {
+    const timestamp = Date.parse(value || '')
+    return Number.isFinite(timestamp) && Date.now() - timestamp <= MAX_CACHE_AGE_MS
+}
+
+function resolveCurrentRating(
+    ratings: PlayerRatingsLike | null | undefined,
     username: string,
-    fallbackRating: number | null | undefined,
-    fallbackRatingVariant: MatchVariant,
-    timeoutData: TimeoutDataLike | null | undefined,
     variant: MatchVariant,
 ): number | null {
-    const risk = timeoutData?.players?.[username.toLowerCase()]
-    const variantRating = variant === 'chess960' ? risk?.rating960 : risk?.dailyRating
-    if (Number.isFinite(variantRating)) return variantRating as number
-    if (fallbackRatingVariant !== variant) return null
-    return Number.isFinite(fallbackRating) ? (fallbackRating as number) : null
+    if (ratings?.membershipStatus !== 'verified' || !isFreshTimestamp(ratings.membershipVerifiedAt)) return null
+    const entry = ratings.players?.[username.toLowerCase()]
+    if (!entry || !isFreshTimestamp(entry.fetchedAt)) return null
+    const rating = variant === 'chess960' ? entry.rating960 : entry.dailyRating
+    return Number.isFinite(rating) ? rating as number : null
 }
 
 function collectRosterCandidates(
     rounds: RoundLike[],
     excludeMatchId: string | undefined,
     excludeUsernames: Set<string>,
-    timeoutData: TimeoutDataLike | null | undefined,
     variant: MatchVariant,
     minRating: number,
     source: RecruitCandidate['source'],
-    requiredHistoricalVariant?: MatchVariant,
+    playerRatings: PlayerRatingsLike | null | undefined,
 ): RecruitCandidate[] {
     const found = new Map<string, RecruitCandidate>()
     rounds.forEach(round => {
         if (round.matchId && round.matchId === excludeMatchId) return
-        const roundVariant = detectMatchVariant(round.name, round.apiMetadata?.rules)
-        if (requiredHistoricalVariant && roundVariant !== requiredHistoricalVariant) return
-        const roster = round.registrationData?.ourRoster
-        if (!roster) return
-        roster.forEach(player => {
-            const username = player?.username
+        if (detectMatchVariant(round.name, round.apiMetadata?.rules) !== variant) return
+        if (!isRecentRound(round)) return
+        const usernames = [
+            ...(round.registrationData?.ourRoster || []).map(player => player?.username),
+            ...Object.keys(round.playerStats || {}),
+        ]
+        usernames.forEach(username => {
             if (!username) return
             const key = username.toLowerCase()
             if (excludeUsernames.has(key) || found.has(key)) return
-            const rating = resolveVariantRating(username, player.rating, roundVariant, timeoutData, variant)
+            const rating = resolveCurrentRating(playerRatings, key, variant)
             if (rating === null || rating < minRating) return
             found.set(key, { username, rating, source })
         })
@@ -129,17 +135,17 @@ function collectRosterCandidates(
 /**
  * Finds up to 5 active player candidates at or above `minRating`, preferring players
  * already registered in other Sub-League matches before expanding to the parent League.
- * For Chess960 targets, players with Chess960 league history are used exclusively when
- * available; standard-match history is only used as a fallback.
+ * Only roster snapshots from rounds matching the target match's variant are considered,
+ * since a chess960 rating and a daily rating are not comparable.
  */
 export function findRecruitCandidatesForTier(
     data: LeagueDataLike | null | undefined,
-    timeoutData: TimeoutDataLike | null | undefined,
     leagueName: string,
     subLeagueName: string,
     currentRound: RoundLike | null | undefined,
     minRating: number,
     existingUsernames: string[],
+    playerRatings: PlayerRatingsLike | null | undefined,
     maxResults: number = MAX_CANDIDATES_PER_TIER,
 ): RecruitCandidate[] {
     const variant = detectMatchVariant(currentRound?.name as string | undefined, currentRound?.apiMetadata?.rules)
@@ -149,45 +155,36 @@ export function findRecruitCandidatesForTier(
     const subLeague = league?.subLeagues?.[subLeagueName]
     const subLeagueRounds = subLeague?.rounds || []
 
-    const findCandidates = (requiredHistoricalVariant?: MatchVariant): RecruitCandidate[] => {
-        const subLeagueCandidates = collectRosterCandidates(
-            subLeagueRounds, currentRound?.matchId, exclude, timeoutData, variant, minRating, 'sub-league', requiredHistoricalVariant
+    const subLeagueCandidates = collectRosterCandidates(
+        subLeagueRounds, currentRound?.matchId, exclude, variant, minRating, 'sub-league', playerRatings
+    )
+
+    let candidates = subLeagueCandidates
+    if (league) {
+        const excludeAll = new Set([...exclude, ...candidates.map(c => c.username.toLowerCase())])
+        const leagueRounds = Object.entries(league.subLeagues || {})
+            .filter(([name]) => name !== subLeagueName)
+            .flatMap(([, sl]) => sl.rounds || [])
+        const leagueCandidates = collectRosterCandidates(
+            leagueRounds, currentRound?.matchId, excludeAll, variant, minRating, 'league', playerRatings
         )
-
-        let candidates = subLeagueCandidates
-        if (league) {
-            const excludeAll = new Set([...exclude, ...candidates.map(c => c.username.toLowerCase())])
-            const leagueRounds = Object.entries(league.subLeagues || {})
-                .filter(([name]) => name !== subLeagueName)
-                .flatMap(([, sl]) => sl.rounds || [])
-            const leagueCandidates = collectRosterCandidates(
-                leagueRounds, currentRound?.matchId, excludeAll, timeoutData, variant, minRating, 'league', requiredHistoricalVariant
-            )
-            candidates = [...candidates, ...leagueCandidates]
-        }
-
-        // Also check recent rounds in every other league so no higher-rated
-        // candidate is missed here only to surface in a lower tier's search.
-        if (data?.leagues) {
-            const excludeAll = new Set([...exclude, ...candidates.map(c => c.username.toLowerCase())])
-            const otherLeagueRounds = Object.entries(data.leagues)
-                .filter(([name]) => name !== leagueName)
-                .flatMap(([, otherLeague]) => Object.values(otherLeague.subLeagues || {}))
-                .flatMap(sl => sl.rounds || [])
-                .filter(isRecentRound)
-            const otherLeagueCandidates = collectRosterCandidates(
-                otherLeagueRounds, currentRound?.matchId, excludeAll, timeoutData, variant, minRating, 'other-league', requiredHistoricalVariant
-            )
-            candidates = [...candidates, ...otherLeagueCandidates]
-        }
-
-        return candidates
+        candidates = [...candidates, ...leagueCandidates]
     }
 
-    // A known Chess960 player is preferable to a standard-only player. Do not
-    // constrain standard matches, where cross-variant history is acceptable.
-    const chess960Candidates = variant === 'chess960' ? findCandidates('chess960') : []
-    const candidates = chess960Candidates.length > 0 ? chess960Candidates : findCandidates()
+    // Also check recent rounds in every other league so no higher-rated
+    // candidate is missed here only to surface in a lower tier's search.
+    if (data?.leagues) {
+        const excludeAll = new Set([...exclude, ...candidates.map(c => c.username.toLowerCase())])
+        const otherLeagueRounds = Object.entries(data.leagues)
+            .filter(([name]) => name !== leagueName)
+            .flatMap(([, otherLeague]) => Object.values(otherLeague.subLeagues || {}))
+            .flatMap(sl => sl.rounds || [])
+            .filter(isRecentRound)
+        const otherLeagueCandidates = collectRosterCandidates(
+            otherLeagueRounds, currentRound?.matchId, excludeAll, variant, minRating, 'other-league', playerRatings
+        )
+        candidates = [...candidates, ...otherLeagueCandidates]
+    }
 
     return candidates
         .sort((a, b) => b.rating - a.rating)

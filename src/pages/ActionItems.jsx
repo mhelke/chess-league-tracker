@@ -523,6 +523,7 @@ export function buildRecruitmentSuggestions(ourTeam, opponentTeam, maxBoards, ro
 function ActionItems() {
     const [data, setData] = useState(null)
     const [timeoutData, setTimeoutData] = useState(null)
+    const [playerRatings, setPlayerRatings] = useState(null)
     const [clubIcons, setClubIcons] = useState({})
     const [loading, setLoading] = useState(true)
     const [recruitsModalMatch, setRecruitsModalMatch] = useState(null)
@@ -532,11 +533,13 @@ function ActionItems() {
         Promise.all([
             fetch('/data/leagueData.json').then(r => r.json()),
             fetch('/data/timeoutData.json').then(r => r.json()).catch(() => null),
+            fetch('/data/playerRatings.json').then(r => r.json()).catch(() => null),
             fetch('/data/clubIcons.json').then(r => r.json()).catch(() => ({})),
         ])
-            .then(([leagueJson, timeoutJson, clubIconsJson]) => {
+            .then(([leagueJson, timeoutJson, playerRatingsJson, clubIconsJson]) => {
                 setData(leagueJson)
                 setTimeoutData(timeoutJson)
+                setPlayerRatings(playerRatingsJson)
                 setClubIcons(clubIconsJson || {})
                 setLoading(false)
             })
@@ -879,7 +882,7 @@ function ActionItems() {
                 isOpen={!!recruitsModalMatch}
                 onClose={() => setRecruitsModalMatch(null)}
                 data={data}
-                timeoutData={timeoutData}
+                playerRatings={playerRatings}
                 leagueName={recruitsModalMatch?.leagueName}
                 subLeagueName={recruitsModalMatch?.subLeagueName}
                 round={recruitsModalMatch}

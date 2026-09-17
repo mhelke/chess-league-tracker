@@ -34,6 +34,9 @@ jobs:
       - name: Fetch league data — 1dpmc
         run: python scripts/fetch_league_data.py --site-key 1dpmc
 
+      - name: Refresh player ratings - 1dpmc
+        run: python scripts/fetch_player_ratings.py --site-key 1dpmc
+
       - name: Enrich timeout data — 1dpmc
         run: python scripts/enrich_timeouts.py --site-key 1dpmc
 
@@ -43,6 +46,9 @@ jobs:
       - name: Fetch league data — teamusa
         run: python scripts/fetch_league_data.py --site-key teamusa
 
+      - name: Refresh player ratings - teamusa
+        run: python scripts/fetch_player_ratings.py --site-key teamusa
+
       - name: Enrich timeout data — teamusa
         run: python scripts/enrich_timeouts.py --site-key teamusa
 
@@ -51,6 +57,9 @@ jobs:
 
       - name: Fetch league data — mn
         run: python scripts/fetch_league_data.py --site-key mn
+
+      - name: Refresh player ratings - mn
+        run: python scripts/fetch_player_ratings.py --site-key mn
 
       - name: Enrich timeout data — mn
         run: python scripts/enrich_timeouts.py --site-key mn

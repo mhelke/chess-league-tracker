@@ -209,6 +209,20 @@ python scripts/fetch_league_data.py --site-key 1dpmc
 python scripts/fetch_league_data.py --site-key teamusa
 ```
 
+After upgrading sub-league detection, run the one-time historical repair for
+each site to re-key ambiguous stored matches using Chess.com team names and
+semantic season/stage normalization:
+
+```bash
+python scripts/fetch_league_data.py --site-key 1dpmc --repair-subleagues
+python scripts/fetch_league_data.py --site-key teamusa --repair-subleagues
+python scripts/fetch_league_data.py --site-key mn --repair-subleagues
+```
+
+The repair mode updates existing league data only; it does not create
+placeholder matches for missing rounds. Ambiguous schedule-based matches stay
+separate and are recorded in each sub-league's diagnostics.
+
 - Reads club ID and league patterns from `config/<siteKey>/league_config.json`
 - Reads variant normalization rules from `config/shared/variant_patterns.json`
 - Writes output to `public/data/<siteKey>/leagueData.json`

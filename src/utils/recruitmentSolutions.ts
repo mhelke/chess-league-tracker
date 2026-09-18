@@ -32,7 +32,7 @@ export interface RecruitCohort {
 }
 
 export interface RecruitmentSolution {
-    strategy: 'top-down' | 'depth-first-fallback'
+    strategy: 'top-down' | 'alternative-full-coverage'
     recruits: RecruitCohort[]
     repairedBoards: number
     repairedBoardNumbers: number[]
@@ -52,10 +52,6 @@ type Simulation = {
     ratings: number[]
     repaired: number[]
     score: number
-}
-
-type FallbackSimulation = Simulation & {
-    concessionCutoff: number
 }
 
 const DEFAULT_THRESHOLD = 50
@@ -150,19 +146,6 @@ function buildCohorts(options: RecruitmentOptions): number[] {
     return cohorts
 }
 
-/** Tests raw board-level fixability (ignoring net-gain gating) so concession grouping can look one board at a time. */
-function boardReachableWithCohorts(boardIndex: number, baseRatings: number[], oppRatings: number[], testCohorts: number[], options: RecruitmentOptions): boolean {
-    const threshold = options.balanceThreshold ?? DEFAULT_THRESHOLD
-    for (const first of testCohorts) {
-        for (const combo of [[first], ...testCohorts.filter(second => second <= first).map(second => [first, second])]) {
-            if (!materializeRecruits(baseRatings, combo, options)) continue
-            const ratings = [...baseRatings, ...combo].sort((a, b) => b - a).slice(0, options.boardCap)
-            if (isCompetitive(ratings[boardIndex], oppRatings[boardIndex], threshold)) return true
-        }
-    }
-    return false
-}
-
 function simulate(baseRatings: number[], oppRatings: number[], candidateRatings: number[], targetStart: number, activeBoards: number, options: RecruitmentOptions): Simulation | null {
     const materializedRecruits = materializeRecruits(baseRatings, candidateRatings, options)
     if (!materializedRecruits) return null
@@ -205,13 +188,79 @@ function simulate(baseRatings: number[], oppRatings: number[], candidateRatings:
     }
 }
 
-function compareTopDown(left: Simulation, right: Simulation, oppRatings: number[], threshold: number): number {
-    for (let index = 0; index < oppRatings.length; index++) {
+function requiredRatingStats(simulation: Simulation): { max: number, sum: number } {
+    const required = simulation.recruits.map(recruit => recruit.exactMinRequiredRating)
+    return {
+        max: required.length ? Math.max(...required) : 0,
+        sum: required.reduce((sum, rating) => sum + rating, 0),
+    }
+}
+
+function lowerHalfCoverage(simulation: Simulation, activeBoards: number): number {
+    const lowerHalfStart = Math.floor(activeBoards / 2) + 1
+    return simulation.repaired.filter(board => board >= lowerHalfStart).length
+}
+
+function compareCoveragePlans(
+    left: Simulation,
+    right: Simulation,
+    oppRatings: number[],
+    threshold: number,
+    activeBoards: number,
+    preferLowerThreshold: boolean = false,
+): number {
+    // Coverage is always the first priority. A full-cap solution must beat any
+    // partial solution, regardless of which individual boards the partial plan fixes.
+    if (left.repaired.length !== right.repaired.length) {
+        return right.repaired.length - left.repaired.length
+    }
+
+    const leftLowerHalf = lowerHalfCoverage(left, activeBoards)
+    const rightLowerHalf = lowerHalfCoverage(right, activeBoards)
+    if (leftLowerHalf !== rightLowerHalf) return rightLowerHalf - leftLowerHalf
+
+    const leftRequirements = requiredRatingStats(left)
+    const rightRequirements = requiredRatingStats(right)
+
+    if (preferLowerThreshold) {
+        if (leftRequirements.max !== rightRequirements.max) {
+            return leftRequirements.max - rightRequirements.max
+        }
+        if (leftRequirements.sum !== rightRequirements.sum) {
+            return leftRequirements.sum - rightRequirements.sum
+        }
+        if (left.recruits.length !== right.recruits.length) {
+            return left.recruits.length - right.recruits.length
+        }
+    } else {
+        // The primary plan minimizes the number of recruits first. A lower
+        // threshold then makes the plan easier to source when recruit counts tie.
+        if (left.recruits.length !== right.recruits.length) {
+            return left.recruits.length - right.recruits.length
+        }
+        if (leftRequirements.max !== rightRequirements.max) {
+            return leftRequirements.max - rightRequirements.max
+        }
+        if (leftRequirements.sum !== rightRequirements.sum) {
+            return leftRequirements.sum - rightRequirements.sum
+        }
+    }
+
+    // Retain top-down ordering as the final tie-breaker, after coverage and
+    // sourcing practicality have been considered.
+    for (let index = 0; index < activeBoards; index++) {
         const leftFixesBoard = isCompetitive(left.ratings[index], oppRatings[index], threshold)
         const rightFixesBoard = isCompetitive(right.ratings[index], oppRatings[index], threshold)
         if (leftFixesBoard !== rightFixesBoard) return leftFixesBoard ? -1 : 1
     }
-    return right.repaired.length - left.repaired.length || left.recruits.length - right.recruits.length || right.score - left.score
+    return right.score - left.score
+}
+
+function planKey(simulation: Simulation): string {
+    return simulation.recruits
+        .map(recruit => recruit.exactMinRequiredRating)
+        .sort((a, b) => a - b)
+        .join(',')
 }
 
 function buildFullTopDownSolution(
@@ -235,7 +284,13 @@ function buildFullTopDownSolution(
         })).filter((choice): choice is { candidateRatings: number[], simulation: Simulation } => choice.simulation !== null)
         if (!choices.length) break
 
-        choices.sort((left, right) => compareTopDown(left.simulation, right.simulation, oppRatings, threshold))
+        choices.sort((left, right) => compareCoveragePlans(
+            left.simulation,
+            right.simulation,
+            oppRatings,
+            threshold,
+            activeBoards,
+        ))
         const chosen = choices[0]
         const prior: Simulation = {
             recruits: [],
@@ -244,7 +299,7 @@ function buildFullTopDownSolution(
                 .filter(board => isCompetitive(currentRatings[board - 1], oppRatings[board - 1], threshold)),
             score: 0,
         }
-        if (compareTopDown(chosen.simulation, prior, oppRatings, threshold) >= 0) break
+        if (compareCoveragePlans(chosen.simulation, prior, oppRatings, threshold, activeBoards) >= 0) break
 
         candidateRatings = chosen.candidateRatings
         currentRatings = chosen.simulation.ratings
@@ -258,9 +313,9 @@ function buildFullTopDownSolution(
 }
 
 /**
- * Finds a top-board solution and an availability-aware depth-first fallback.
- * Candidate recruits are represented by 100-point cohorts by default and one
- * or two recruits are simulated for each strategy.
+ * Finds a full-coverage top-down solution and, when materially different, an
+ * alternate full-coverage solution that favors lower minimum rating thresholds.
+ * Candidate recruits are represented by 100-point cohorts by default.
  */
 export function findRecruitmentSolutions(
     ourRoster: RatedPlayer[],
@@ -276,8 +331,16 @@ export function findRecruitmentSolutions(
     const activeBoards = Math.min(options.boardCap, Math.max(ourRatings.length, oppRatings.length))
     if (!activeBoards) return { solution1: null, solution2: null }
 
+    const threshold = options.balanceThreshold ?? DEFAULT_THRESHOLD
     const cohorts = buildCohorts(options)
-    const candidates: Simulation[] = []
+    const baseRepaired = Array.from({ length: activeBoards }, (_, index) => index + 1)
+        .filter(board => isCompetitive(ourRatings[board - 1], oppRatings[board - 1], threshold))
+    const candidates: Simulation[] = [{
+        recruits: [],
+        ratings: ourRatings.slice(0, options.boardCap),
+        repaired: baseRepaired,
+        score: baseRepaired.length,
+    }]
     for (const first of cohorts) {
         const one = simulate(ourRatings, oppRatings, [first], 0, activeBoards, options)
         if (one) candidates.push(one)
@@ -288,77 +351,36 @@ export function findRecruitmentSolutions(
         }
     }
 
-    // Solution 1 may require more than two recruits. Build a greedy,
-    // board-prioritized sequence until every active board is covered or no
-    // further legal insertion improves the top-down position.
+    // A full solution may require more than two recruits. Build a greedy,
+    // coverage-first sequence until every active board is covered or no legal
+    // insertion improves coverage.
     const fullTopDown = buildFullTopDownSolution(ourRatings, oppRatings, cohorts, activeBoards, options)
     if (fullTopDown) candidates.push(fullTopDown)
 
-    const threshold = options.balanceThreshold ?? DEFAULT_THRESHOLD
-    const baseRepaired = Array.from({ length: activeBoards }, (_, index) => index + 1)
-        .filter(board => isCompetitive(ourRatings[board - 1], oppRatings[board - 1], threshold))
-    const topCandidates = candidates.length ? candidates : [{ recruits: [], ratings: ourRatings, repaired: baseRepaired, score: baseRepaired.length }]
-    const bestTop = [...topCandidates].sort((a, b) => compareTopDown(a, b, oppRatings, threshold))[0]
-    const solution1MinRating = bestTop.recruits.length
-        ? Math.min(...bestTop.recruits.map(recruit => recruit.rating))
+    const bestTop = [...candidates].sort((a, b) => compareCoveragePlans(
+        a,
+        b,
+        oppRatings,
+        threshold,
+        activeBoards,
+    ))[0]
+
+    // Only expose a secondary plan when it also repairs every active board and
+    // has a genuinely different rating/recruit tradeoff. A partial fallback is
+    // less useful than a single clear, actionable full-coverage recommendation.
+    const fullCandidates = candidates.filter(candidate => candidate.repaired.length === activeBoards)
+    const bestLowerThreshold = [...fullCandidates].sort((a, b) => compareCoveragePlans(
+        a,
+        b,
+        oppRatings,
+        threshold,
+        activeBoards,
+        true,
+    ))[0]
+    const bestAlternative = bestLowerThreshold
+        && planKey(bestLowerThreshold) !== planKey(bestTop)
+        ? bestLowerThreshold
         : null
-
-    // A fallback must be genuinely more attainable than the direct strategy.
-    // Cohort values are their ceilings, so this is strict cohort separation.
-    const fallbackCohorts = solution1MinRating === null
-        ? []
-        : cohorts.filter(cohortCeiling => cohortCeiling < solution1MinRating)
-
-    // Group every consecutive top board that no fallback-tier cohort can repair
-    // (i.e. boards that would need a Solution-1-equivalent recruit) into the concession.
-    let concessionCutoff = 0
-    while (
-        concessionCutoff < activeBoards
-        && !isCompetitive(ourRatings[concessionCutoff], oppRatings[concessionCutoff], threshold)
-        && !boardReachableWithCohorts(concessionCutoff, ourRatings, oppRatings, fallbackCohorts, options)
-    ) concessionCutoff++
-
-    const targetZoneTotal = activeBoards - concessionCutoff
-    let bestFallback: FallbackSimulation | undefined
-    if (targetZoneTotal > 0) {
-        const baselineTargetRepaired = Array.from({ length: targetZoneTotal }, (_, index) => index + concessionCutoff)
-            .filter(index => isCompetitive(ourRatings[index], oppRatings[index], threshold)).length
-        const fallbackCandidates: FallbackSimulation[] = []
-        for (const first of fallbackCohorts) {
-            const one = simulate(ourRatings, oppRatings, [first], concessionCutoff, activeBoards, options)
-            if (one && one.repaired.length > baselineTargetRepaired) {
-                fallbackCandidates.push({
-                    ...one,
-                    concessionCutoff,
-                    score: one.repaired.length * 2 - one.recruits.length * 0.75
-                        - (one.recruits.reduce((sum, recruit) => sum + recruit.tier, 0) / one.recruits.length) * 0.05,
-                })
-            }
-            for (const second of fallbackCohorts) {
-                if (second > first) continue
-                const two = simulate(ourRatings, oppRatings, [first, second], concessionCutoff, activeBoards, options)
-                if (two && two.repaired.length > baselineTargetRepaired) {
-                    fallbackCandidates.push({
-                        ...two,
-                        concessionCutoff,
-                        score: two.repaired.length * 2 - two.recruits.length * 0.75
-                            - (two.recruits.reduce((sum, recruit) => sum + recruit.tier, 0) / two.recruits.length) * 0.05,
-                    })
-                }
-            }
-        }
-        // Suppress low-signal recommendations: the fallback must repair at least half of
-        // the non-conceded target zone or add two net-new boards over the starting roster.
-        const qualifyingCandidates = fallbackCandidates.filter(candidate =>
-            candidate.repaired.length / targetZoneTotal >= 0.5
-            || candidate.repaired.length - baselineTargetRepaired >= 2
-        )
-        // Repair count is the primary objective. Score then chooses the lighter,
-        // lower-tier option only among cascades that repair the same target boards.
-        bestFallback = [...qualifyingCandidates].sort((a, b) =>
-            b.repaired.length - a.repaired.length || b.score - a.score || a.recruits.length - b.recruits.length
-        )[0]
-    }
 
     const topSolution: RecruitmentSolution = {
         strategy: 'top-down',
@@ -369,22 +391,22 @@ export function findRecruitmentSolutions(
         concededBoards: [],
         score: bestTop.score,
         summaryLabel: bestTop.recruits.length
-            ? `Fixes boards ${compactBoards(bestTop.repaired)}.`
+            ? bestTop.repaired.length === activeBoards
+                ? 'Fixes all active boards.'
+                : `Fixes boards ${compactBoards(bestTop.repaired)}; no full-coverage plan was found within the configured caps.`
             : `No legal recruit improves the active boards; currently fixes boards ${compactBoards(bestTop.repaired)}.`,
     }
 
-    const fallbackSolution = bestFallback ? {
-        strategy: 'depth-first-fallback' as const,
-        recruits: bestFallback.recruits,
-        repairedBoards: bestFallback.repaired.length,
-        repairedBoardNumbers: bestFallback.repaired,
-        totalTargetBoards: activeBoards - bestFallback.concessionCutoff,
-        concededBoards: Array.from({ length: bestFallback.concessionCutoff }, (_, index) => index + 1),
-        score: bestFallback.score,
-        summaryLabel: bestFallback.concessionCutoff > 0
-            ? `Concedes upper boards ${compactBoards(Array.from({ length: bestFallback.concessionCutoff }, (_, index) => index + 1))} to focus on lower boards ${compactBoards(Array.from({ length: activeBoards - bestFallback.concessionCutoff }, (_, index) => index + bestFallback.concessionCutoff + 1))}; fixes boards ${compactBoards(bestFallback.repaired)}.`
-            : `Fixes boards ${compactBoards(bestFallback.repaired)}.`,
+    const alternativeSolution = bestAlternative ? {
+        strategy: 'alternative-full-coverage' as const,
+        recruits: bestAlternative.recruits,
+        repairedBoards: bestAlternative.repaired.length,
+        repairedBoardNumbers: bestAlternative.repaired,
+        totalTargetBoards: activeBoards,
+        concededBoards: [],
+        score: bestAlternative.score,
+        summaryLabel: 'Alternative full-coverage plan with a lower rating threshold.',
     } : null
 
-    return { solution1: topSolution, solution2: fallbackSolution }
+    return { solution1: topSolution, solution2: alternativeSolution }
 }

@@ -209,6 +209,60 @@ function registrationHistoryEntries(round) {
     return Object.entries(source).map(([timestamp, value]) => ({ ts: timestamp, added: value }))
 }
 
+function normalizeAddedPlayers(value) {
+    if (!Array.isArray(value)) return []
+    return value.map(player => {
+        if (typeof player === 'string') return { username: player, rating: null }
+        if (!player || typeof player !== 'object') return null
+        const username = player.username ?? player.userName ?? player.handle ?? player.name
+        if (!username) return null
+        const rating = numericRating(player.rating ?? player.dailyRating ?? player.currentRating)
+        return { username: String(username), rating }
+    }).filter(Boolean)
+}
+
+function getRecentOpponentAdditions(round, nowSeconds = Date.now() / 1000) {
+    const seen = new Set()
+    const additions = []
+    registrationHistoryEntries(round).forEach(entry => {
+        const timestamp = historyTimestamp(entry)
+        if (timestamp === null) return
+        const age = nowSeconds - timestamp
+        if (age < 0 || age > SURGE_WINDOW_SECONDS) return
+        const opponent = entry?.opp ?? entry?.opponent ?? entry
+        const added = opponent?.added
+            ?? opponent?.joined
+            ?? opponent?.joins
+            ?? opponent?.playersAdded
+            ?? opponent?.opponentPlayersAdded
+            ?? opponent?.players
+        normalizeAddedPlayers(added).forEach(player => {
+            const key = player.username.toLowerCase()
+            if (seen.has(key)) return
+            seen.add(key)
+            additions.push(player)
+        })
+    })
+    return additions.sort((left, right) => (right.rating ?? -Infinity) - (left.rating ?? -Infinity))
+}
+
+function groupOpponentAdditionsByRating(additions = []) {
+    const groups = new Map()
+    additions.forEach(player => {
+        const rating = numericRating(player?.rating)
+        const key = rating === null
+            ? 'Rating unavailable'
+            : `${Math.floor(rating / 100) * 100}-${Math.floor(rating / 100) * 100 + 99}`
+        groups.set(key, (groups.get(key) || 0) + 1)
+    })
+    return Array.from(groups, ([range, count]) => ({ range, count }))
+        .sort((left, right) => {
+            if (left.range === 'Rating unavailable') return 1
+            if (right.range === 'Rating unavailable') return -1
+            return Number(right.range.split('-')[0]) - Number(left.range.split('-')[0])
+        })
+}
+
 export function getOpponentPlayersAdded24h(round, nowSeconds = Date.now() / 1000) {
     const explicitDelta = round?.opponentPlayersAdded24h ?? round?.registrationData?.opponentPlayersAdded24h
     if (explicitDelta !== undefined) return Math.max(0, numericRating(explicitDelta) ?? 0)
@@ -223,13 +277,19 @@ export function getOpponentPlayersAdded24h(round, nowSeconds = Date.now() / 1000
 
 export function getSurgeRecruitmentStatus(round, nowSeconds = Date.now() / 1000) {
     const matchTime = timestampToSeconds(round?.startTime)
-    if (matchTime === null) return { surgeRecruitment: false, opponentPlayersAdded24h: 0, matchStartsInDays: null }
+    if (matchTime === null) return {
+        surgeRecruitment: false,
+        opponentPlayersAdded24h: 0,
+        recentOpponentAdditions: [],
+        matchStartsInDays: null,
+    }
     const secondsUntilStart = matchTime - nowSeconds
     const matchImminent = secondsUntilStart >= 0 && secondsUntilStart <= SURGE_IMMINENCE_SECONDS
     const opponentPlayersAdded24h = getOpponentPlayersAdded24h(round, nowSeconds)
     return {
         surgeRecruitment: matchImminent && opponentPlayersAdded24h > 3,
         opponentPlayersAdded24h,
+        recentOpponentAdditions: getRecentOpponentAdditions(round, nowSeconds),
         matchStartsInDays: Math.max(0, Math.ceil(secondsUntilStart / DAY_SECONDS)),
     }
 }
@@ -365,15 +425,6 @@ function recruitmentSummary(suggestions) {
     return `Recruit ${primary.needed} player${primary.needed !== 1 ? 's' : ''} (${cohorts.join(', ')}) to fix ${primary.repairedBoards}/${primary.totalBoards} boards`
 }
 
-// The fixed/total pill already conveys which boards are repaired, so drop that clause from the summary sentence.
-function stripRedundantFixSummary(text) {
-    if (!text) return ''
-    return text
-        .replace(/;\s*(currently\s+)?fixes boards [^.]+\.$/i, '.')
-        .replace(/^(currently\s+)?fixes boards [^.]+\.$/i, '')
-        .trim()
-}
-
 function recruitThresholdLabel(minimumRating) {
     return `${Math.ceil(minimumRating / 25) * 25}+`
 }
@@ -396,6 +447,18 @@ export function buildRecruitmentSuggestions(ourTeam, opponentTeam, maxBoards, ro
     if (sectionBounds.min > sectionBounds.max) return []
     const activeBoards = Math.min(boardLimit, Math.max(ourRatings.length, oppRatings.length))
     if (!activeBoards) return []
+    const currentBoardGaps = Array.from({ length: activeBoards }, (_, index) => {
+        const opponentRating = oppRatings[index]
+        const ourRating = ourRatings[index]
+        if (opponentRating === undefined) return null
+        if (ourRating !== undefined && opponentRating - ourRating <= BALANCE_THRESHOLD) return null
+        return {
+            board: index + 1,
+            ourRating: ourRating ?? null,
+            opponentRating,
+            gap: ourRating === undefined ? null : opponentRating - ourRating,
+        }
+    }).filter(Boolean)
     const configuredCeilings = [...sectionSources, round]
         .map(source => getBoundValue(source, ['availabilityCeiling', 'recruitmentAvailabilityCeiling', 'maxRecruitRating']))
         .filter(value => value !== null)
@@ -417,18 +480,19 @@ export function buildRecruitmentSuggestions(ourTeam, opponentTeam, maxBoards, ro
 
     return [solution1, solution2].filter(Boolean).map(solution => {
         const cohorts = solution.recruits.map(recruit => recruitThresholdLabel(recruit.exactMinRequiredRating))
-        // Coverage is reported against every active board, not just the post-concession target zone, so partial fallbacks read honestly.
+        // Coverage is reported against every active board so each option can be
+        // compared directly in the expanded action-item details.
         const totalBoards = solution.totalTargetBoards + solution.concededBoards.length
         return {
             kind: solution.strategy,
-            title: solution.strategy === 'top-down' ? 'Top-Down' : 'Depth-First Fallback',
+            title: solution.strategy === 'top-down' ? 'Top-Down Full Coverage' : 'Lower Threshold',
             needed: solution.recruits.length,
             cohorts,
             ratingLabel: cohorts.join(' and '),
-            impact: stripRedundantFixSummary(solution.summaryLabel),
             repairedBoards: solution.repairedBoards,
+            repairedBoardNumbers: solution.repairedBoardNumbers,
+            currentBoardGaps,
             totalBoards,
-            capNote: sectionBounds.hasCap ? `Capped at ${sectionBounds.max}` : '',
         }
     })
 
@@ -684,6 +748,7 @@ function ActionItems() {
                                 playerDeficitThreshold,
                                 surgeRecruitment: surgeStatus.surgeRecruitment,
                                 opponentPlayersAdded24h: surgeStatus.opponentPlayersAdded24h,
+                                recentOpponentAdditions: surgeStatus.recentOpponentAdditions,
                                 matchStartsInDays: surgeStatus.matchStartsInDays,
                                 activeBoardCount,
                                 statusLevel: status.level,
@@ -817,6 +882,32 @@ function ActionItems() {
 
                                                 <div className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-[2000px] opacity-100 mt-3' : 'max-h-0 opacity-0'}`} aria-hidden={!isExpanded}>
                                                     <div className="space-y-3">
+                                                        {match.warnings.opponentPlayersAdded24h > 0 && (
+                                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                                <div className="text-xs font-semibold text-gray-800 mb-1">Opponent registration activity</div>
+                                                                <div className="text-[11px] text-gray-600">
+                                                                    +{match.warnings.opponentPlayersAdded24h} player{match.warnings.opponentPlayersAdded24h === 1 ? '' : 's'} added in the last 24 hours
+                                                                    {match.warnings.matchStartsInDays !== null && (
+                                                                        <> · Match starts {match.warnings.matchStartsInDays === 0 ? 'today' : `in ${match.warnings.matchStartsInDays} day${match.warnings.matchStartsInDays === 1 ? '' : 's'}`}</>
+                                                                    )}
+                                                                </div>
+                                                                {match.warnings.recentOpponentAdditions?.length > 0 ? (
+                                                                    <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                                                                        {groupOpponentAdditionsByRating(match.warnings.recentOpponentAdditions).map(group => (
+                                                                            <div key={group.range} className="flex items-center justify-between gap-3 rounded border border-gray-200 bg-white px-2.5 py-1.5 text-[10px] text-gray-700">
+                                                                                <span className="font-medium">Rating {group.range}</span>
+                                                                                <span className="whitespace-nowrap rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-600">
+                                                                                    {group.count} player{group.count === 1 ? '' : 's'}
+                                                                                </span>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="mt-1 text-[11px] text-gray-500">Rating ranges were not included in the registration update.</div>
+                                                                )}
+                                                            </div>
+                                                        )}
+
                                                         {match.warnings.highRiskTimeoutPlayers?.length > 0 && (
                                                             <div className="bg-gray-50 p-3 rounded-lg">
                                                                 <div className="text-xs font-semibold text-gray-800 mb-2">Timeout Removal Guidance</div>
@@ -834,15 +925,31 @@ function ActionItems() {
                                                         {hasRecruitment && (
                                                             <div className="bg-gray-50 p-3 rounded-lg">
                                                                 <div className="text-xs font-semibold text-gray-800 mb-2">Recruitment options</div>
+                                                                {(match.warnings.recruitmentSuggestions[0]?.currentBoardGaps || []).length > 0 && (
+                                                                    <div className="mb-2 rounded border border-gray-200 bg-white px-2.5 py-2">
+                                                                        <div className="text-[11px] font-semibold text-gray-700">Current board gaps</div>
+                                                                        <div className="mt-1 flex flex-wrap gap-1.5">
+                                                                            {match.warnings.recruitmentSuggestions[0].currentBoardGaps.map(gap => (
+                                                                                <span key={gap.board} className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-800">
+                                                                                    <span>Board {gap.board}</span>
+                                                                                    <span className="font-normal text-amber-700">{gap.gap === null ? 'No player' : `-${gap.gap} gap`}</span>
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                                 <div className="space-y-2">
                                                                     {match.warnings.recruitmentSuggestions.map((sugg, suggestionIndex) => (
-                                                                        <div key={suggestionIndex} className="text-xs text-gray-700">
+                                                                        <div key={suggestionIndex} className="rounded border border-gray-200 bg-white px-2.5 py-2 text-xs text-gray-700">
                                                                             <div className="flex items-center justify-between gap-2">
-                                                                                <span className="font-semibold">Option {suggestionIndex + 1}: {sugg.title}</span>
+                                                                                <span className="font-semibold">
+                                                                                    {match.warnings.recruitmentSuggestions.length > 1 && `${suggestionIndex === 0 ? 'Primary' : 'Alternative'} · `}{sugg.title}
+                                                                                </span>
                                                                                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${sugg.repairedBoards >= sugg.totalBoards ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{sugg.repairedBoards}/{sugg.totalBoards} fixed</span>
                                                                             </div>
-                                                                            <div className="mt-1">Recruit {groupRecruitCohorts(sugg.cohorts).join(', ')}.</div>
-                                                                            {(sugg.impact || sugg.capNote) && <div className="mt-1 text-[11px] text-gray-500">{sugg.impact}{sugg.capNote ? ` ${sugg.capNote}.` : ''}</div>}
+                                                                            <div className="mt-1 text-[11px] text-gray-600">
+                                                                                Recruit {groupRecruitCohorts(sugg.cohorts).join(', ')}.
+                                                                            </div>
                                                                         </div>
                                                                     ))}
                                                                 </div>

@@ -72,6 +72,26 @@ def parse_timeout_percent(value: Any) -> Optional[float]:
         return None
 
 
+def parse_nonnegative_count(value: Any) -> Optional[int]:
+    """Normalize optional member-service counters without turning missing data into zero."""
+    try:
+        count = int(value)
+    except (TypeError, ValueError):
+        return None
+    return count if count >= 0 else None
+
+
+def parse_last_online(value: Any) -> Optional[str]:
+    """Keep the service's date-level last-online value in a stable ISO form."""
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return datetime.strptime(text[:10], "%Y-%m-%d").date().isoformat()
+    except ValueError:
+        return None
+
+
 def parse_source_timestamp(value: Any, fallback: datetime) -> str:
     """Convert member-service updateDate (epoch milliseconds) to ISO time."""
     try:
@@ -246,6 +266,9 @@ def refresh_site(site_key: str) -> Dict[str, Any]:
             "dailyRating": parse_rating(member.get("daily_rating")),
             "rating960": parse_rating(member.get("daily_960_rating")),
             "memberServiceTimeoutPercent": parse_timeout_percent(member.get("timeout_percent")),
+            "memberServiceTotalTimeouts": parse_nonnegative_count(member.get("total_timeouts")),
+            "totalMatches90Days": parse_nonnegative_count(member.get("total_matches_entered")),
+            "lastOnlineAt": parse_last_online(member.get("last_online")),
             "fetchedAt": source_updated_at,
             "lastSeenAt": previous.get("lastSeenAt") or source_updated_at,
         }

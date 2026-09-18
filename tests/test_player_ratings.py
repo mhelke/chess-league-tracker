@@ -99,6 +99,15 @@ class PlayerRatingsTests(unittest.TestCase):
         self.assertIsNone(ratings.member_service_members({"members": []}))
         self.assertIsNone(ratings.member_service_members({"updateDate": "not-a-timestamp", "members": []}))
 
+    def test_activity_field_parsers_preserve_unknown_values(self):
+        self.assertEqual(ratings.parse_nonnegative_count("12"), 12)
+        self.assertEqual(ratings.parse_nonnegative_count(0), 0)
+        self.assertIsNone(ratings.parse_nonnegative_count(-1))
+        self.assertIsNone(ratings.parse_nonnegative_count("unknown"))
+        self.assertEqual(ratings.parse_last_online("2026-09-17"), "2026-09-17")
+        self.assertEqual(ratings.parse_last_online("2026-09-17T12:30:00Z"), "2026-09-17")
+        self.assertIsNone(ratings.parse_last_online("not-a-date"))
+
     def test_successful_import_filters_history_and_removes_departed(self):
         with tempfile.TemporaryDirectory() as root:
             config_dir = os.path.join(root, "config", "test")
@@ -126,7 +135,15 @@ class PlayerRatingsTests(unittest.TestCase):
                 with patch.object(ratings, "fetch_member_service_members", return_value={
                     "updateDate": 1789682178103,
                     "members": [
-                        {"username": "ACTIVE", "daily_rating": 1500, "daily_960_rating": 1300, "timeout_percent": 4},
+                        {
+                            "username": "ACTIVE",
+                            "daily_rating": 1500,
+                            "daily_960_rating": 1300,
+                            "timeout_percent": 4,
+                            "total_matches_entered": 12,
+                            "total_timeouts": 2,
+                            "last_online": "2026-09-17",
+                        },
                         {"username": "NewMember", "daily_rating": 1700, "daily_960_rating": 1500},
                     ],
                 }):
@@ -140,6 +157,9 @@ class PlayerRatingsTests(unittest.TestCase):
         self.assertEqual(output["players"]["active"]["dailyRating"], 1500)
         self.assertEqual(output["players"]["active"]["rating960"], 1300)
         self.assertEqual(output["players"]["active"]["memberServiceTimeoutPercent"], 4.0)
+        self.assertEqual(output["players"]["active"]["memberServiceTotalTimeouts"], 2)
+        self.assertEqual(output["players"]["active"]["totalMatches90Days"], 12)
+        self.assertEqual(output["players"]["active"]["lastOnlineAt"], "2026-09-17")
         self.assertNotIn("departed", output["players"])
         self.assertNotIn("not-in-history", output["players"])
 
@@ -158,7 +178,12 @@ class PlayerRatingsTests(unittest.TestCase):
             previous = {
                 "schemaVersion": 1,
                 "membershipStatus": "verified",
-                "players": {"active": {"dailyRating": 1500}},
+                "players": {"active": {
+                    "dailyRating": 1500,
+                    "totalMatches90Days": 8,
+                    "lastOnlineAt": "2026-09-16",
+                    "memberServiceTotalTimeouts": 1,
+                }},
             }
             with open(os.path.join(data_dir, "playerRatings.json"), "w", encoding="utf-8") as handle:
                 json.dump(previous, handle)
@@ -174,6 +199,9 @@ class PlayerRatingsTests(unittest.TestCase):
         self.assertEqual(output["sourceStatus"], "stale")
         self.assertEqual(output["membershipStatus"], "verified")
         self.assertIn("active", output["players"])
+        self.assertEqual(output["players"]["active"]["totalMatches90Days"], 8)
+        self.assertEqual(output["players"]["active"]["lastOnlineAt"], "2026-09-16")
+        self.assertEqual(output["players"]["active"]["memberServiceTotalTimeouts"], 1)
 
 
 if __name__ == "__main__":

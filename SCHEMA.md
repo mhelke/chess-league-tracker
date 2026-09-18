@@ -164,6 +164,9 @@ depend on this service.
       dailyRating: number | null,
       rating960: number | null,
       memberServiceTimeoutPercent: number | null,
+      memberServiceTotalTimeouts: number | null,
+      totalMatches90Days: number | null,
+      lastOnlineAt: string | null,
       fetchedAt: string,
       lastSeenAt: string
     }
@@ -181,7 +184,9 @@ next successful member-service validation; their historical league records
 remain unchanged. A failed validation never removes entries.
 
 The importer maps each member-service `members[]` record's `username`, `daily_rating`,
-`daily_960_rating`, and `timeout_percent` to the corresponding player fields.
+`daily_960_rating`, `timeout_percent`, `total_timeouts`, `total_matches_entered`,
+and `last_online` to the corresponding player fields. `totalMatches90Days` reflects
+the member service's recent match-count field; missing activity values remain null.
 The response-level `updateDate` is an epoch-millisecond source timestamp. A
 response is valid only when it contains both a member list and a valid positive
 `updateDate`. When the service is disabled, the ratings cache is unavailable

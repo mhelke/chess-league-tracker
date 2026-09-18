@@ -833,10 +833,7 @@ function ActionItems() {
 
                                                         {hasRecruitment && (
                                                             <div className="bg-gray-50 p-3 rounded-lg">
-                                                                <div className="flex items-center justify-between gap-2 mb-2">
-                                                                    <div className="text-xs font-semibold text-gray-800">Recruitment options</div>
-                                                                    <button onClick={() => setRecruitsModalMatch(match)} className="text-[11px] font-semibold text-chess-green hover:underline">Suggested Recruits</button>
-                                                                </div>
+                                                                <div className="text-xs font-semibold text-gray-800 mb-2">Recruitment options</div>
                                                                 <div className="space-y-2">
                                                                     {match.warnings.recruitmentSuggestions.map((sugg, suggestionIndex) => (
                                                                         <div key={suggestionIndex} className="text-xs text-gray-700">

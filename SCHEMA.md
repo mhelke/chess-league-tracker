@@ -71,6 +71,7 @@ sub-league has fewer than two numbered rounds.
   matchUrl: string,                  // API URL
   matchWebUrl?: string,              // Web-friendly URL
   name: string,                      // Original match title
+  matchVariant?: string | null,      // Same-round variant (e.g. Classic, Thematic, Chess960)
   startTime?: number | null,         // Unix seconds
   endTime?: number | null,           // Unix seconds
   boards: number,                    // Number of boards
@@ -411,6 +412,7 @@ This document describes the actual structure of `leagueData.json` produced by `s
   matchUrl: string,                  // API URL
   matchWebUrl?: string,              // Web-friendly URL (https://www.chess.com/club/matches/{id})
   name: string,                      // Original match title
+  matchVariant?: string | null,      // Same-round variant (e.g. Classic, Thematic, Chess960)
   startTime?: number | null,         // Unix seconds (may be null)
   endTime?: number | null,           // Unix seconds (may be null)
   boards: number,                    // Number of boards in the match

@@ -299,7 +299,8 @@ def parse_match_title(title: str, team_names: Optional[List[str]] = None) -> Opt
     # Track if we fell back to a bare " vs " split. That is the only case where
     # team1's name may bleed into the sub-league text (ambiguous).
     split_on_vs_only = False
-    if ":" in working:
+    has_structural_colon = ":" in working
+    if has_structural_colon:
         working = working.split(":", 1)[0].strip()
 
     # ── 3. Extract round token ─────────────────────────────────────────────────
@@ -313,10 +314,25 @@ def parse_match_title(title: str, team_names: Optional[List[str]] = None) -> Opt
         (r"\bGame\.?\s*(\d+)\b",         "G"),   # Game 1
     ]
     round_str: Optional[str] = None
+    round_variant: Optional[str] = None
     for rp, prefix in ROUND_PATTERNS:
         round_m = re.search(rp, working, re.IGNORECASE)
         if round_m:
             round_str = f"{prefix}{round_m.group(1)}"
+            # Some competitions schedule several matches for one team
+            # pairing and round, distinguished by a label after the round
+            # token (for example R1 Classic, R1 Thematic, and R1 960).  This
+            # is a match variant, not part of the sub-league name.
+            variant_text = working[round_m.end():].strip()
+            if (has_structural_colon or team_names) and variant_text:
+                for variant_pattern, variant_canonical in VARIANT_PATTERNS:
+                    variant_text = re.sub(
+                        variant_pattern,
+                        variant_canonical,
+                        variant_text,
+                        flags=re.IGNORECASE,
+                    )
+                round_variant = _normalise_spaces(variant_text) or None
             # Keep only the text LEFT of the round token as the sub-league
             # qualifier; text to the right was team1's name (no colon present).
             working = working[:round_m.start()].strip()
@@ -372,6 +388,7 @@ def parse_match_title(title: str, team_names: Optional[List[str]] = None) -> Opt
         "subLeague": sub_league,
         "canonicalSubLeague": canonical_subleague_key(sub_league),
         "round":     round_str,
+        "matchVariant": round_variant,
         "confidence": "high" if team_names else "medium",
     }
 
@@ -747,6 +764,8 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
         "matchResult": match_result,
         "playerStats": cleaned_player_stats
     }
+    if parsed_title.get("matchVariant"):
+        result["matchVariant"] = parsed_title["matchVariant"]
 
     # Internal metadata consumed by the caller for grouping. It is removed
     # before the round is written to leagueData.json.
@@ -1239,6 +1258,27 @@ def _normalised_round_label(round_data: Dict) -> Optional[str]:
     return value or None
 
 
+def _normalised_match_variant(round_data: Dict) -> Optional[str]:
+    """Return the same-round match variant, when the title supplies one.
+
+    Older output did not persist this field, so derive it from the original
+    title as a backwards-compatible fallback.  An absent variant is kept
+    distinct from a named variant: two unlabelled matches in one round are
+    still a collision, while ``Classic``, ``Thematic``, and ``Chess960`` can
+    legitimately coexist.
+    """
+    value = round_data.get("matchVariant")
+    if not value:
+        title = round_data.get("name", "")
+        if title:
+            parsed = parse_match_title(title)
+            value = parsed.get("matchVariant") if parsed else None
+    if not value:
+        return None
+    value = unicodedata.normalize("NFKC", str(value)).casefold()
+    return " ".join(value.split()) or None
+
+
 def _team_round_collisions(left_rounds: List[Dict], right_rounds: List[Dict]) -> List[Dict[str, str]]:
     """Find hard team/round conflicts that make combining two buckets invalid."""
     collisions = []
@@ -1260,6 +1300,14 @@ def _team_round_collisions(left_rounds: List[Dict], right_rounds: List[Dict]) ->
             if left_match and right_match and left_match == right_match:
                 continue
             right_teams = {record["identity"]: record["name"] for record in _round_team_records(right)}
+            left_variant = _normalised_match_variant(left)
+            right_variant = _normalised_match_variant(right)
+            # A named variant represents a separate match in formats such as
+            # Fire and Ashes, which has Classic, Thematic, and 960 matches for
+            # each round.  Only identical variant slots collide; unlabelled
+            # duplicate matches remain guarded by the old invariant.
+            if left_variant and right_variant and left_variant != right_variant:
+                continue
             for identity in sorted(set(left_teams) & set(right_teams)):
                 collisions.append({
                     "team": left_teams.get(identity) or right_teams.get(identity) or identity,

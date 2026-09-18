@@ -792,6 +792,57 @@ class SubLeagueDetectionTests(unittest.TestCase):
             for reason in reasons
         ))
 
+    def test_same_round_match_variants_share_one_subleague(self):
+        fetcher.load_config("1dpmc")
+
+        def match(match_id, variant):
+            return {
+                "round": "R1",
+                "status": "finished",
+                "matchId": match_id,
+                "name": (
+                    f"PCL Fire and Ashes S2 GA R1 {variant}: "
+                    "1 day per move club vs Chess Players Without Borders"
+                ),
+                "teams": [
+                    {"name": "1 day per move club", "clubId": "1-day-per-move-club"},
+                    {"name": "Chess Players Without Borders", "clubId": "chess-players-without-borders"},
+                ],
+                "playerStats": {},
+                "matchResult": {"result": "win"},
+            }
+
+        parsed = fetcher.parse_match_title(
+            match("classic", "Classic")["name"]
+        )
+        self.assertEqual(parsed["subLeague"], "Fire and Ashes S2 GA")
+        self.assertEqual(parsed["matchVariant"], "Classic")
+        self.assertEqual(
+            fetcher.parse_match_title(match("960", "960")["name"])["matchVariant"],
+            "Chess960",
+        )
+
+        output = fetcher.rebuild_leagues_output(
+            {"PCL": {"subLeagues": {
+                "Fire and Ashes S2 GA": {"rounds": [
+                    match("classic", "Classic"),
+                    match("thematic", "Thematic"),
+                    match("960", "960"),
+                ]},
+            }}},
+            {}, {}, {},
+        )
+
+        self.assertEqual(list(output["PCL"]["subLeagues"]), ["Fire and Ashes S2 GA"])
+        self.assertEqual(
+            {round_data["matchId"] for round_data in output["PCL"]["subLeagues"]["Fire and Ashes S2 GA"]["rounds"]},
+            {"classic", "thematic", "960"},
+        )
+        self.assertEqual(
+            output["PCL"]["subLeagues"]["Fire and Ashes S2 GA"]["diagnostics"]["ambiguousMatches"],
+            [],
+        )
+
     def test_team_round_collision_also_partitions_fresh_batch(self):
         fetcher.load_config("teamusa")
         key = ("WL", fetcher.canonical_subleague_key("2026 Open"))

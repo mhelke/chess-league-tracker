@@ -528,6 +528,7 @@ function ActionItems() {
     const [loading, setLoading] = useState(true)
     const [recruitsModalMatch, setRecruitsModalMatch] = useState(null)
     const [expandedMatches, setExpandedMatches] = useState(() => new Set())
+    const recruitmentEnabled = playerRatings?.recruitmentEnabled === true
 
     useEffect(() => {
         Promise.all([
@@ -602,7 +603,7 @@ function ActionItems() {
                         // A mismatch still takes priority when multiple issues apply;
                         // this creates one recommendation set rather than duplicating it
                         // for the player deficit or surge warning.
-                        if (showRecruitmentRecommendations) {
+                        if (showRecruitmentRecommendations && recruitmentEnabled) {
                             recruitmentSuggestions = buildRecruitmentSuggestions(
                                 round.registrationData.ourRoster || [],
                                 round.registrationData.oppRoster || [],
@@ -709,7 +710,7 @@ function ActionItems() {
         // Sort by startTime ascending
         matches.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
         return matches
-    }, [data, timeoutData])
+    }, [data, timeoutData, recruitmentEnabled])
 
     // Group by date
     const matchesByDate = useMemo(() => {
@@ -759,7 +760,9 @@ function ActionItems() {
                                     const isExpanded = expandedMatches.has(matchKey)
                                     const metricBadges = getMetricBadges(match.warnings)
                                     const summary = recruitmentSummary(match.warnings.recruitmentSuggestions)
-                                    const hasRecruitment = match.warnings.showRecruitmentRecommendations && match.warnings.recruitmentSuggestions.length > 0
+                                    const hasRecruitment = recruitmentEnabled
+                                        && match.warnings.showRecruitmentRecommendations
+                                        && match.warnings.recruitmentSuggestions.length > 0
 
                                     return (
                                         <div key={matchKey} className={`card p-0 border-l-4 overflow-hidden ${match.warnings.status.level === 'urgent' ? 'border-red-400' : match.warnings.status.level === 'advisory' ? 'border-amber-400' : 'border-green-400'}`}>

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Build a bounded, membership-verified cache of current daily ratings.
+"""Import current member ratings from the optional member-data service.
 
-The cache is intentionally a lookup table, not a rating history.  Historical
-league data discovers candidates, while the Club Members API decides whether a
-candidate still belongs to the club.
+The member service performs the expensive Chess.com member/statistics work and
+returns one cached roster response per club. This script keeps the local
+ratings lookup compact: only players present in local league history and in the
+latest valid member response are retained. The service is optional so forks
+can disable rating-based recruitment while retaining league and risk data.
 """
 
 import argparse
@@ -12,8 +14,7 @@ import json
 import os
 import sys
 import tempfile
-import time
-from typing import Any, Dict, Iterable, Optional, Set, Tuple
+from typing import Any, Dict, Iterable, Optional
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -21,6 +22,7 @@ from urllib.request import Request, urlopen
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 DEFAULT_USER_AGENT = "ChessLeagueTracker/1.0"
+MEMBER_SERVICE_URL = "https://chessteamdata.com/api/members"
 
 
 def utc_now() -> datetime:
@@ -35,34 +37,48 @@ def normalise_username(value: Any) -> str:
     return str(value or "").strip().casefold()
 
 
-def fetch_json(url: str, user_agent: str) -> Optional[Dict[str, Any]]:
-    """Fetch public Chess.com JSON.  None means the response was unusable."""
+def fetch_member_service_members(url: str, club_id: str, user_agent: str) -> Optional[Dict[str, Any]]:
+    """Fetch one cached member-service roster response for a club."""
     try:
-        request = Request(url, headers={"User-Agent": user_agent})
+        request = Request(
+            url,
+            headers={"User-Agent": user_agent, "clubid": club_id},
+        )
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
         return payload if isinstance(payload, dict) else None
     except HTTPError as exc:
-        print(f"  [WARN] HTTP {exc.code} fetching {url}", file=sys.stderr)
-    except URLError as exc:
-        print(f"  [WARN] Network error fetching {url}: {exc}", file=sys.stderr)
-    except json.JSONDecodeError as exc:
-        print(f"  [WARN] Invalid JSON from {url}: {exc}", file=sys.stderr)
+        print(f"  [WARN] HTTP {exc.code} fetching member-service data for {club_id}", file=sys.stderr)
+    except (URLError, TimeoutError) as exc:
+        print(f"  [WARN] Network error fetching member-service data for {club_id}: {exc}", file=sys.stderr)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        print(f"  [WARN] Invalid member-service data for {club_id}: {exc}", file=sys.stderr)
     return None
 
 
-def extract_ratings(stats: Dict[str, Any]) -> Tuple[Optional[int], Optional[int]]:
-    """Return the latest Daily and Daily Chess960 ratings from /stats."""
-    ratings = []
-    for variant_key in ("chess_daily", "chess960_daily"):
-        variant = stats.get(variant_key) or {}
-        last = variant.get("last") if isinstance(variant, dict) else None
-        rating = last.get("rating") if isinstance(last, dict) else None
-        try:
-            ratings.append(int(rating) if rating is not None else None)
-        except (TypeError, ValueError):
-            ratings.append(None)
-    return ratings[0], ratings[1]
+def parse_rating(value: Any) -> Optional[int]:
+    """Normalize member-service ratings; the service uses 0 for unavailable."""
+    try:
+        rating = int(value)
+    except (TypeError, ValueError):
+        return None
+    return rating if rating > 0 else None
+
+
+def parse_timeout_percent(value: Any) -> Optional[float]:
+    try:
+        return float(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def parse_source_timestamp(value: Any, fallback: datetime) -> str:
+    """Convert member-service updateDate (epoch milliseconds) to ISO time."""
+    try:
+        timestamp = float(value) / 1000.0
+        return iso_timestamp(datetime.fromtimestamp(timestamp, timezone.utc))
+    except (TypeError, ValueError, OverflowError, OSError):
+        return iso_timestamp(fallback)
 
 
 def iter_rounds(leagues: Dict[str, Any]) -> Iterable[Dict[str, Any]]:
@@ -77,39 +93,15 @@ def iter_rounds(leagues: Dict[str, Any]) -> Iterable[Dict[str, Any]]:
                     yield round_data
 
 
-def _record_player(players: Dict[str, Tuple[str, float]], username: Any, seen_ts: float) -> None:
-    display_name = str(username or "").strip()
-    key = normalise_username(display_name)
-    if not key:
-        return
-    prior = players.get(key)
-    if prior is None or seen_ts > prior[1]:
-        players[key] = (display_name, seen_ts)
-
-
-def discover_players(
-    leagues: Dict[str, Any], now_ts: float, refresh_window_days: int
-) -> Tuple[Dict[str, Tuple[str, float]], Set[str]]:
-    """Return own-club historical players and the active/recent refresh cohort."""
-    seen: Dict[str, Tuple[str, float]] = {}
-    refresh: Set[str] = set()
-    cutoff = now_ts - refresh_window_days * 86400
-
+def discover_historical_players(leagues: Dict[str, Any]) -> Dict[str, str]:
+    """Return every player represented in local league history."""
+    seen: Dict[str, str] = {}
     for round_data in iter_rounds(leagues):
-        status = str(round_data.get("status") or "").casefold()
-        raw_start = round_data.get("startTime")
-        try:
-            start_ts = float(raw_start)
-        except (TypeError, ValueError):
-            start_ts = 0.0
-        is_live = status in {"open", "in_progress"}
-        is_recent = start_ts >= cutoff if start_ts else False
-        seen_ts = max(start_ts, now_ts) if is_live else start_ts
-
         usernames = []
         player_stats = round_data.get("playerStats") or {}
         if isinstance(player_stats, dict):
             usernames.extend(player_stats.keys())
+
         registration = round_data.get("registrationData") or {}
         if isinstance(registration, dict):
             usernames.extend(
@@ -117,31 +109,39 @@ def discover_players(
                 for player in registration.get("ourRoster") or []
                 if isinstance(player, dict)
             )
-        usernames.extend(
-            board.get("ourPlayer")
-            for board in round_data.get("boardsData") or []
-            if isinstance(board, dict)
-        )
+
+        for board in round_data.get("boardsData") or []:
+            if isinstance(board, dict):
+                usernames.append(board.get("ourPlayer"))
 
         for username in usernames:
-            _record_player(seen, username, seen_ts)
-            key = normalise_username(username)
-            if key and (is_live or is_recent):
-                refresh.add(key)
-    return seen, refresh
+            display_name = str(username or "").strip()
+            key = normalise_username(display_name)
+            if key:
+                seen.setdefault(key, display_name)
+    return seen
 
 
-def current_members(data: Dict[str, Any]) -> Optional[Set[str]]:
-    """Validate and normalize the complete current-membership response."""
-    if not all(isinstance(data.get(group), list) for group in ("weekly", "monthly", "all_time")):
+def member_service_members(payload: Dict[str, Any]) -> Optional[Dict[str, Dict[str, Any]]]:
+    """Validate and normalize the complete member-service response."""
+    raw_members = payload.get("members")
+    update_date = payload.get("updateDate")
+    try:
+        # The service contract uses a positive Unix epoch in milliseconds.
+        if float(update_date) <= 0:
+            return None
+    except (TypeError, ValueError):
         return None
-    members: Set[str] = set()
-    for group in ("weekly", "monthly", "all_time"):
-        for member in data[group]:
-            if isinstance(member, dict):
-                key = normalise_username(member.get("username"))
-                if key:
-                    members.add(key)
+    if not isinstance(raw_members, list):
+        return None
+
+    members: Dict[str, Dict[str, Any]] = {}
+    for member in raw_members:
+        if not isinstance(member, dict):
+            continue
+        key = normalise_username(member.get("username"))
+        if key:
+            members[key] = member
     return members
 
 
@@ -171,19 +171,10 @@ def write_json_atomically(path: str, value: Dict[str, Any]) -> None:
         raise
 
 
-def parse_iso_timestamp(value: Any) -> float:
-    if not isinstance(value, str):
-        return 0.0
-    try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
-    except ValueError:
-        return 0.0
-
-
-def refresh_site(site_key: str, force: bool = False, usernames: Optional[Set[str]] = None) -> Dict[str, Any]:
+def refresh_site(site_key: str) -> Dict[str, Any]:
     config_dir = os.path.join(PROJECT_ROOT, "config", site_key)
-    params = load_json(os.path.join(config_dir, "script_params.json"), {})
     league_config = load_json(os.path.join(config_dir, "league_config.json"), {})
+    params = load_json(os.path.join(config_dir, "script_params.json"), {})
     club_id = league_config.get("clubId")
     if not isinstance(club_id, str) or not club_id:
         raise ValueError(f"Missing clubId for site '{site_key}'")
@@ -197,115 +188,94 @@ def refresh_site(site_key: str, force: bool = False, usernames: Optional[Set[str
     existing = load_json(output_path, {})
     existing_players = existing.get("players") if isinstance(existing.get("players"), dict) else {}
     now = utc_now()
-    now_ts = now.timestamp()
-    refresh_days = int(params.get("ratingsRefreshWindowDays", 180))
-    retention_days = int(params.get("ratingsRetentionDays", 365))
-    request_delay = float(params.get("ratingsRequestDelaySeconds", 0.3))
-    user_agent = os.environ.get("USER_AGENT", params.get("userAgent", DEFAULT_USER_AGENT))
+    user_agent = os.environ.get("USER_AGENT", DEFAULT_USER_AGENT)
+    member_service_enabled = bool(params.get("memberServiceEnabled", False))
+    recruitment_enabled = bool(params.get("recruitmentEnabled", False))
+    member_service_url = str(params.get("memberServiceUrl") or MEMBER_SERVICE_URL)
+    historical = discover_historical_players(league_data.get("leagues") or {})
 
-    membership_data = fetch_json(f"https://api.chess.com/pub/club/{club_id}/members", user_agent)
-    members = current_members(membership_data) if membership_data else None
-    output: Dict[str, Any] = {
-        "schemaVersion": 1,
-        "generatedAt": iso_timestamp(now),
-        "refreshWindowDays": refresh_days,
-        "retentionDays": retention_days,
-        "membershipStatus": "verified" if members is not None else "unverified",
-        "membershipVerifiedAt": iso_timestamp(now) if members is not None else existing.get("membershipVerifiedAt"),
-        "players": dict(existing_players),
-    }
-
-    if members is None:
+    if not member_service_enabled:
+        output = {
+            "schemaVersion": 1,
+            "generatedAt": iso_timestamp(now),
+            "source": "member-service",
+            "sourceStatus": "disabled",
+            "sourceUpdatedAt": None,
+            "lastAttemptedAt": None,
+            "membershipStatus": "unverified",
+            "membershipVerifiedAt": None,
+            "recruitmentEnabled": False,
+            "players": {},
+        }
         write_json_atomically(output_path, output)
-        print(f"Membership validation failed for {site_key}; retained {len(existing_players)} entries and marked cache unverified.")
+        print(f"{site_key}: member service disabled; ratings/recruitment cache unavailable.")
         return output
 
-    seen, refresh_cohort = discover_players(league_data.get("leagues") or {}, now_ts, refresh_days)
-    seen = {key: value for key, value in seen.items() if key in members}
-    refresh_cohort.intersection_update(members)
-    selected = {normalise_username(name) for name in (usernames or set()) if normalise_username(name)}
-    if selected:
-        refresh_cohort.intersection_update(selected)
+    payload = fetch_member_service_members(member_service_url, club_id, user_agent)
+    members = member_service_members(payload) if payload else None
 
-    retention_cutoff = now_ts - retention_days * 86400
+    if members is None:
+        output = {
+            "schemaVersion": 1,
+            "generatedAt": iso_timestamp(now),
+            "source": "member-service",
+            "sourceStatus": "stale" if existing_players else "unavailable",
+            "sourceUpdatedAt": existing.get("sourceUpdatedAt"),
+            "lastAttemptedAt": iso_timestamp(now),
+            "membershipStatus": existing.get("membershipStatus", "unverified"),
+            "membershipVerifiedAt": existing.get("membershipVerifiedAt"),
+            "recruitmentEnabled": recruitment_enabled,
+            "players": dict(existing_players),
+        }
+        write_json_atomically(output_path, output)
+        print(
+            f"{site_key}: member-service data unavailable; retained {len(existing_players)} cached players.",
+            file=sys.stderr,
+        )
+        return output
+
+    source_updated_at = parse_source_timestamp(payload.get("updateDate"), now)
     players: Dict[str, Dict[str, Any]] = {}
-    removed_departed = 0
-    pruned = 0
-    for username, entry in existing_players.items():
-        key = normalise_username(username)
-        if not key or not isinstance(entry, dict):
+    for key, display_name in historical.items():
+        member = members.get(key)
+        if member is None:
             continue
-        if key not in members:
-            removed_departed += 1
-            continue
-        last_seen_ts = parse_iso_timestamp(entry.get("lastSeenAt"))
-        if key in seen:
-            last_seen_ts = seen[key][1]
-        if last_seen_ts and last_seen_ts < retention_cutoff and key not in refresh_cohort:
-            pruned += 1
-            continue
-        players[key] = dict(entry)
+        previous = existing_players.get(key) if isinstance(existing_players.get(key), dict) else {}
+        players[key] = {
+            "username": str(member.get("username") or display_name),
+            "dailyRating": parse_rating(member.get("daily_rating")),
+            "rating960": parse_rating(member.get("daily_960_rating")),
+            "memberServiceTimeoutPercent": parse_timeout_percent(member.get("timeout_percent")),
+            "fetchedAt": source_updated_at,
+            "lastSeenAt": previous.get("lastSeenAt") or source_updated_at,
+        }
 
-    newly_retained: Set[str] = set()
-    for key, (display_name, seen_ts) in seen.items():
-        # Do not resurrect a long-inactive historical player after retention
-        # pruned it. They become eligible again only through recent/live play.
-        if key not in players and seen_ts < retention_cutoff and key not in refresh_cohort:
-            continue
-        if key not in players:
-            newly_retained.add(key)
-        entry = players.setdefault(key, {})
-        entry["username"] = display_name
-        entry["lastSeenAt"] = iso_timestamp(datetime.fromtimestamp(seen_ts, timezone.utc))
-
-    targets = set(refresh_cohort)
-    targets.update(newly_retained)
-    targets.update(
-        key for key, entry in players.items()
-        if entry.get("fetchStatus") == "failed"
-    )
-    if selected:
-        targets = selected & members
-    elif force:
-        targets = set(players)
-
-    fetched = 0
-    failed = 0
-    for username in sorted(targets):
-        stats = fetch_json(f"https://api.chess.com/pub/player/{username}/stats", user_agent)
-        entry = players.setdefault(username, {"username": seen.get(username, (username, now_ts))[0]})
-        entry["lastAttemptedAt"] = iso_timestamp(now)
-        if stats is None:
-            entry["fetchStatus"] = "failed"
-            failed += 1
-        else:
-            daily_rating, rating_960 = extract_ratings(stats)
-            entry.update({
-                "dailyRating": daily_rating,
-                "rating960": rating_960,
-                "fetchedAt": iso_timestamp(now),
-                "fetchStatus": "ok",
-            })
-            fetched += 1
-        if request_delay:
-            time.sleep(request_delay)
-
-    output["players"] = players
+    output = {
+        "schemaVersion": 1,
+        "generatedAt": iso_timestamp(now),
+        "source": "member-service",
+        "sourceStatus": "ok",
+        "sourceUpdatedAt": source_updated_at,
+        "lastAttemptedAt": iso_timestamp(now),
+        "membershipStatus": "verified",
+        "membershipVerifiedAt": source_updated_at,
+        "recruitmentEnabled": recruitment_enabled,
+        "players": players,
+    }
     write_json_atomically(output_path, output)
+    removed = len(set(existing_players) - set(players))
     print(
-        f"{site_key}: members={len(members)}, seen={len(seen)}, refresh={len(refresh_cohort)}, "
-        f"fetched={fetched}, failed={failed}, removed_departed={removed_departed}, pruned={pruned}."
+        f"{site_key}: memberServiceUpdate={source_updated_at}, members={len(members)}, "
+        f"retained={len(players)}, removed={removed}.",
     )
     return output
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Refresh membership-verified daily ratings.")
+    parser = argparse.ArgumentParser(description="Import current ratings from ChessClubData.")
     parser.add_argument("--site-key", required=True, help="Site key under config/ and public/data/.")
-    parser.add_argument("--force", action="store_true", help="Refresh every retained current member.")
-    parser.add_argument("--username", action="append", default=[], help="Refresh one current member (repeatable).")
     args = parser.parse_args()
-    refresh_site(args.site_key, force=args.force, usernames=set(args.username))
+    refresh_site(args.site_key)
 
 
 if __name__ == "__main__":

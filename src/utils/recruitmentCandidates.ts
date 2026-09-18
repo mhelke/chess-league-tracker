@@ -38,8 +38,12 @@ export interface LeagueDataLike {
 }
 
 export interface PlayerRatingsLike {
+    recruitmentEnabled?: boolean
     membershipStatus?: 'verified' | 'unverified'
     membershipVerifiedAt?: string | null
+    sourceStatus?: 'ok' | 'stale' | 'unavailable' | 'disabled'
+    sourceUpdatedAt?: string | null
+    lastAttemptedAt?: string | null
     players?: {
         [username: string]: {
             dailyRating?: number | null
@@ -59,7 +63,6 @@ export interface RecruitCandidate {
 
 const MAX_CANDIDATES_PER_TIER = 5
 const RECENT_ROUND_WINDOW_DAYS = 180
-const MAX_CACHE_AGE_MS = 36 * 60 * 60 * 1000
 
 /**
  * Chess960 matches are identified by the API's authoritative `apiMetadata.rules` field.
@@ -81,23 +84,19 @@ function isRecentRound(round: RoundLike): boolean {
 }
 
 /**
- * Collects roster candidates from rounds whose own variant matches `variant`. Roster
- * snapshots are refreshed on every fetch of an open match, so a same-variant snapshot
- * is both fresh and guaranteed to be the correct rating type — no other source needed.
+ * Collects roster candidates from rounds whose own variant matches `variant`. The
+ * member-service snapshot supplies the current variant-specific rating; its normal
+ * daily/weekly cadence is accepted when the service is temporarily unavailable.
  */
-function isFreshTimestamp(value: string | null | undefined): boolean {
-    const timestamp = Date.parse(value || '')
-    return Number.isFinite(timestamp) && Date.now() - timestamp <= MAX_CACHE_AGE_MS
-}
-
 function resolveCurrentRating(
     ratings: PlayerRatingsLike | null | undefined,
     username: string,
     variant: MatchVariant,
 ): number | null {
-    if (ratings?.membershipStatus !== 'verified' || !isFreshTimestamp(ratings.membershipVerifiedAt)) return null
+    if (ratings?.recruitmentEnabled !== true) return null
+    if (ratings?.membershipStatus !== 'verified') return null
     const entry = ratings.players?.[username.toLowerCase()]
-    if (!entry || !isFreshTimestamp(entry.fetchedAt)) return null
+    if (!entry) return null
     const rating = variant === 'chess960' ? entry.rating960 : entry.dailyRating
     return Number.isFinite(rating) ? rating as number : null
 }
@@ -134,7 +133,7 @@ function collectRosterCandidates(
 
 /**
  * Finds up to 5 active player candidates at or above `minRating`, preferring players
- * already registered in other Sub-League matches before expanding to the parent League.
+ * already registered in other Sub-League matches before expanding to the main League.
  * Only roster snapshots from rounds matching the target match's variant are considered,
  * since a chess960 rating and a daily rating are not comparable.
  */

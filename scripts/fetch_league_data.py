@@ -642,7 +642,8 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
                     if board:
                         our_boards[board] = {
                             "username": player.get("username"),
-                            "rating": player.get("rating")
+                            "rating": player.get("rating"),
+                            "timeoutPercent": player.get("timeout_percent"),
                         }
             
             for player in opponent_players:
@@ -651,7 +652,8 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
                     if board:
                         opponent_boards[board] = {
                             "username": player.get("username"),
-                            "rating": player.get("rating")
+                            "rating": player.get("rating"),
+                            "timeoutPercent": player.get("timeout_percent"),
                         }
             
             # Calculate rating differential for each board
@@ -667,8 +669,10 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
                         "boardNumber": board_num,
                         "ourPlayer": our_player.get("username"),
                         "ourRating": our_rating,
+                        "ourTimeoutPercent": our_player.get("timeoutPercent"),
                         "oppPlayer": opp_player.get("username"),
                         "oppRating": opp_rating,
+                        "oppTimeoutPercent": opp_player.get("timeoutPercent"),
                         "ratingDiff": None
                     }
                     
@@ -681,14 +685,16 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
             # No board assignments yet, so collect all registered players
             # Sort by rating descending.
             our_roster = sorted(
-                [{"username": p.get("username"), "rating": p.get("rating")} 
+                [{"username": p.get("username"), "rating": p.get("rating"),
+                  "timeoutPercent": p.get("timeout_percent")}
                  for p in players if isinstance(p, dict) and p.get("username")],
                 key=lambda x: x.get("rating") or 0,
                 reverse=True
             )
             
             opp_roster = sorted(
-                [{"username": p.get("username"), "rating": p.get("rating")} 
+                [{"username": p.get("username"), "rating": p.get("rating"),
+                  "timeoutPercent": p.get("timeout_percent")}
                  for p in opponent_players if isinstance(p, dict) and p.get("username")],
                 key=lambda x: x.get("rating") or 0,
                 reverse=True

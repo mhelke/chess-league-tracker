@@ -1,6 +1,9 @@
 {
   "clubId": "team-usa",
   "leagues": [
-    {"root_pattern": "\\bWL", "name": "WL"}
+    {"root_pattern": "\\bWL", "name": "WL"},
+    {"root_pattern": "\\b1WL\\b", "name": "1WL"},
+    {"root_pattern": "\\b(?:WCGC|World Champions Gold Cup)\\b", "name": "WCGC"},
+    {"root_pattern": "\\bPANAM(?=\\d|\\b)", "name": "PANAM"}
   ]
 }

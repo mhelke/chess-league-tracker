@@ -1,250 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
-import { computeMatchupRatings } from '../utils/ratingUtils'
+import { useSearchParams } from 'react-router-dom'
 import { findRecruitmentSolutions } from '../utils/recruitmentSolutions'
+import { BALANCE_THRESHOLD, collectActionItems, normalizeMatchId, numericRating } from '../utils/actionItemUtils'
 import SuggestedRecruitsModal from '../components/SuggestedRecruitsModal'
 
-const BALANCE_THRESHOLD = 50
-const DEFAULT_PLAYER_DEFICIT_THRESHOLD = 3
-const DAY_SECONDS = 24 * 60 * 60
-const SURGE_WINDOW_SECONDS = DAY_SECONDS
-const SURGE_IMMINENCE_SECONDS = 5 * DAY_SECONDS
-
-const MATCH_STATUS_META = {
-    urgent: {
-        icon: '🔴',
-        label: 'URGENT: Action Required',
-        className: 'border-red-300 bg-red-50 text-red-900',
-        reasonClassName: 'text-red-800',
-    },
-    advisory: {
-        icon: '🟡',
-        label: 'ADVISORY: Match Monitoring',
-        className: 'border-amber-300 bg-amber-50 text-amber-900',
-        reasonClassName: 'text-amber-800',
-    },
-    secure: {
-        icon: '🟢',
-        label: 'SECURE: Match Ready',
-        className: 'border-green-300 bg-green-50 text-green-900',
-        reasonClassName: 'text-green-800',
-    },
-}
-
-/**
- * Classifies a match independently from the individual warning alerts.
- * The returned metadata is ready for the status banner rendered by the card.
- */
-export function getMatchStatusLevel({
-    minNotMet = false,
-    ourCount = 0,
-    oppCount = 0,
-    ratingDisadvantage = false,
-    mismatchedBoardCount = 0,
-    activeBoards = 0,
-    playerDeficit = false,
-    surgeRecruitment = false,
-    avgDiff = 0,
-    highRiskTimeoutPresent = false,
-    highRiskRemovalDropsBelowMinimum = false,
-    highRiskRemovalSafe = false,
-} = {}) {
-    const mismatchRatio = activeBoards > 0 ? mismatchedBoardCount / activeBoards : 0
-    const urgentReasons = []
-
-    if (minNotMet) urgentReasons.push('Minimum roster unmet')
-    if (oppCount > ourCount && ratingDisadvantage) {
-        urgentReasons.push('Player-count and rating deficit')
-    }
-    if (mismatchRatio > 0.5) {
-        urgentReasons.push('More than half of boards mismatched')
-    }
-    if (surgeRecruitment && (playerDeficit || ratingDisadvantage)) {
-        urgentReasons.push('Surge compounds a roster or rating deficit')
-    }
-    if (highRiskTimeoutPresent && highRiskRemovalDropsBelowMinimum) {
-        urgentReasons.push('High-risk player cannot be removed safely')
-    }
-
-    if (urgentReasons.length > 0) {
-        return { level: 'urgent', ...MATCH_STATUS_META.urgent, reasons: urgentReasons }
-    }
-
-    const advisoryReasons = []
-    if (mismatchedBoardCount > 0 && mismatchRatio <= 0.5) {
-        advisoryReasons.push(`${mismatchedBoardCount} board${mismatchedBoardCount === 1 ? '' : 's'} need monitoring`)
-    }
-    if (oppCount > ourCount && avgDiff >= 0) {
-        advisoryReasons.push('Opponent leads in players; we lead in rating')
-    }
-    if (surgeRecruitment && ourCount >= oppCount && avgDiff >= 0) {
-        advisoryReasons.push('Opponent surge is contained')
-    }
-    if (highRiskTimeoutPresent && highRiskRemovalSafe) {
-        advisoryReasons.push('High-risk player can be removed safely')
-    }
-
-    if (advisoryReasons.length > 0) {
-        return { level: 'advisory', ...MATCH_STATUS_META.advisory, reasons: advisoryReasons }
-    }
-
-    return { level: 'secure', ...MATCH_STATUS_META.secure, reasons: [] }
-}
-
-const numericRating = value => Number.isFinite(Number(value)) ? Number(value) : null
-
-function sortedRosterRatings(roster = []) {
-    return roster
-        .map(player => numericRating(player?.rating))
-        .filter(rating => rating !== null)
-        .sort((a, b) => b - a)
-}
-
-function competitiveBoardCount(ourRoster, opponentRoster, boardCap) {
-    const ourRatings = sortedRosterRatings(ourRoster)
-    const opponentRatings = sortedRosterRatings(opponentRoster)
-    const activeBoards = Math.min(ourRatings.length, opponentRatings.length, boardCap)
-    const competitiveBoards = Array.from({ length: activeBoards }, (_, index) => index)
-        .filter(index => opponentRatings[index] - ourRatings[index] <= BALANCE_THRESHOLD)
-    return { activeBoards, competitiveBoards: competitiveBoards.length }
-}
-
-/**
- * Simulates removing one high-risk player, including the rating-sort cascade
- * that changes which players occupy each board.
- */
-export function analyzeTimeoutRemoval(
-    player,
-    ourRoster = [],
-    opponentRoster = [],
-    boardCap = Infinity,
-    ourCount = ourRoster.length,
-    minTeamPlayers = 0,
-) {
-    const before = competitiveBoardCount(ourRoster, opponentRoster, boardCap)
-    const username = player?.username
-    const playerKey = typeof username === 'string' ? username.toLowerCase() : null
-    const remaining = ourRoster.filter(candidate => {
-        if (candidate === player) return false
-        const candidateKey = typeof candidate?.username === 'string' ? candidate.username.toLowerCase() : null
-        return candidateKey !== playerKey
-    })
-    const after = competitiveBoardCount(remaining, opponentRoster, boardCap)
-    const netBoardChange = after.competitiveBoards - before.competitiveBoards
-    const belowMinimum = ourCount - 1 < minTeamPlayers
-    return {
-        username,
-        beforeCompetitiveBoards: before.competitiveBoards,
-        afterCompetitiveBoards: after.competitiveBoards,
-        netBoardChange,
-        netBoardLoss: before.competitiveBoards - after.competitiveBoards,
-        remainingPlayerCount: Math.max(0, ourCount - 1),
-        belowMinimum,
-        safeRemoval: netBoardChange >= 0 && !belowMinimum,
-    }
-}
-
-function timestampToSeconds(value) {
-    if (typeof value === 'number' && Number.isFinite(value)) {
-        return value > 1e12 ? value / 1000 : value
-    }
-    if (typeof value !== 'string' || !value.trim()) return null
-    const numeric = Number(value)
-    if (Number.isFinite(numeric)) return numeric > 1e12 ? numeric / 1000 : numeric
-    const parsed = Date.parse(value)
-    return Number.isFinite(parsed) ? parsed / 1000 : null
-}
-
-function historyTimestamp(entry) {
-    return timestampToSeconds(
-        entry?.ts ?? entry?.timestamp ?? entry?.time ?? entry?.date ?? entry?.recordedAt ?? entry?.createdAt
-    )
-}
-
-function countDelta(value) {
-    if (Array.isArray(value)) return value.length
-    const numeric = numericRating(value)
-    if (numeric !== null) return numeric
-    if (value && typeof value === 'object') {
-        return countDelta(value.count ?? value.total ?? value.players ?? value.usernames)
-    }
-    return 0
-}
-
-function opponentRegistrationDelta(entry) {
-    const opponent = entry?.opp ?? entry?.opponent ?? entry
-    if (!opponent || typeof opponent !== 'object') return 0
-    const explicitNet = opponent.netIncrease ?? opponent.net ?? opponent.delta
-    if (explicitNet !== undefined) return numericRating(explicitNet) ?? 0
-    const added = opponent.added
-        ?? opponent.joined
-        ?? opponent.joins
-        ?? opponent.playersAdded
-        ?? opponent.opponentPlayersAdded
-        ?? opponent.players
-        // Daily-join feeds commonly expose the delta as `count`.
-        ?? opponent.count
-    const removed = opponent.removed ?? opponent.left ?? opponent.leaves ?? opponent.playersRemoved
-    return countDelta(added) - countDelta(removed)
-}
-
-function registrationHistoryEntries(round) {
-    const sources = [
-        round?.opponentHistory,
-        round?.opponentDailyJoins,
-        round?.registrationData?.opponentDailyJoins,
-        round?.registrationData?.opponentHistory,
-        round?.registrationData?.registeredPlayers?.opponentHistory,
-        round?.registeredPlayers?.opponentHistory,
-        round?.registrationHistory,
-        round?.registrationData?.registrationHistory,
-    ]
-    // These fields are alternative representations of the same feed. Use the
-    // first populated one so a caller providing both does not double-count joins.
-    const source = sources.find(value => Array.isArray(value) ? value.length > 0 : value && typeof value === 'object' && Object.keys(value).length > 0)
-    if (!source) return []
-    if (Array.isArray(source)) return source
-    // Daily feeds are sometimes keyed by an ISO date/timestamp instead of
-    // carrying the timestamp inside each value.
-    if (historyTimestamp(source) !== null) return [source]
-    return Object.entries(source).map(([timestamp, value]) => ({ ts: timestamp, added: value }))
-}
-
-function normalizeAddedPlayers(value) {
-    if (!Array.isArray(value)) return []
-    return value.map(player => {
-        if (typeof player === 'string') return { username: player, rating: null }
-        if (!player || typeof player !== 'object') return null
-        const username = player.username ?? player.userName ?? player.handle ?? player.name
-        if (!username) return null
-        const rating = numericRating(player.rating ?? player.dailyRating ?? player.currentRating)
-        return { username: String(username), rating }
-    }).filter(Boolean)
-}
-
-function getRecentOpponentAdditions(round, nowSeconds = Date.now() / 1000) {
-    const seen = new Set()
-    const additions = []
-    registrationHistoryEntries(round).forEach(entry => {
-        const timestamp = historyTimestamp(entry)
-        if (timestamp === null) return
-        const age = nowSeconds - timestamp
-        if (age < 0 || age > SURGE_WINDOW_SECONDS) return
-        const opponent = entry?.opp ?? entry?.opponent ?? entry
-        const added = opponent?.added
-            ?? opponent?.joined
-            ?? opponent?.joins
-            ?? opponent?.playersAdded
-            ?? opponent?.opponentPlayersAdded
-            ?? opponent?.players
-        normalizeAddedPlayers(added).forEach(player => {
-            const key = player.username.toLowerCase()
-            if (seen.has(key)) return
-            seen.add(key)
-            additions.push(player)
-        })
-    })
-    return additions.sort((left, right) => (right.rating ?? -Infinity) - (left.rating ?? -Infinity))
-}
+export { analyzeTimeoutRemoval, getMatchStatusLevel, getSurgeRecruitmentStatus } from '../utils/actionItemUtils'
 
 function groupOpponentAdditionsByRating(additions = []) {
     const groups = new Map()
@@ -261,37 +21,6 @@ function groupOpponentAdditionsByRating(additions = []) {
             if (right.range === 'Rating unavailable') return -1
             return Number(right.range.split('-')[0]) - Number(left.range.split('-')[0])
         })
-}
-
-export function getOpponentPlayersAdded24h(round, nowSeconds = Date.now() / 1000) {
-    const explicitDelta = round?.opponentPlayersAdded24h ?? round?.registrationData?.opponentPlayersAdded24h
-    if (explicitDelta !== undefined) return Math.max(0, numericRating(explicitDelta) ?? 0)
-    return registrationHistoryEntries(round).reduce((total, entry) => {
-        const timestamp = historyTimestamp(entry)
-        if (timestamp === null) return total
-        const age = nowSeconds - timestamp
-        if (age < 0 || age > SURGE_WINDOW_SECONDS) return total
-        return total + opponentRegistrationDelta(entry)
-    }, 0)
-}
-
-export function getSurgeRecruitmentStatus(round, nowSeconds = Date.now() / 1000) {
-    const matchTime = timestampToSeconds(round?.startTime)
-    if (matchTime === null) return {
-        surgeRecruitment: false,
-        opponentPlayersAdded24h: 0,
-        recentOpponentAdditions: [],
-        matchStartsInDays: null,
-    }
-    const secondsUntilStart = matchTime - nowSeconds
-    const matchImminent = secondsUntilStart >= 0 && secondsUntilStart <= SURGE_IMMINENCE_SECONDS
-    const opponentPlayersAdded24h = getOpponentPlayersAdded24h(round, nowSeconds)
-    return {
-        surgeRecruitment: matchImminent && opponentPlayersAdded24h > 3,
-        opponentPlayersAdded24h,
-        recentOpponentAdditions: getRecentOpponentAdditions(round, nowSeconds),
-        matchStartsInDays: Math.max(0, Math.ceil(secondsUntilStart / DAY_SECONDS)),
-    }
 }
 
 function getBoundValue(source, names, boardIndex = null) {
@@ -356,37 +85,24 @@ function getBoardBounds(round, boardIndex, sectionBounds) {
     return { min, max }
 }
 
-const withinThreshold = (ourRating, oppRating) => oppRating - ourRating <= BALANCE_THRESHOLD
-
-function formatBoardNumbers(boards) {
-    if (!boards.length) return 'none'
-    const ranges = []
-    let start = boards[0]
-    let end = start
-    boards.slice(1).forEach(board => {
-        if (board === end + 1) {
-            end = board
-            return
-        }
-        ranges.push(start === end ? `${start}` : `${start}-${end}`)
-        start = board
-        end = board
-    })
-    ranges.push(start === end ? `${start}` : `${start}-${end}`)
-    return ranges.join(', ')
-}
-
-function cohortLabel(min, max, preferred) {
-    const cohortMin = Math.max(min, Math.floor(preferred / 100) * 100)
-    const cohortMax = Math.min(max, Math.floor(preferred / 100) * 100 + 99)
-    if (cohortMin <= cohortMax) return cohortMin === cohortMax ? `${cohortMin}` : `${cohortMin}–${cohortMax}`
-    return `${min}–${max}`
-}
-
 function groupRecruitCohorts(cohorts) {
     const counts = new Map()
     cohorts.forEach(cohort => counts.set(cohort, (counts.get(cohort) || 0) + 1))
-    return Array.from(counts, ([cohort, count]) => `${count} player${count !== 1 ? 's' : ''} ${cohort}`)
+    return Array.from(counts, ([cohort, count]) => ({ cohort, count }))
+}
+
+function groupCurrentBoardGaps(gaps = []) {
+    const groups = new Map()
+    gaps.forEach(gap => {
+        const numericGap = Number(gap.gap)
+        const label = Number.isFinite(numericGap)
+            ? numericGap >= 100 ? '100+ points' : '50–99 points'
+            : 'No player'
+        groups.set(label, (groups.get(label) || 0) + 1)
+    })
+    return ['50–99 points', '100+ points', 'No player']
+        .filter(label => groups.has(label))
+        .map(label => ({ label, count: groups.get(label) }))
 }
 
 function getMetricBadges(warnings) {
@@ -421,8 +137,8 @@ function getMetricBadges(warnings) {
 function recruitmentSummary(suggestions) {
     const primary = suggestions?.find(suggestion => suggestion.needed > 0)
     if (!primary) return null
-    const cohorts = [...new Set(primary.cohorts)]
-    return `Recruit ${primary.needed} player${primary.needed !== 1 ? 's' : ''} (${cohorts.join(', ')}) to fix ${primary.repairedBoards}/${primary.totalBoards} boards`
+    const tierCount = groupRecruitCohorts(primary.cohorts).length
+    return `Recruit ${primary.needed} player${primary.needed !== 1 ? 's' : ''} across ${tierCount} rating tier${tierCount !== 1 ? 's' : ''} to fix ${primary.repairedBoards}/${primary.totalBoards} boards`
 }
 
 function recruitThresholdLabel(minimumRating) {
@@ -485,7 +201,7 @@ export function buildRecruitmentSuggestions(ourTeam, opponentTeam, maxBoards, ro
         const totalBoards = solution.totalTargetBoards + solution.concededBoards.length
         return {
             kind: solution.strategy,
-            title: solution.strategy === 'top-down' ? 'Top-Down Full Coverage' : 'Lower Threshold',
+            title: solution.strategy === 'top-down' ? 'Cover all board gaps' : 'Use lower-rated recruits',
             needed: solution.recruits.length,
             cohorts,
             ratingLabel: cohorts.join(' and '),
@@ -496,92 +212,6 @@ export function buildRecruitmentSuggestions(ourTeam, opponentTeam, maxBoards, ro
         }
     })
 
-    /* Legacy implementation retained below temporarily for comparison. */
-    const mismatches = A.map((rating, index) => ({ index, gap: O[index] - rating }))
-        .filter(({ gap }) => gap > BALANCE_THRESHOLD)
-
-    const describeImpact = ratings => {
-        const fixed = ratings.reduce((boards, rating, index) => withinThreshold(rating, O[index]) ? boards.concat(index + 1) : boards, [])
-        return fixed.length ? `Fixes boards ${formatBoardNumbers(fixed)} within 50pt threshold` : 'Does not bring a board within the 50pt threshold'
-    }
-    const options = []
-
-    // One recruit: test every actual insertion point, including all cascade effects.
-    for (let k = 0; k < N; k++) {
-        const boardBounds = getBoardBounds(round, k, sectionBounds)
-        const seatingMin = k < A.length ? A[k] : -Infinity
-        const seatingMax = k > 0 ? A[k - 1] : Infinity
-        const min = Math.max(boardBounds.min, seatingMin)
-        const max = Math.min(boardBounds.max, seatingMax)
-        if (min > max) continue
-
-        const idealTarget = Math.max(O[k] - BALANCE_THRESHOLD, O[k])
-        const target = Math.min(max, Math.max(min, idealTarget))
-        const after = [...A.slice(0, k), target, ...A.slice(k)].slice(0, N)
-        const downstreamLegal = after.slice(k + 1).every((rating, index) => withinThreshold(rating, O[k + index + 1]))
-        const fixes = after.filter((rating, index) => withinThreshold(rating, O[index])).length
-        const constrained = target !== idealTarget || target === sectionBounds.max || target === sectionBounds.min
-        options.push({
-            kind: 'top', needed: 1, index: k, target, min, max, after, fixes, downstreamLegal, constrained,
-            partial: !withinThreshold(target, O[k]),
-            impact: describeImpact(after),
-        })
-    }
-
-    const bestTop = options
-        .sort((a, b) => b.fixes - a.fixes || Number(b.downstreamLegal) - Number(a.downstreamLegal) || a.index - b.index)[0]
-    if (bestTop) {
-        options.length = 0
-        options.push(bestTop)
-    }
-
-    // Depth option: the two largest current deficits each get a legal, ordered board range.
-    const [first, second] = [...mismatches].sort((a, b) => b.gap - a.gap || a.index - b.index)
-    if (first && second) {
-        const [i, j] = [first.index, second.index].sort((a, b) => a - b)
-        const firstBounds = getBoardBounds(round, i, sectionBounds)
-        const secondBounds = getBoardBounds(round, j, sectionBounds)
-        const firstRange = {
-            min: Math.max(O[i] - BALANCE_THRESHOLD, firstBounds.min, i < A.length ? A[i] : -Infinity),
-            max: Math.min(O[i] + BALANCE_THRESHOLD, firstBounds.max, i > 0 ? A[i - 1] : Infinity),
-        }
-        const firstTarget = Math.min(firstRange.max, Math.max(firstRange.min, O[i]))
-        const secondFloorPlayer = A[j - 1] // The first recruit shifts this player down before the second insertion.
-        const secondRange = {
-            min: Math.max(O[j] - BALANCE_THRESHOLD, secondBounds.min, secondFloorPlayer ?? -Infinity),
-            max: Math.min(
-                O[j] + BALANCE_THRESHOLD,
-                secondBounds.max,
-                j === i + 1 ? firstTarget : (j > 1 ? A[j - 2] : Infinity)
-            ),
-        }
-        const secondTarget = Math.min(secondRange.max, Math.max(secondRange.min, O[j]))
-        if (firstRange.min <= firstRange.max && secondRange.min <= secondRange.max && firstTarget >= secondTarget) {
-            const after = [...A]
-            after.splice(i, 0, firstTarget)
-            after.splice(j, 0, secondTarget)
-            after.length = N
-            options.push({
-                kind: 'depth', needed: 2, targets: [firstTarget, secondTarget], ranges: [firstRange, secondRange], after,
-                constrained: firstTarget !== O[i] || secondTarget !== O[j],
-                partial: !withinThreshold(firstTarget, O[i]) || !withinThreshold(secondTarget, O[j]),
-                impact: describeImpact(after),
-            })
-        }
-    }
-
-    return options.slice(0, 2).map(option => {
-        const cohorts = option.needed === 1
-            ? [cohortLabel(option.min, option.max, option.target)]
-            : option.ranges.map((range, index) => cohortLabel(range.min, range.max, option.targets[index]))
-        return {
-            ...option,
-            cohorts,
-            ratingLabel: cohorts.join(' and '),
-            capNote: option.constrained && sectionBounds.hasCap ? `Constrained by section cap (${sectionBounds.max})` : '',
-            status: option.partial ? 'Partial Balance Solution' : 'Balanced Solution',
-        }
-    })
 }
 
 function ActionItems() {
@@ -592,6 +222,9 @@ function ActionItems() {
     const [loading, setLoading] = useState(true)
     const [recruitsModalMatch, setRecruitsModalMatch] = useState(null)
     const [expandedMatches, setExpandedMatches] = useState(() => new Set())
+    const [highlightedMatchKey, setHighlightedMatchKey] = useState(null)
+    const [searchParams] = useSearchParams()
+    const targetMatchId = normalizeMatchId(searchParams.get('matchId'))
     const recruitmentEnabled = playerRatings?.recruitmentEnabled === true
 
     useEffect(() => {
@@ -616,160 +249,9 @@ function ActionItems() {
 
     // Collect all OPEN matches with warnings
     const matchesWithWarnings = useMemo(() => {
-        if (!data?.leagues) return []
-        const matches = []
-
-        Object.entries(data.leagues).forEach(([leagueName, leagueData]) => {
-            Object.entries(leagueData.subLeagues || {}).forEach(([subLeagueName, subLeagueData]) => {
-                (subLeagueData.rounds || []).forEach(round => {
-                    if (round.status !== 'open') return
-
-                    // Check for warnings
-                    const minRequired = round.minTeamPlayers || 0
-                    const ourCount = round.registeredPlayers?.our || 0
-                    const oppCount = round.registeredPlayers?.opponent || 0
-                    // Allow a league/round to override the default before treating a
-                    // small registration difference as a depth warning.
-                    const playerDeficitThreshold = numericRating(round.playerDeficitThreshold)
-                        ?? numericRating(subLeagueData.playerDeficitThreshold)
-                        ?? DEFAULT_PLAYER_DEFICIT_THRESHOLD
-                    const playerDeficitCount = oppCount - ourCount
-                    const playerDeficit = playerDeficitCount >= playerDeficitThreshold
-                    const minNotMet = minRequired > 0 && ourCount < minRequired
-                    const surgeStatus = getSurgeRecruitmentStatus(round)
-
-                    let ratingDisadvantage = false
-                    let avgDiff = 0
-                    let recruitmentSuggestions = []
-                    let showRecruitmentRecommendations = false
-                    let mismatchedBoards = []
-                    let activeBoardCount = 0
-                    if (round.registrationData && round.registrationData.type === 'roster') {
-                        const cap = round.maxTeamPlayers ?? round.boards ?? Infinity
-                        const matchup = computeMatchupRatings(round.registrationData.ourRoster || [], round.registrationData.oppRoster || [], cap)
-                        avgDiff = matchup.avgDiff
-                        ratingDisadvantage = avgDiff < -50
-
-                        const activeOurRatings = (round.registrationData.ourRoster || [])
-                            .map(player => numericRating(player.rating)).filter(rating => rating !== null).sort((a, b) => b - a)
-                        const activeOppRatings = (round.registrationData.oppRoster || [])
-                            .map(player => numericRating(player.rating)).filter(rating => rating !== null).sort((a, b) => b - a)
-                        activeBoardCount = Math.min(activeOurRatings.length, activeOppRatings.length, cap)
-                        mismatchedBoards = Array.from({ length: activeBoardCount }, (_, index) => index + 1)
-                            .filter(boardNumber => activeOppRatings[boardNumber - 1] - activeOurRatings[boardNumber - 1] > BALANCE_THRESHOLD)
-                        const hasBoardMismatch = mismatchedBoards.length > 0
-                        ratingDisadvantage = hasBoardMismatch
-                        // Board mismatches always qualify for recruitment options. If
-                        // there is no mismatch, only an opponent player-count lead does.
-                        showRecruitmentRecommendations = ratingDisadvantage
-                            || (!ratingDisadvantage && oppCount > ourCount)
-
-                        // A mismatch still takes priority when multiple issues apply;
-                        // this creates one recommendation set rather than duplicating it
-                        // for the player deficit or surge warning.
-                        if (showRecruitmentRecommendations && recruitmentEnabled) {
-                            recruitmentSuggestions = buildRecruitmentSuggestions(
-                                round.registrationData.ourRoster || [],
-                                round.registrationData.oppRoster || [],
-                                cap,
-                                round,
-                                [leagueData, subLeagueData, leagueName, subLeagueName]
-                            )
-                        }
-                    }
-
-                    // Only HIGH risk players receive timeout alerts. Simulate each
-                    // removal after sorting the remaining roster by rating.
-                    const highRiskTimeoutPlayers = []
-                    const roster = round.registrationData?.ourRoster || []
-                    const opponentRoster = round.registrationData?.oppRoster || []
-                    const boardCap = round.maxTeamPlayers ?? round.boards ?? Infinity
-                    if (timeoutData?.players && roster.length > 0) {
-                        const seen = new Set()
-                        roster.forEach(player => {
-                            const username = player?.username
-                            if (!username) return
-                            const key = username.toLowerCase()
-                            const td = timeoutData.players[key]
-                            if (!td?.riskFlag || String(td?.riskLevel || '').toUpperCase() !== 'HIGH' || seen.has(key)) return
-                            seen.add(key)
-                            const removal = analyzeTimeoutRemoval(
-                                player,
-                                roster,
-                                opponentRoster,
-                                boardCap,
-                                ourCount,
-                                minRequired,
-                            )
-                            highRiskTimeoutPlayers.push({
-                                ...removal,
-                                username,
-                                riskLevel: 'HIGH',
-                                riskReason: td.riskReason || '',
-                            })
-                        })
-                    }
-
-                    const playersWithHighTimeout = highRiskTimeoutPlayers.length
-                    const hasTimeoutWarning = playersWithHighTimeout > 0
-                    const hasTrappedHighRiskTimeout = highRiskTimeoutPlayers.some(player => player.belowMinimum)
-                    const hasSafeHighRiskTimeoutRemoval = highRiskTimeoutPlayers.some(player => player.safeRemoval)
-                    const status = getMatchStatusLevel({
-                        minNotMet,
-                        ourCount,
-                        oppCount,
-                        ratingDisadvantage,
-                        mismatchedBoardCount: mismatchedBoards.length,
-                        activeBoards: activeBoardCount,
-                        playerDeficit,
-                        surgeRecruitment: surgeStatus.surgeRecruitment,
-                        avgDiff,
-                        highRiskTimeoutPresent: hasTimeoutWarning,
-                        highRiskRemovalDropsBelowMinimum: hasTrappedHighRiskTimeout,
-                        highRiskRemovalSafe: hasSafeHighRiskTimeoutRemoval,
-                    })
-                    const hasWarning = minNotMet
-                        || playerDeficit
-                        || ratingDisadvantage
-                        || surgeStatus.surgeRecruitment
-                        || hasTimeoutWarning
-
-                    // Only include if has any warning
-                    if (hasWarning) {
-                        matches.push({
-                            ...round,
-                            leagueName,
-                            subLeagueName,
-                            warnings: {
-                                minNotMet,
-                                needPlayers: minRequired - ourCount,
-                                playerDeficit,
-                                playerDeficitCount,
-                                playerDeficitThreshold,
-                                surgeRecruitment: surgeStatus.surgeRecruitment,
-                                opponentPlayersAdded24h: surgeStatus.opponentPlayersAdded24h,
-                                recentOpponentAdditions: surgeStatus.recentOpponentAdditions,
-                                matchStartsInDays: surgeStatus.matchStartsInDays,
-                                activeBoardCount,
-                                statusLevel: status.level,
-                                status,
-                                statusReasons: status.reasons,
-                                ratingDisadvantage,
-                                avgDiff: Math.round(avgDiff),
-                                mismatchedBoardCount: mismatchedBoards?.length || 0,
-                                mismatchedBoards: formatBoardNumbers(mismatchedBoards || []),
-                                recruitmentSuggestions,
-                                showRecruitmentRecommendations,
-                                highRiskTimeoutPlayers,
-                                hasTrappedHighRiskTimeout,
-                                hasSafeHighRiskTimeoutRemoval,
-                                playersWithHighTimeout,
-                                hasTimeoutWarning,
-                            }
-                        })
-                    }
-                })
-            })
+        return collectActionItems(data, timeoutData, {
+            recruitmentEnabled,
+            buildRecruitmentSuggestions,
         })
 
         // Sort by startTime ascending
@@ -787,6 +269,36 @@ function ActionItems() {
         })
         return groups
     }, [matchesWithWarnings])
+
+    useEffect(() => {
+        if (!targetMatchId || matchesWithWarnings.length === 0) return undefined
+
+        const targetMatch = matchesWithWarnings.find(match => normalizeMatchId(match.matchId) === targetMatchId)
+        if (!targetMatch) return undefined
+
+        const targetKey = normalizeMatchId(targetMatch.matchId)
+        setExpandedMatches(previous => {
+            if (previous.has(targetKey)) return previous
+            const next = new Set(previous)
+            next.add(targetKey)
+            return next
+        })
+
+        let highlightTimer
+        const scrollTimer = window.setTimeout(() => {
+            const targetElement = document.getElementById(`action-match-${encodeURIComponent(targetKey)}`)
+            if (!targetElement) return
+
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            setHighlightedMatchKey(targetKey)
+            highlightTimer = window.setTimeout(() => setHighlightedMatchKey(null), 3500)
+        }, 0)
+
+        return () => {
+            window.clearTimeout(scrollTimer)
+            if (highlightTimer) window.clearTimeout(highlightTimer)
+        }
+    }, [matchesWithWarnings, targetMatchId])
 
     if (loading) {
         return (
@@ -821,16 +333,22 @@ function ActionItems() {
                             </h3>
                             <div className="space-y-2">
                                 {dateMatches.map((match, idx) => {
-                                    const matchKey = match.matchId || `${match.leagueName}-${match.subLeagueName}-${match.name}-${idx}`
+                                    const matchKey = normalizeMatchId(match.matchId) || `${match.leagueName}-${match.subLeagueName}-${match.name}-${idx}`
                                     const isExpanded = expandedMatches.has(matchKey)
                                     const metricBadges = getMetricBadges(match.warnings)
                                     const summary = recruitmentSummary(match.warnings.recruitmentSuggestions)
+                                    const currentBoardGaps = match.warnings.recruitmentSuggestions[0]?.currentBoardGaps || []
+                                    const currentBoardGapGroups = groupCurrentBoardGaps(currentBoardGaps)
                                     const hasRecruitment = recruitmentEnabled
                                         && match.warnings.showRecruitmentRecommendations
                                         && match.warnings.recruitmentSuggestions.length > 0
 
                                     return (
-                                        <div key={matchKey} className={`card p-0 border-l-4 overflow-hidden ${match.warnings.status.level === 'urgent' ? 'border-red-400' : match.warnings.status.level === 'advisory' ? 'border-amber-400' : 'border-green-400'}`}>
+                                        <div
+                                            id={`action-match-${encodeURIComponent(String(matchKey))}`}
+                                            key={matchKey}
+                                            className={`card p-0 border-l-4 overflow-hidden scroll-mt-[16vh] sm:scroll-mt-[22vh] transition-shadow ${match.warnings.status.level === 'urgent' ? 'border-red-400' : match.warnings.status.level === 'advisory' ? 'border-amber-400' : 'border-green-400'} ${highlightedMatchKey === String(matchKey) ? 'ring-2 ring-chess-green ring-offset-2' : ''}`}
+                                        >
                                             <div className="px-4 py-3 border-b border-gray-100">
                                                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                                                     <div className="min-w-0">
@@ -922,22 +440,24 @@ function ActionItems() {
                                                             </div>
                                                         )}
 
-                                                        {hasRecruitment && (
-                                                            <div className="bg-gray-50 p-3 rounded-lg">
-                                                                <div className="text-xs font-semibold text-gray-800 mb-2">Recruitment options</div>
-                                                                {(match.warnings.recruitmentSuggestions[0]?.currentBoardGaps || []).length > 0 && (
-                                                                    <div className="mb-2 rounded border border-gray-200 bg-white px-2.5 py-2">
-                                                                        <div className="text-[11px] font-semibold text-gray-700">Current board gaps</div>
-                                                                        <div className="mt-1 flex flex-wrap gap-1.5">
-                                                                            {match.warnings.recruitmentSuggestions[0].currentBoardGaps.map(gap => (
-                                                                                <span key={gap.board} className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-800">
-                                                                                    <span>Board {gap.board}</span>
-                                                                                    <span className="font-normal text-amber-700">{gap.gap === null ? 'No player' : `-${gap.gap} gap`}</span>
-                                                                                </span>
-                                                                            ))}
+                                                {hasRecruitment && (
+                                                    <div className="bg-gray-50 p-3 rounded-lg">
+                                                        <div className="text-xs font-semibold text-gray-800 mb-2">Recruitment options</div>
+                                                        {currentBoardGapGroups.length > 0 && (
+                                                            <div className="mb-2 rounded border border-gray-200 bg-white px-2.5 py-2 text-[11px] text-gray-700">
+                                                                <div className="mb-1 font-semibold">Current board gaps · {currentBoardGaps.length} board{currentBoardGaps.length !== 1 ? 's' : ''}</div>
+                                                                <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                                                                    {currentBoardGapGroups.map(group => (
+                                                                        <div key={group.label} className="flex items-center justify-between gap-3 rounded border border-gray-200 bg-gray-50 px-2.5 py-1.5">
+                                                                            <span className="font-medium text-gray-600">{group.label}</span>
+                                                                            <span className="whitespace-nowrap rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-600">
+                                                                                {group.count} board{group.count !== 1 ? 's' : ''}
+                                                                            </span>
                                                                         </div>
-                                                                    </div>
-                                                                )}
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                                 <div className="space-y-2">
                                                                     {match.warnings.recruitmentSuggestions.map((sugg, suggestionIndex) => (
                                                                         <div key={suggestionIndex} className="rounded border border-gray-200 bg-white px-2.5 py-2 text-xs text-gray-700">
@@ -947,8 +467,16 @@ function ActionItems() {
                                                                                 </span>
                                                                                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${sugg.repairedBoards >= sugg.totalBoards ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{sugg.repairedBoards}/{sugg.totalBoards} fixed</span>
                                                                             </div>
-                                                                            <div className="mt-1 text-[11px] text-gray-600">
-                                                                                Recruit {groupRecruitCohorts(sugg.cohorts).join(', ')}.
+                                                                            <div className="mt-2">
+                                                                                <div className="mb-1 text-[11px] font-medium text-gray-600">Recruit players in these tiers</div>
+                                                                                <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                                                                                    {groupRecruitCohorts(sugg.cohorts).map(group => (
+                                                                                        <div key={group.cohort} className="flex items-center justify-between gap-3 rounded border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-[11px]">
+                                                                                            <span className="whitespace-nowrap font-semibold text-gray-800">{group.cohort}</span>
+                                                                                            <span className="text-gray-600">{group.count} player{group.count !== 1 ? 's' : ''}</span>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     ))}

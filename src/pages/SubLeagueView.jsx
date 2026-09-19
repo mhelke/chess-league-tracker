@@ -39,7 +39,7 @@ function SubLeagueView() {
 
     const subLeague = data?.leagues?.[leagueName]?.subLeagues?.[subLeagueName]
 
-    const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData), [earlyResignData])
+    const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData, data), [earlyResignData, data])
 
     // Aggregate early resignations for this specific sub-league
     const subLeagueEarlyResigns = useMemo(() => {

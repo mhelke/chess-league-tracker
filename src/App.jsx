@@ -6,6 +6,8 @@ import SubLeagueView from './pages/SubLeagueView'
 import GlobalLeaderboard from './pages/GlobalLeaderboard'
 import AllMatches from './pages/AllMatches'
 import ActionItems from './pages/ActionItems'
+import EarlyResignations from './pages/EarlyResignations'
+import TimeoutHistory from './pages/TimeoutHistory'
 import NotFound from './pages/NotFound'
 import EmbedLeagueOverview from './pages/EmbedLeagueOverview'
 import About from './pages/About'
@@ -32,7 +34,7 @@ const CLUB_API_IDS = {
 }
 
 const NAV_LINKS = [
-    { to: '/', label: 'Leagues' },
+    { to: '/', label: 'Dashboard' },
     { to: '/action-items', label: 'Action Items' },
     { to: '/matches', label: 'All Matches' },
     { to: '/league-overview', label: 'Overview' },
@@ -206,6 +208,8 @@ function AppContent() {
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/action-items" element={<ActionItems />} />
+                    <Route path="/early-resignations" element={<EarlyResignations />} />
+                    <Route path="/timeouts" element={<TimeoutHistory />} />
                     <Route path="/matches" element={<AllMatches />} />
                     <Route path="/league/:leagueName" element={<LeagueView />} />
                     <Route path="/league/:leagueName/:subLeagueName" element={<SubLeagueView />} />

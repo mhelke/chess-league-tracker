@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 import TimeoutModal from '../components/TimeoutModal'
 import EarlyResignModal from '../components/EarlyResignModal'
@@ -27,6 +27,11 @@ function AllMatches() {
     const [selectedLeague, setSelectedLeague] = useState('')
     const [openViewMode, setOpenViewMode] = useState('calendar')
     const [finishedVisibleCounts, setFinishedVisibleCounts] = useState({})
+    const [highlightedMatchKey, setHighlightedMatchKey] = useState(null)
+    const [searchParams] = useSearchParams()
+    const targetMatchId = normalizeMatchId(searchParams.get('matchId'))
+    const requestedStatus = searchParams.get('status')
+    const shouldOpenAudit = searchParams.get('audit') === '1'
 
     const SITE_NAMES = {
         '1dpmc': '1 Day Per Move Club',
@@ -36,7 +41,7 @@ function AllMatches() {
     const ourSiteName = SITE_NAMES[__SITE_KEY__] || 'Our Team'
 
     // Build early resignation index — must be before any early return (Rules of Hooks)
-    const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData), [earlyResignData])
+    const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData, data), [earlyResignData, data])
 
     const actionItemsByMatchId = useMemo(() => {
         const index = new Map()
@@ -91,6 +96,62 @@ function AllMatches() {
             })
     }, [])
 
+    useEffect(() => {
+        if (!data || !targetMatchId) return
+
+        let targetMatch = null
+        Object.entries(data.leagues || {}).forEach(([leagueName, leagueData]) => {
+            Object.entries(leagueData.subLeagues || {}).forEach(([subLeagueName, subLeagueData]) => {
+                ; (subLeagueData.rounds || []).forEach(round => {
+                    if (normalizeMatchId(round.matchId) === targetMatchId) {
+                        targetMatch = { ...round, leagueName, subLeagueName }
+                    }
+                })
+            })
+        })
+
+        if (targetMatch) {
+            setActiveTab(targetMatch.status)
+            if (targetMatch.status === 'open') setOpenViewMode('calendar')
+            setSearchQuery('')
+            setSelectedLeague('')
+            if (targetMatch.status === 'finished') {
+                setFinishedVisibleCounts(prev => ({ ...prev, [targetMatch.leagueName]: Number.MAX_SAFE_INTEGER }))
+                setCollapsedLeagues(prev => ({ ...prev, [targetMatch.leagueName]: false }))
+            }
+            if (shouldOpenAudit && (targetMatch.registrationHistory || []).length > 0) {
+                setHistoryModalMatch(targetMatch)
+                setShowHistoryModal(true)
+            }
+        }
+    }, [data, shouldOpenAudit, targetMatchId])
+
+    useEffect(() => {
+        if (!data || targetMatchId) return
+        if (requestedStatus === 'open' || requestedStatus === 'in_progress' || requestedStatus === 'finished') {
+            setActiveTab(requestedStatus)
+        }
+    }, [data, requestedStatus, targetMatchId])
+
+    useEffect(() => {
+        if (!data || !targetMatchId) return undefined
+
+        let highlightTimer
+        const scrollTimer = window.setTimeout(() => {
+            const targetElement = document.getElementById(`all-match-${encodeURIComponent(targetMatchId)}`)
+            if (!targetElement) return
+
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            setHighlightedMatchKey(targetMatchId)
+            highlightTimer = window.setTimeout(() => setHighlightedMatchKey(null), 3500)
+        }, 50)
+
+        return () => {
+            window.clearTimeout(scrollTimer)
+            if (highlightTimer) window.clearTimeout(highlightTimer)
+        }
+    }, [activeTab, collapsedLeagues, data, finishedVisibleCounts, openViewMode, targetMatchId])
+
     if (loading) {
         return (
             <div className="page-container">
@@ -139,8 +200,9 @@ function AllMatches() {
         return timeDifference || compareMatchNames(a, b)
     }
     const compareFinishedMatches = (a, b) => {
-        const timeDifference = (b.startTime || 0) - (a.startTime || 0)
-        return timeDifference || compareMatchNames(a, b)
+        const completedTimeDifference = (b.endTime || b.startTime || 0) - (a.endTime || a.startTime || 0)
+        const startTimeDifference = (b.startTime || 0) - (a.startTime || 0)
+        return completedTimeDifference || startTimeDifference || compareMatchNames(a, b)
     }
 
     // Sort: open/in_progress ascending by startTime (next starting first); finished descending (most recent first)
@@ -154,6 +216,7 @@ function AllMatches() {
     }
 
     const MatchRow = ({ match }) => {
+        const matchKey = normalizeMatchId(match.matchId) || `${match.leagueName}-${match.subLeagueName}-${match.name || match.round}`
         // Calculate timeout info for this match
         const matchTimeouts = useMemo(() => {
             if (match.status === 'open') {
@@ -239,7 +302,10 @@ function AllMatches() {
         })()
 
         return (
-            <div className={`card mb-3 overflow-hidden ${cardBorder}`}>
+            <div
+                id={`all-match-${encodeURIComponent(matchKey)}`}
+                className={`card mb-3 overflow-hidden scroll-mt-[16vh] sm:scroll-mt-[22vh] transition-shadow ${cardBorder} ${highlightedMatchKey === matchKey ? 'ring-2 ring-chess-green ring-offset-2' : ''}`}
+            >
                 {/* Warning Banner */}
                 {hasWarning && match.status === 'open' && (
                     <div className="bg-red-50 border-b-2 border-red-200 -mx-6 -mt-6 mb-2 p-3">

@@ -6,6 +6,7 @@ import EarlyResignModal from './EarlyResignModal'
 import AuditLogModal from './AuditLogModal'
 import { getModalPlayersForMatch } from '../utils/earlyResignUtils'
 import { computeMatchupRatings } from '../utils/ratingUtils'
+import { getTimeoutRiskPlayers } from '../utils/actionItemUtils'
 
 function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignIndex, clubIcons, onViewDetails }) {
     const [showTimeoutModal, setShowTimeoutModal] = useState(false)
@@ -39,53 +40,20 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
 
     const timeoutInfo = matchTimeoutInfo()
 
-    // For open matches, calculate alerts using timeoutData.json
-    const openMatchAlerts = () => {
-        if (round.status !== 'open' || !timeoutData?.players) return null
-
-        // Open matches have no playerStats; players are in registrationData.ourRoster
-        const ourRoster = round.registrationData?.ourRoster ?? []
-        if (ourRoster.length === 0) return null
-
-        const highRiskThreshold = timeoutData?.riskThresholdPercent ?? 25
-        let playersWithHighTimeoutPercent = 0
-        const alertPlayers = []
-        const seen = new Set()
-
-        ourRoster.forEach(({ username }) => {
-            if (!username) return
-            const td = timeoutData.players[username.toLowerCase()]
-            if (!td?.riskFlag) return
-
-            const subleagueTimeouts = td.subLeagueTimeouts?.[leagueName]?.[subLeagueName] ?? 0
-
-            if ((td.timeoutPercent ?? 0) > highRiskThreshold) playersWithHighTimeoutPercent++
-
-            if (!seen.has(username)) {
-                seen.add(username)
-                alertPlayers.push({
-                    username,
-                    dailyRating: td.dailyRating ?? null,
-                    rating960: td.rating960 ?? null,
-                    timeoutPercent: td.timeoutPercent ?? null,
-                    totalLeagueTimeouts90Days: td.totalLeagueTimeouts90Days ?? 0,
-                    subleagueTimeouts,
-                    dailyTimeouts: td.dailyTimeouts ?? {},
-                    riskFlag: true,
-                    riskLevel: td.riskLevel,
-                    riskReason: td.riskReason,
-                })
-            }
+    const alerts = (() => {
+        if (round.status !== 'open') return null
+        const alertPlayers = getTimeoutRiskPlayers({
+            round,
+            timeoutData,
+            leagueName,
+            subLeagueName,
         })
-
-        // Sort HIGH → MEDIUM → LOW
-        const order = { HIGH: 0, MEDIUM: 1, LOW: 2 }
-        alertPlayers.sort((a, b) => (order[a.riskLevel] ?? 99) - (order[b.riskLevel] ?? 99))
-
-        return { playersWithHighTimeoutPercent, alertPlayers }
-    }
-
-    const alerts = openMatchAlerts()
+        if (alertPlayers.length === 0) return null
+        return {
+            playersWithHighTimeoutPercent: alertPlayers.filter(player => player.riskLevel === 'HIGH').length,
+            alertPlayers,
+        }
+    })()
 
     // True when opponent has at least one removal across any history snapshot
     const hasOppRemovals = (round.registrationHistory ?? []).some(
@@ -109,6 +77,11 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
         return []
     })()
 
+    const hasIncompleteRegistrationAlert = round.status === 'open'
+        && !!round.registeredPlayers
+        && (round.minTeamPlayers || 0) > 0
+        && (round.registeredPlayers.our || 0) < (round.minTeamPlayers || 0)
+
     return (
         <div className="card overflow-hidden">
             {/* Warning Banner / Registration Status */}
@@ -116,20 +89,18 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
                 const minRequired = round.minTeamPlayers || 0
                 const maxAllowed = round.maxTeamPlayers || 0
                 const ourCount = round.registeredPlayers.our || 0
-                const needsAttention = minRequired > 0 && ourCount < minRequired
 
                 const denominator = maxAllowed
                     ? `/${maxAllowed}`
                     : minRequired > 0 ? `/${minRequired}+` : ''
 
+                if (!hasIncompleteRegistrationAlert) return null
+
                 return (
-                    <div className={`-mx-6 -mt-6 mb-6 p-4 border-b-2 text-sm font-medium ${needsAttention
-                        ? 'bg-red-50 text-red-700 border-red-200'
-                        : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                        }`}>
+                    <div className="-mx-6 -mt-6 mb-6 p-4 border-b-2 text-sm font-medium bg-red-50 text-red-700 border-red-200">
                         <div className="flex justify-between items-center">
                             <span className="font-semibold">
-                                {needsAttention ? '⚠️ Registration Incomplete' : '📝 Open for Registration'}
+                                ⚠️ Registration Incomplete
                             </span>
                             <span>
                                 {ourCount}{denominator} registered
@@ -141,11 +112,11 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
 
             {/* Timeout alerts for open matches */}
             {round.status === 'open' && alerts && alerts.playersWithHighTimeoutPercent > 0 && (
-                <div className={`flex flex-col mb-6 -mx-6 block ${!round.registeredPlayers ? '-mt-6' : ''}`}>
+                <div className={`flex flex-col mb-6 -mx-6 block ${hasIncompleteRegistrationAlert ? '' : '-mt-6'}`}>
                     <button
                         onClick={() => handleAlertClick(
-                            `Players with High Timeout Risk (>${timeoutData?.riskThresholdPercent ?? 25}%)`,
-                            alerts.alertPlayers.filter(p => p.timeoutPercent > (timeoutData?.riskThresholdPercent ?? 25))
+                            'Timeout Risk Details',
+                            alerts.alertPlayers
                         )}
                         className="w-full p-4 border-b border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition-all text-left"
                     >
@@ -154,10 +125,30 @@ function MatchCard({ round, timeoutData, leagueName, subLeagueName, earlyResignI
                                 <span className="text-xl">⏱️</span>
                                 <div>
                                     <div className="font-bold text-amber-900 text-sm">Timeout Risk Alert</div>
-                                    <div className="text-xs text-amber-800">{alerts.playersWithHighTimeoutPercent} player{alerts.playersWithHighTimeoutPercent !== 1 ? 's' : ''} with high timeout ratio</div>
+                                    <div className="text-xs text-amber-800">{alerts.alertPlayers.length} player{alerts.alertPlayers.length !== 1 ? 's' : ''} to review</div>
                                 </div>
                             </div>
                             <span className="text-xs font-bold text-amber-700">View Details →</span>
+                        </div>
+                    </button>
+                </div>
+            )}
+
+            {round.status === 'open' && alerts && alerts.playersWithHighTimeoutPercent === 0 && (
+                <div className={`flex flex-col mb-6 -mx-6 block ${hasIncompleteRegistrationAlert ? '' : '-mt-6'}`}>
+                    <button
+                        onClick={() => handleAlertClick('Timeout Risk Details', alerts.alertPlayers)}
+                        className="w-full p-3 border-b border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors text-left"
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg">⏱️</span>
+                                <div>
+                                    <div className="font-semibold text-blue-900 text-sm">Timeout Monitoring</div>
+                                    <div className="text-xs text-blue-800">{alerts.alertPlayers.length} at-risk player{alerts.alertPlayers.length !== 1 ? 's' : ''}</div>
+                                </div>
+                            </div>
+                            <span className="text-xs font-bold text-blue-700">View Details →</span>
                         </div>
                     </button>
                 </div>

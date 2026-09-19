@@ -69,23 +69,23 @@ function Home() {
         <div className="page-container">
             {/* Header Section */}
             <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Active Leagues</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Leagues</h2>
                 <p className="text-gray-600">
                     Last updated: {new Date(data.lastUpdated).toLocaleString()}
                 </p>
             </div>
 
-            {/* View Open Matches Button */}
+            {/* View All Matches Button */}
             <Link
                 to="/matches"
-                className="block mb-8 card bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="block mb-8 rounded-lg bg-chess-green p-6 shadow-md transition-colors duration-200 hover:bg-green-700 hover:shadow-lg"
             >
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">Open Matches</h3>
-                        <p className="text-gray-800">View all open matches</p>
+                        <h3 className="text-2xl font-bold text-white mb-2">View All Matches</h3>
+                        <p className="text-green-50">Browse open, in-progress, and finished matches</p>
                     </div>
-                    <div className="text-4xl">→</div>
+                    <div className="text-4xl text-white">→</div>
                 </div>
             </Link>
 

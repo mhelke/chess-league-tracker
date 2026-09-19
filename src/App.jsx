@@ -8,6 +8,7 @@ import AllMatches from './pages/AllMatches'
 import ActionItems from './pages/ActionItems'
 import NotFound from './pages/NotFound'
 import EmbedLeagueOverview from './pages/EmbedLeagueOverview'
+import { collectActionItems } from './utils/actionItemUtils'
 
 const SITE_NAMES = {
     '1dpmc': '1 Day Per Move Club',
@@ -35,16 +36,28 @@ const NAV_LINKS = [
     { to: '/global', label: 'Global Leaderboard' },
 ]
 
-function NavLink({ to, label, onClick }) {
+function NavLink({ to, label, onClick, badgeCount = 0 }) {
     const location = useLocation()
     const active = location.pathname === to
+    const hasBadge = badgeCount > 0
     return (
         <Link
             to={to}
             onClick={onClick}
+            aria-label={hasBadge ? `${label}, ${badgeCount} requiring attention` : undefined}
             className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:text-chess-light hover:bg-white/10 ${active ? 'text-chess-light' : ''}`}
         >
-            {label}
+            <span className="inline-flex items-center gap-2">
+                {label}
+                {hasBadge && (
+                    <span
+                        aria-hidden="true"
+                        className="inline-flex min-w-5 items-center justify-center rounded-full bg-amber-400 px-1.5 py-0.5 text-[11px] font-bold leading-none text-chess-dark"
+                    >
+                        {badgeCount > 99 ? '99+' : badgeCount}
+                    </span>
+                )}
+            </span>
         </Link>
     )
 }
@@ -53,6 +66,7 @@ function AppContent() {
     const siteName = SITE_NAMES[__SITE_KEY__] || 'Chess League Tracker'
     const [menuOpen, setMenuOpen] = useState(false)
     const [clubIcon, setClubIcon] = useState(null)
+    const [actionItemCount, setActionItemCount] = useState(0)
     const location = useLocation()
     const isEmbed = location.pathname === '/league-overview' && new URLSearchParams(location.search).get('embed') === '1'
 
@@ -62,6 +76,17 @@ function AppContent() {
         fetch(`https://api.chess.com/pub/club/${apiId}`)
             .then(r => r.json())
             .then(data => { if (data?.icon) setClubIcon(data.icon) })
+            .catch(() => { })
+    }, [])
+
+    useEffect(() => {
+        Promise.all([
+            fetch('/data/leagueData.json').then(response => response.json()),
+            fetch('/data/timeoutData.json').then(response => response.json()).catch(() => null),
+        ])
+            .then(([leagueData, timeoutData]) => {
+                setActionItemCount(collectActionItems(leagueData, timeoutData).length)
+            })
             .catch(() => { })
     }, [])
 
@@ -91,7 +116,13 @@ function AppContent() {
 
                         {/* Desktop nav */}
                         <nav className="hidden sm:flex items-center space-x-1">
-                            {NAV_LINKS.map(l => <NavLink key={l.to} {...l} />)}
+                            {NAV_LINKS.map(l => (
+                                <NavLink
+                                    key={l.to}
+                                    {...l}
+                                    badgeCount={l.to === '/action-items' ? actionItemCount : 0}
+                                />
+                            ))}
                             <a
                                 href={`https://www.chessteamdata.com/members?clubid=${MEMBER_CLUB_IDS[__SITE_KEY__] || __SITE_KEY__}`}
                                 target="_blank"
@@ -124,7 +155,14 @@ function AppContent() {
                     {/* Mobile dropdown */}
                     {menuOpen && (
                         <nav className="sm:hidden mt-2 pb-1 border-t border-white/20 pt-2 flex flex-col gap-0.5">
-                            {NAV_LINKS.map(l => <NavLink key={l.to} {...l} onClick={() => setMenuOpen(false)} />)}
+                            {NAV_LINKS.map(l => (
+                                <NavLink
+                                    key={l.to}
+                                    {...l}
+                                    badgeCount={l.to === '/action-items' ? actionItemCount : 0}
+                                    onClick={() => setMenuOpen(false)}
+                                />
+                            ))}
                             <a
                                 href={`https://www.chessteamdata.com/members?clubid=${MEMBER_CLUB_IDS[__SITE_KEY__] || __SITE_KEY__}`}
                                 target="_blank"

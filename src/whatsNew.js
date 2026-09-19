@@ -2,10 +2,14 @@
 // Update the id when publishing a new announcement so returning admins see it once.
 export const WHATS_NEW_ANNOUNCEMENT = {
     enabled: true,
-    id: 'admin-match-monitoring-2026-09',
+    id: 'admin-dashboard-and-match-monitoring-2026-09',
     title: 'Know what needs attention. Act faster.',
-    intro: 'Action Items brings registration gaps, recruitment opportunities, rating mismatches, and timeout risks into one prioritized workflow.',
+    intro: 'A more flexible dashboard for the match activity that matters most, alongside a prioritized workflow for issues that need attention.',
     items: [
+        {
+            title: 'Customizable dashboard',
+            description: 'Arrange dashboard cards around your workflow and hide the ones you do not need. The dashboard brings together action items, upcoming matches, timeout history, early resignations, opponent roster removals, and recent results.',
+        },
         {
             title: 'Action Items',
             description: 'A new prioritized list of open matches needing attention. Each item explains the issue and includes recruitment suggestions, board coverage guidance, rating mismatches, registration gaps, and high timeout-risk decisions.',

@@ -106,22 +106,26 @@ function LeagueView() {
     const subLeagueEntries = Object.entries(league.subLeagues || {})
     const diagnosticEntries = subLeagueEntries.map(([subLeagueName, subLeagueData]) => {
         const diagnostics = subLeagueData.diagnostics || {}
+        const ambiguousMatches = Array.isArray(diagnostics.ambiguousMatches) ? diagnostics.ambiguousMatches : []
+        const unresolvedMatches = ambiguousMatches.filter(match =>
+            !String(match?.reason || '').toLowerCase().includes('retained existing sub-league key')
+        )
         return {
             subLeagueName,
             mergedFrom: Array.isArray(diagnostics.mergedFrom) ? diagnostics.mergedFrom : [],
             dateResolvedMatches: Array.isArray(diagnostics.dateResolvedMatches) ? diagnostics.dateResolvedMatches : [],
-            ambiguousMatches: Array.isArray(diagnostics.ambiguousMatches) ? diagnostics.ambiguousMatches : [],
+            unresolvedMatches,
             missingRounds: Array.isArray(diagnostics.missingRounds) ? diagnostics.missingRounds : [],
         }
     })
     const diagnosticSummary = diagnosticEntries.reduce((summary, entry) => ({
         merged: summary.merged + entry.mergedFrom.length,
         dateResolved: summary.dateResolved + entry.dateResolvedMatches.length,
-        ambiguous: summary.ambiguous + entry.ambiguousMatches.length,
+        unresolved: summary.unresolved + entry.unresolvedMatches.length,
         missingRounds: summary.missingRounds + entry.missingRounds.length,
-    }), { merged: 0, dateResolved: 0, ambiguous: 0, missingRounds: 0 })
+    }), { merged: 0, dateResolved: 0, unresolved: 0, missingRounds: 0 })
     const diagnosticIssues = diagnosticEntries.filter(entry =>
-        entry.ambiguousMatches.length > 0 || entry.missingRounds.length > 0
+        entry.unresolvedMatches.length > 0 || entry.missingRounds.length > 0
     )
     const diagnosticActivity = diagnosticEntries.filter(entry =>
         entry.mergedFrom.length > 0 || entry.dateResolvedMatches.length > 0
@@ -148,7 +152,7 @@ function LeagueView() {
     const copyDiagnosticsReport = async () => {
         const lines = [
             `League diagnostics: ${leagueName}`,
-            `Merges: ${diagnosticSummary.merged}; date-resolved matches: ${diagnosticSummary.dateResolved}; ambiguous matches: ${diagnosticSummary.ambiguous}; missing rounds: ${diagnosticSummary.missingRounds}`,
+            `Merges: ${diagnosticSummary.merged}; date-resolved matches: ${diagnosticSummary.dateResolved}; unresolved groupings: ${diagnosticSummary.unresolved}; missing rounds: ${diagnosticSummary.missingRounds}`,
         ]
         diagnosticActivity.forEach(entry => {
             if (entry.mergedFrom.length > 0) {
@@ -159,7 +163,7 @@ function LeagueView() {
             if (entry.missingRounds.length > 0) {
                 lines.push(`${entry.subLeagueName}: missing ${entry.missingRounds.join(', ')}`)
             }
-            entry.ambiguousMatches.forEach(match => {
+            entry.unresolvedMatches.forEach(match => {
                 lines.push(`${entry.subLeagueName}: ${match.matchId || 'unknown match'} - ${match.reason}`)
             })
         })
@@ -250,8 +254,8 @@ function LeagueView() {
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm font-semibold text-gray-700">
                     <span>Admin diagnostics</span>
                     <span className="text-xs font-normal text-gray-500">
-                        {diagnosticSummary.ambiguous + diagnosticSummary.missingRounds > 0
-                            ? `${diagnosticSummary.ambiguous} ambiguous · ${diagnosticSummary.missingRounds} missing`
+                        {diagnosticSummary.unresolved + diagnosticSummary.missingRounds > 0
+                            ? `${diagnosticSummary.unresolved} unresolved · ${diagnosticSummary.missingRounds} missing`
                             : 'No unresolved issues'}
                     </span>
                 </summary>
@@ -259,7 +263,7 @@ function LeagueView() {
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                         <span>Merges: <strong>{diagnosticSummary.merged}</strong></span>
                         <span>Date-resolved: <strong>{diagnosticSummary.dateResolved}</strong></span>
-                        <span>Ambiguous: <strong>{diagnosticSummary.ambiguous}</strong></span>
+                        <span>Unresolved groupings: <strong>{diagnosticSummary.unresolved}</strong></span>
                         <span>Missing rounds: <strong>{diagnosticSummary.missingRounds}</strong></span>
                     </div>
                     {diagnosticIssues.length > 0 && (
@@ -270,9 +274,9 @@ function LeagueView() {
                                     {entry.missingRounds.length > 0 && (
                                         <div>Missing: {entry.missingRounds.join(', ')}</div>
                                     )}
-                                    {entry.ambiguousMatches.map((match, index) => (
+                                    {entry.unresolvedMatches.map((match, index) => (
                                         <div key={`${match.matchId || match.name}-${index}`}>
-                                            Ambiguous: {match.matchId || match.name}
+                                            Unresolved grouping: {match.matchId || match.name}
                                         </div>
                                     ))}
                                 </div>

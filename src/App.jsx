@@ -9,6 +9,8 @@ import ActionItems from './pages/ActionItems'
 import NotFound from './pages/NotFound'
 import EmbedLeagueOverview from './pages/EmbedLeagueOverview'
 import { collectActionItems } from './utils/actionItemUtils'
+import WhatsNewModal from './components/WhatsNewModal'
+import { WHATS_NEW_ANNOUNCEMENT } from './whatsNew'
 
 const SITE_NAMES = {
     '1dpmc': '1 Day Per Move Club',
@@ -67,6 +69,7 @@ function AppContent() {
     const [menuOpen, setMenuOpen] = useState(false)
     const [clubIcon, setClubIcon] = useState(null)
     const [actionItemCount, setActionItemCount] = useState(0)
+    const [showWhatsNew, setShowWhatsNew] = useState(false)
     const location = useLocation()
     const isEmbed = location.pathname === '/league-overview' && new URLSearchParams(location.search).get('embed') === '1'
 
@@ -89,6 +92,26 @@ function AppContent() {
             })
             .catch(() => { })
     }, [])
+
+    useEffect(() => {
+        if (isEmbed || !WHATS_NEW_ANNOUNCEMENT.enabled) return
+
+        try {
+            const storageKey = `whats-new:${WHATS_NEW_ANNOUNCEMENT.id}`
+            if (!window.localStorage.getItem(storageKey)) setShowWhatsNew(true)
+        } catch {
+            setShowWhatsNew(true)
+        }
+    }, [isEmbed])
+
+    const dismissWhatsNew = () => {
+        setShowWhatsNew(false)
+        try {
+            window.localStorage.setItem(`whats-new:${WHATS_NEW_ANNOUNCEMENT.id}`, 'dismissed')
+        } catch {
+            // The modal is still dismissed for the current session if storage is unavailable.
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -190,6 +213,12 @@ function AppContent() {
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </main>
+
+            <WhatsNewModal
+                announcement={WHATS_NEW_ANNOUNCEMENT}
+                isOpen={showWhatsNew && !isEmbed}
+                onClose={dismissWhatsNew}
+            />
 
             {/* Footer */}
             {!isEmbed && <footer className="bg-chess-dark text-white mt-12">

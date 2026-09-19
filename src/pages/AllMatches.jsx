@@ -8,6 +8,8 @@ import { buildEarlyResignIndex, getModalPlayersForMatch } from '../utils/earlyRe
 import { computeMatchupRatings } from '../utils/ratingUtils'
 import { collectActionItems, getTimeoutRiskPlayers, normalizeMatchId } from '../utils/actionItemUtils'
 
+const FINISHED_LIST_PAGE_SIZE = 10
+
 function AllMatches() {
     const [data, setData] = useState(null)
     const [timeoutData, setTimeoutData] = useState(null)
@@ -26,6 +28,8 @@ function AllMatches() {
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedLeague, setSelectedLeague] = useState('')
     const [openViewMode, setOpenViewMode] = useState('calendar')
+    const [finishedViewMode, setFinishedViewMode] = useState('list')
+    const [finishedListPage, setFinishedListPage] = useState(1)
     const [finishedVisibleCounts, setFinishedVisibleCounts] = useState({})
     const [highlightedMatchKey, setHighlightedMatchKey] = useState(null)
     const [searchParams] = useSearchParams()
@@ -100,9 +104,13 @@ function AllMatches() {
         if (!data || !targetMatchId) return
 
         let targetMatch = null
+        const finishedMatches = []
         Object.entries(data.leagues || {}).forEach(([leagueName, leagueData]) => {
             Object.entries(leagueData.subLeagues || {}).forEach(([subLeagueName, subLeagueData]) => {
                 ; (subLeagueData.rounds || []).forEach(round => {
+                    if (round.status === 'finished') {
+                        finishedMatches.push({ ...round, leagueName, subLeagueName })
+                    }
                     if (normalizeMatchId(round.matchId) === targetMatchId) {
                         targetMatch = { ...round, leagueName, subLeagueName }
                     }
@@ -116,8 +124,18 @@ function AllMatches() {
             setSearchQuery('')
             setSelectedLeague('')
             if (targetMatch.status === 'finished') {
-                setFinishedVisibleCounts(prev => ({ ...prev, [targetMatch.leagueName]: Number.MAX_SAFE_INTEGER }))
-                setCollapsedLeagues(prev => ({ ...prev, [targetMatch.leagueName]: false }))
+                setFinishedViewMode('list')
+                finishedMatches.sort((left, right) => {
+                    const completedTimeDifference = (right.endTime || right.startTime || 0) - (left.endTime || left.startTime || 0)
+                    const startTimeDifference = (right.startTime || 0) - (left.startTime || 0)
+                    const leftName = `${left.leagueName || ''}|${left.subLeagueName || ''}|${left.name || ''}`
+                    const rightName = `${right.leagueName || ''}|${right.subLeagueName || ''}|${right.name || ''}`
+                    return completedTimeDifference || startTimeDifference || leftName.localeCompare(rightName)
+                })
+                const targetIndex = finishedMatches.findIndex(match => normalizeMatchId(match.matchId) === targetMatchId)
+                if (targetIndex >= 0) {
+                    setFinishedListPage(Math.floor(targetIndex / FINISHED_LIST_PAGE_SIZE) + 1)
+                }
             }
             if (shouldOpenAudit && (targetMatch.registrationHistory || []).length > 0) {
                 setHistoryModalMatch(targetMatch)
@@ -132,6 +150,10 @@ function AllMatches() {
             setActiveTab(requestedStatus)
         }
     }, [data, requestedStatus, targetMatchId])
+
+    useEffect(() => {
+        setFinishedListPage(1)
+    }, [searchQuery, selectedLeague])
 
     useEffect(() => {
         if (!data || !targetMatchId) return undefined
@@ -150,7 +172,7 @@ function AllMatches() {
             window.clearTimeout(scrollTimer)
             if (highlightTimer) window.clearTimeout(highlightTimer)
         }
-    }, [activeTab, collapsedLeagues, data, finishedVisibleCounts, openViewMode, targetMatchId])
+    }, [activeTab, collapsedLeagues, data, finishedListPage, finishedViewMode, finishedVisibleCounts, openViewMode, targetMatchId])
 
     if (loading) {
         return (
@@ -707,7 +729,7 @@ function AllMatches() {
     }
 
     const renderMatches = (matches, emptyMessage, options = {}) => {
-        const { calendar = false, paginateFinished = false } = options
+        const { calendar = false, list = false, paginateFinished = false } = options
         const q = searchQuery.trim().toLowerCase()
         const matchesQuery = match => {
             if (!q) return true
@@ -765,6 +787,51 @@ function AllMatches() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )
+        }
+
+        if (list) {
+            const totalPages = Math.ceil(filtered.length / FINISHED_LIST_PAGE_SIZE)
+            const safePage = Math.min(finishedListPage, totalPages)
+            const pageStart = (safePage - 1) * FINISHED_LIST_PAGE_SIZE
+            const pageMatches = filtered.slice(pageStart, pageStart + FINISHED_LIST_PAGE_SIZE)
+
+            return (
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        {pageMatches.map((match, idx) => (
+                            <MatchRow key={`${match.matchId}-${idx}`} match={match} />
+                        ))}
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 pt-4">
+                        <span className="text-sm text-gray-500" aria-live="polite">
+                            Showing {pageStart + 1}-{pageStart + pageMatches.length} of {filtered.length}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setFinishedListPage(page => Math.max(1, page - 1))}
+                                disabled={safePage === 1}
+                                aria-label="Previous finished matches page"
+                                className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                Previous
+                            </button>
+                            <span className="px-1 text-sm text-gray-600" aria-label={`Finished matches page ${safePage} of ${totalPages}`}>
+                                Page {safePage} of {totalPages}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => setFinishedListPage(page => Math.min(totalPages, page + 1))}
+                                disabled={safePage === totalPages}
+                                aria-label="Next finished matches page"
+                                className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )
         }
@@ -986,6 +1053,39 @@ function AllMatches() {
                 </div>
             )}
 
+            {activeTab === 'finished' && (
+                <div className="mb-6 flex justify-end">
+                    <div
+                        role="group"
+                        aria-label="Finished match layout"
+                        className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1"
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setFinishedViewMode('list')}
+                            aria-pressed={finishedViewMode === 'list'}
+                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${finishedViewMode === 'list'
+                                ? 'bg-white text-chess-green shadow-sm'
+                                : 'text-gray-600 hover:text-gray-800'
+                                }`}
+                        >
+                            List
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFinishedViewMode('league')}
+                            aria-pressed={finishedViewMode === 'league'}
+                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${finishedViewMode === 'league'
+                                ? 'bg-white text-chess-green shadow-sm'
+                                : 'text-gray-600 hover:text-gray-800'
+                                }`}
+                        >
+                            By league
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Tab Content */}
             {activeTab === 'open' && renderMatches(
                 selectedLeague ? allMatches.open.filter(m => m.leagueName === selectedLeague) : allMatches.open,
@@ -997,7 +1097,9 @@ function AllMatches() {
             {activeTab === 'finished' && renderMatches(
                 selectedLeague ? allMatches.finished.filter(m => m.leagueName === selectedLeague) : allMatches.finished,
                 'No finished matches',
-                { paginateFinished: true })}
+                finishedViewMode === 'list'
+                    ? { list: true }
+                    : { paginateFinished: true })}
 
             {/* Timeout Modal */}
             <TimeoutModal

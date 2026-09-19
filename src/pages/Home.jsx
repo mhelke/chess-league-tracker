@@ -184,7 +184,7 @@ function Home() {
     )
     const timeoutHistory = useMemo(() => buildTimeoutHistory(data), [data])
     const recentTimeoutPlayers = useMemo(
-        () => getRecentTimeoutPlayers(timeoutHistory),
+        () => getRecentTimeoutPlayers(timeoutHistory, 7),
         [timeoutHistory]
     )
     const recentTimeoutCount = recentTimeoutPlayers.reduce((sum, player) => sum + player.totalTimeouts, 0)
@@ -434,8 +434,8 @@ function Home() {
                     <h3 className="text-2xl font-bold text-gray-900">Recent Timeout History</h3>
                     <p className="mt-1 text-sm text-gray-600">
                         {recentTimeoutPlayers.length > 0
-                            ? `${recentTimeoutCount} timeout${recentTimeoutCount === 1 ? '' : 's'} by ${recentTimeoutPlayers.length} player${recentTimeoutPlayers.length === 1 ? '' : 's'} in the past 30 days`
-                            : 'No players have timed out in the past 30 days'}
+                            ? `${recentTimeoutCount} timeout${recentTimeoutCount === 1 ? '' : 's'} by ${recentTimeoutPlayers.length} player${recentTimeoutPlayers.length === 1 ? '' : 's'} in the past 7 days`
+                            : 'No players have timed out in the past 7 days'}
                     </p>
                 </div>
 
@@ -533,7 +533,9 @@ function Home() {
                             {recentFinishedMatches.slice(0, RECENT_ACTIVITY_LIMIT).map(match => (
                                 <Link
                                     key={normalizeMatchId(match.matchId) || `${match.leagueName}-${match.subLeagueName}-${match.name}`}
-                                    to={subLeaguePath(match.leagueName, match.subLeagueName)}
+                                    to={normalizeMatchId(match.matchId)
+                                        ? `/matches?status=finished&matchId=${encodeURIComponent(normalizeMatchId(match.matchId))}`
+                                        : subLeaguePath(match.leagueName, match.subLeagueName)}
                                     className="block rounded-lg border border-gray-200 p-3 transition-colors hover:border-chess-green hover:bg-green-50"
                                 >
                                     <div className="flex items-start justify-between gap-3">

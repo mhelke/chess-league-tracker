@@ -6,6 +6,7 @@ import EarlyResignModal from '../components/EarlyResignModal'
 import AuditLogModal from '../components/AuditLogModal'
 import { buildEarlyResignIndex, getModalPlayersForMatch } from '../utils/earlyResignUtils'
 import { computeMatchupRatings } from '../utils/ratingUtils'
+import { collectActionItems, getTimeoutRiskPlayers, normalizeMatchId } from '../utils/actionItemUtils'
 
 function AllMatches() {
     const [data, setData] = useState(null)
@@ -24,6 +25,8 @@ function AllMatches() {
     const [collapsedLeagues, setCollapsedLeagues] = useState({})
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedLeague, setSelectedLeague] = useState('')
+    const [openViewMode, setOpenViewMode] = useState('calendar')
+    const [finishedVisibleCounts, setFinishedVisibleCounts] = useState({})
 
     const SITE_NAMES = {
         '1dpmc': '1 Day Per Move Club',
@@ -34,6 +37,15 @@ function AllMatches() {
 
     // Build early resignation index — must be before any early return (Rules of Hooks)
     const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData), [earlyResignData])
+
+    const actionItemsByMatchId = useMemo(() => {
+        const index = new Map()
+        collectActionItems(data, timeoutData).forEach(match => {
+            const matchId = normalizeMatchId(match.matchId)
+            if (matchId) index.set(matchId, match)
+        })
+        return index
+    }, [data, timeoutData])
 
     // List of available top-level leagues for quick filtering
     const leagueOptions = useMemo(() => {
@@ -118,10 +130,23 @@ function AllMatches() {
         })
     }
 
+    const compareMatchNames = (a, b) => (
+        `${a.leagueName || ''}|${a.subLeagueName || ''}|${a.name || ''}`
+            .localeCompare(`${b.leagueName || ''}|${b.subLeagueName || ''}|${b.name || ''}`)
+    )
+    const compareUpcomingMatches = (a, b) => {
+        const timeDifference = (a.startTime || 0) - (b.startTime || 0)
+        return timeDifference || compareMatchNames(a, b)
+    }
+    const compareFinishedMatches = (a, b) => {
+        const timeDifference = (b.startTime || 0) - (a.startTime || 0)
+        return timeDifference || compareMatchNames(a, b)
+    }
+
     // Sort: open/in_progress ascending by startTime (next starting first); finished descending (most recent first)
-    allMatches.open.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
-    allMatches.in_progress.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
-    allMatches.finished.sort((a, b) => (b.startTime || 0) - (a.startTime || 0))
+    allMatches.open.sort(compareUpcomingMatches)
+    allMatches.in_progress.sort(compareUpcomingMatches)
+    allMatches.finished.sort(compareFinishedMatches)
 
     const formatDate = (timestamp) => {
         if (!timestamp) return 'Not started'
@@ -131,70 +156,58 @@ function AllMatches() {
     const MatchRow = ({ match }) => {
         // Calculate timeout info for this match
         const matchTimeouts = useMemo(() => {
-            let totalTimeouts = 0
-            let playersWithHighTimeout = 0
-            const alertPlayers = []
-            const seen = new Set()
-
-            if (match.status === 'open' && timeoutData?.players) {
-                // Open matches: players are in registrationData.ourRoster, not playerStats
-                const ourRoster = match.registrationData?.ourRoster ?? []
-                ourRoster.forEach(({ username }) => {
-                    if (!username) return
-                    const td = timeoutData.players[username.toLowerCase()]
-                    if (!td?.riskFlag) return
-                    if (seen.has(username)) return
-                    seen.add(username)
-                    playersWithHighTimeout++
-                    const subleagueTimeouts = td.subLeagueTimeouts?.[match.leagueName]?.[match.subLeagueName] ?? 0
-                    alertPlayers.push({
-                        username,
-                        dailyRating: td.dailyRating ?? null,
-                        rating960: td.rating960 ?? null,
-                        timeoutPercent: td.timeoutPercent ?? null,
-                        totalLeagueTimeouts90Days: td.totalLeagueTimeouts90Days ?? 0,
-                        subleagueTimeouts,
-                        dailyTimeouts: td.dailyTimeouts ?? {},
-                        riskFlag: true,
-                        riskLevel: td.riskLevel,
-                        riskReason: td.riskReason,
-                    })
+            if (match.status === 'open') {
+                const alertPlayers = getTimeoutRiskPlayers({
+                    round: match,
+                    timeoutData,
+                    leagueName: match.leagueName,
+                    subLeagueName: match.subLeagueName,
                 })
-            } else if (match.playerStats) {
+                const highRiskPlayers = alertPlayers.filter(player => player.riskLevel === 'HIGH')
+                return {
+                    totalTimeouts: 0,
+                    hasHighTimeout: highRiskPlayers.length > 0,
+                    hasMonitoringRisk: alertPlayers.length > 0,
+                    playersWithHighTimeout: highRiskPlayers.length,
+                    alertPlayers,
+                }
+            }
+
+            let totalTimeouts = 0
+            const alertPlayers = []
+
+            if (match.playerStats) {
                 // In-progress / finished: count timeouts from playerStats
                 Object.values(match.playerStats).forEach(stats => {
                     if (stats.timeouts) totalTimeouts += stats.timeouts
                 })
             }
 
-            // Sort HIGH → MEDIUM → LOW
-            const order = { HIGH: 0, MEDIUM: 1, LOW: 2 }
-            alertPlayers.sort((a, b) => (order[a.riskLevel] ?? 99) - (order[b.riskLevel] ?? 99))
-
-            return { totalTimeouts, hasHighTimeout: playersWithHighTimeout > 0, playersWithHighTimeout, alertPlayers }
+            return {
+                totalTimeouts,
+                hasHighTimeout: false,
+                hasMonitoringRisk: alertPlayers.length > 0,
+                playersWithHighTimeout: 0,
+                alertPlayers,
+            }
         }, [match, timeoutData])
 
         // Calculate warning conditions for registration matches
         const minRequired = match.minTeamPlayers || 0
         const ourCount = match.registeredPlayers?.our || 0
-        const oppCount = match.registeredPlayers?.opponent || 0
-        const playerDeficit = ourCount < oppCount
-        const minNotMet = minRequired > 0 && ourCount < minRequired
 
-        // Calculate rating differential for registration matches
-        // Only boards that actually have a matchup (rank-paired, capped by the smaller roster) are compared
-        let avgDiff = 0
-        let ratingDisadvantage = false
-        if (match.registrationData && match.registrationData.type === 'roster') {
-            const cap = match.maxTeamPlayers || 0
-            const matchup = computeMatchupRatings(match.registrationData.ourRoster, match.registrationData.oppRoster, cap)
-            avgDiff = matchup.avgDiff
-            ratingDisadvantage = avgDiff < -50  // More than 50 points behind
-        }
-
-        const hasWarning = minNotMet || playerDeficit || ratingDisadvantage
+        const actionItem = actionItemsByMatchId.get(normalizeMatchId(match.matchId))
+        const actionWarnings = actionItem?.warnings
+        const hasActionItem = !!actionItem
+        const hasWarning = hasActionItem
         const hasTimeoutWarning = match.status === 'open' && matchTimeouts.hasHighTimeout
         const hasAlert = hasWarning || hasTimeoutWarning
+        const actionReasonLabels = actionWarnings ? [
+            (actionWarnings.minNotMet || actionWarnings.playerDeficit) && 'Roster gap',
+            actionWarnings.ratingDisadvantage && (actionWarnings.mismatchedBoardCount > 0 ? 'Board mismatch' : 'Rating disadvantage'),
+            actionWarnings.surgeRecruitment && 'Registration surge',
+            actionWarnings.hasTimeoutWarning && 'High timeout risk',
+        ].filter(Boolean) : []
 
         // Early resignation banner — in-progress and finished matches only
         const earlyResignPlayers = (match.status === 'in_progress' || match.status === 'finished')
@@ -229,15 +242,29 @@ function AllMatches() {
             <div className={`card mb-3 overflow-hidden ${cardBorder}`}>
                 {/* Warning Banner */}
                 {hasWarning && match.status === 'open' && (
-                    <div className="bg-red-50 border-b-2 border-red-200 -mx-6 -mt-6 mb-2 p-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-red-700">
-                            <span className="text-xl">⚠️</span>
-                            <span>Action Required</span>
-                        </div>
-                        <div className="mt-1 text-xs text-red-600 space-y-1">
-                            {minNotMet && <div>• Need {minRequired - ourCount} more player(s) to avoid forfeit</div>}
-                            {playerDeficit && !minNotMet && <div>• Opponent has {oppCount - ourCount} more player(s) registered</div>}
-                            {ratingDisadvantage && <div>• Team average rating is {Math.abs(avgDiff).toFixed(0)} points lower</div>}
+                    <div className="bg-red-50 border-b-2 border-red-200 -mx-6 -mt-6 mb-2 p-3">
+                        <div className="flex items-center justify-between gap-3 text-sm font-semibold text-red-700">
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-lg">⚠️</span>
+                                    <span>Action Required <span className="font-normal text-red-600">· {actionReasonLabels.length} issue{actionReasonLabels.length !== 1 ? 's' : ''}</span></span>
+                                </div>
+                                {actionReasonLabels.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                        {actionReasonLabels.map(label => (
+                                            <span key={label} className="rounded-full border border-red-200 bg-white/70 px-2 py-0.5 text-[11px] font-semibold text-red-700">
+                                                {label}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <Link
+                                to={`/action-items?matchId=${encodeURIComponent(normalizeMatchId(match.matchId))}`}
+                                className="shrink-0 text-xs font-semibold text-red-700 hover:text-red-900 hover:underline whitespace-nowrap"
+                            >
+                                View Action Items →
+                            </Link>
                         </div>
                     </div>
                 )}
@@ -246,7 +273,7 @@ function AllMatches() {
                 {hasTimeoutWarning && (
                     <button
                         onClick={() => {
-                            setModalTitle(`Players with High Timeout Risk (>${timeoutData?.riskThresholdPercent ?? 25}%)`)
+                            setModalTitle('Timeout Risk Details')
                             setModalPlayers(matchTimeouts.alertPlayers)
                             setShowTimeoutModal(true)
                         }}
@@ -257,10 +284,35 @@ function AllMatches() {
                                 <span className="text-2xl">⏱️</span>
                                 <div>
                                     <div className="text-sm font-bold text-amber-900">Timeout Risk Alert</div>
-                                    <div className="text-xs text-amber-800 mt-0.5">{matchTimeouts.playersWithHighTimeout} player{matchTimeouts.playersWithHighTimeout !== 1 ? 's' : ''} with high timeout ratio</div>
+                                    <div className="text-xs text-amber-800 mt-0.5">{matchTimeouts.alertPlayers.length} player{matchTimeouts.alertPlayers.length !== 1 ? 's' : ''} to review</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 text-xs font-bold text-amber-700">
+                                <span>View Details</span>
+                                <span>→</span>
+                            </div>
+                        </div>
+                    </button>
+                )}
+
+                {match.status === 'open' && matchTimeouts.hasMonitoringRisk && !hasTimeoutWarning && (
+                    <button
+                        onClick={() => {
+                            setModalTitle('Timeout Risk Details')
+                            setModalPlayers(matchTimeouts.alertPlayers)
+                            setShowTimeoutModal(true)
+                        }}
+                        className={`w-[calc(100%+3.05rem)] bg-blue-50 border-b border-blue-200 -mx-6 p-3 mb-4 hover:bg-blue-100 transition-colors text-left ${!hasActionItem ? '-mt-6' : ''}`}
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg">⏱️</span>
+                                <div>
+                                    <div className="text-sm font-semibold text-blue-900">Timeout Monitoring</div>
+                                    <div className="text-xs text-blue-800">{matchTimeouts.alertPlayers.length} at-risk player{matchTimeouts.alertPlayers.length !== 1 ? 's' : ''}</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs font-bold text-blue-700">
                                 <span>View Details</span>
                                 <span>→</span>
                             </div>
@@ -588,17 +640,17 @@ function AllMatches() {
         )
     }
 
-    const renderMatches = (matches, emptyMessage) => {
-        // Apply search filter
+    const renderMatches = (matches, emptyMessage, options = {}) => {
+        const { calendar = false, paginateFinished = false } = options
         const q = searchQuery.trim().toLowerCase()
-        const filtered = q
-            ? matches.filter(match => {
-                const nameMatch = match.name?.toLowerCase().includes(q)
-                const clubName = clubIcons[match.opponentClubId]?.name?.toLowerCase() || ''
-                const clubIdMatch = match.opponentClubId?.toLowerCase().includes(q)
-                return nameMatch || clubName.includes(q) || clubIdMatch
-            })
-            : matches
+        const matchesQuery = match => {
+            if (!q) return true
+            const nameMatch = match.name?.toLowerCase().includes(q)
+            const clubName = clubIcons[match.opponentClubId]?.name?.toLowerCase() || ''
+            const clubIdMatch = match.opponentClubId?.toLowerCase().includes(q)
+            return nameMatch || clubName.includes(q) || clubIdMatch
+        }
+        const filtered = matches.filter(matchesQuery)
 
         if (matches.length === 0) {
             return (
@@ -616,9 +668,43 @@ function AllMatches() {
             )
         }
 
-        // Group by league
+        if (calendar) {
+            const byDate = {}
+            filtered.forEach(match => {
+                const dateKey = match.startTime
+                    ? new Date(match.startTime * 1000).toLocaleDateString()
+                    : 'No Date'
+                if (!byDate[dateKey]) byDate[dateKey] = []
+                byDate[dateKey].push(match)
+            })
+
+            const dateGroups = Object.entries(byDate).sort(([dateA, matchesA], [dateB, matchesB]) => {
+                if (dateA === 'No Date') return 1
+                if (dateB === 'No Date') return -1
+                return (matchesA[0].startTime || 0) - (matchesB[0].startTime || 0)
+            })
+
+            return (
+                <div className="space-y-6">
+                    {dateGroups.map(([dateKey, dateMatches]) => (
+                        <div key={dateKey}>
+                            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <span aria-hidden="true">📅</span>
+                                {dateKey}
+                            </h3>
+                            <div className="space-y-2">
+                                {dateMatches.map((match, idx) => (
+                                    <MatchRow key={`${match.matchId}-${idx}`} match={match} />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )
+        }
+
         const byLeague = {}
-        matches.forEach(match => {
+        filtered.forEach(match => {
             if (!byLeague[match.leagueName]) byLeague[match.leagueName] = []
             byLeague[match.leagueName].push(match)
         })
@@ -626,30 +712,25 @@ function AllMatches() {
         return (
             <div className="space-y-6">
                 {Object.entries(byLeague).map(([leagueName, leagueMatches]) => {
-                    const visibleMatches = q
-                        ? leagueMatches.filter(match => {
-                            const nameMatch = match.name?.toLowerCase().includes(q)
-                            const clubName = clubIcons[match.opponentClubId]?.name?.toLowerCase() || ''
-                            const clubIdMatch = match.opponentClubId?.toLowerCase().includes(q)
-                            return nameMatch || clubName.includes(q) || clubIdMatch
-                        })
-                        : leagueMatches
-
-                    if (visibleMatches.length === 0) return null
-
                     const isCollapsed = !!collapsedLeagues[leagueName]
-                    const countLabel = q && visibleMatches.length !== leagueMatches.length
-                        ? `${visibleMatches.length} of ${leagueMatches.length}`
+                    const visibleCount = paginateFinished
+                        ? Math.min(finishedVisibleCounts[leagueName] || 5, leagueMatches.length)
                         : leagueMatches.length
+                    const renderedMatches = paginateFinished
+                        ? leagueMatches.slice(0, visibleCount)
+                        : leagueMatches
+                    const hasMore = paginateFinished && visibleCount < leagueMatches.length
 
                     return (
                         <div key={leagueName} className="border border-gray-200 rounded-lg overflow-hidden">
                             <button
                                 onClick={() => setCollapsedLeagues(prev => ({ ...prev, [leagueName]: !prev[leagueName] }))}
+                                aria-expanded={!isCollapsed}
+                                aria-controls={`matches-${leagueName}`}
                                 className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
                             >
                                 <h3 className="text-xl font-bold text-chess-dark">
-                                    {leagueName} <span className="text-base font-normal text-gray-500">({countLabel})</span>
+                                    {leagueName} <span className="text-base font-normal text-gray-500">({leagueMatches.length})</span>
                                 </h3>
                                 <svg
                                     className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`}
@@ -659,10 +740,43 @@ function AllMatches() {
                                 </svg>
                             </button>
                             {!isCollapsed && (
-                                <div className="p-3 space-y-2">
-                                    {visibleMatches.map((match, idx) => (
+                                <div id={`matches-${leagueName}`} className="p-3 space-y-2">
+                                    {renderedMatches.map((match, idx) => (
                                         <MatchRow key={`${match.matchId}-${idx}`} match={match} />
                                     ))}
+                                    {paginateFinished && (
+                                        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3 mt-3">
+                                            <span className="text-xs text-gray-500">
+                                                Showing {renderedMatches.length} of {leagueMatches.length}
+                                            </span>
+                                            <div className="flex items-center gap-3">
+                                                {hasMore && (
+                                                    <button
+                                                        onClick={() => setFinishedVisibleCounts(prev => ({
+                                                            ...prev,
+                                                            [leagueName]: visibleCount + 5
+                                                        }))}
+                                                        aria-expanded={false}
+                                                        className="text-sm font-medium text-chess-green hover:text-green-700 hover:underline"
+                                                    >
+                                                        Show 5 more
+                                                    </button>
+                                                )}
+                                                {visibleCount > 5 && (
+                                                    <button
+                                                        onClick={() => setFinishedVisibleCounts(prev => ({
+                                                            ...prev,
+                                                            [leagueName]: 5
+                                                        }))}
+                                                        aria-expanded={true}
+                                                        className="text-sm font-medium text-gray-600 hover:text-gray-800 hover:underline"
+                                                    >
+                                                        Show less
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -773,16 +887,51 @@ function AllMatches() {
                 </div>
             </div>
 
+            {activeTab === 'open' && (
+                <div className="mb-6 flex justify-end">
+                    <div
+                        role="group"
+                        aria-label="Open match layout"
+                        className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1"
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setOpenViewMode('calendar')}
+                            aria-pressed={openViewMode === 'calendar'}
+                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${openViewMode === 'calendar'
+                                ? 'bg-white text-chess-green shadow-sm'
+                                : 'text-gray-600 hover:text-gray-800'
+                                }`}
+                        >
+                            Calendar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setOpenViewMode('league')}
+                            aria-pressed={openViewMode === 'league'}
+                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${openViewMode === 'league'
+                                ? 'bg-white text-chess-green shadow-sm'
+                                : 'text-gray-600 hover:text-gray-800'
+                                }`}
+                        >
+                            By league
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Tab Content */}
             {activeTab === 'open' && renderMatches(
                 selectedLeague ? allMatches.open.filter(m => m.leagueName === selectedLeague) : allMatches.open,
-                'No matches open for registration')}
+                'No matches open for registration',
+                { calendar: openViewMode === 'calendar' })}
             {activeTab === 'in_progress' && renderMatches(
                 selectedLeague ? allMatches.in_progress.filter(m => m.leagueName === selectedLeague) : allMatches.in_progress,
                 'No matches in progress')}
             {activeTab === 'finished' && renderMatches(
                 selectedLeague ? allMatches.finished.filter(m => m.leagueName === selectedLeague) : allMatches.finished,
-                'No finished matches')}
+                'No finished matches',
+                { paginateFinished: true })}
 
             {/* Timeout Modal */}
             <TimeoutModal

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 import AuditLogModal from '../components/AuditLogModal'
@@ -10,6 +10,52 @@ const UPCOMING_MATCH_LIMIT = 5
 const RECENT_ACTIVITY_LIMIT = 3
 const RECENT_ACTIVITY_DAYS = 7
 const OPPONENT_REMOVAL_WINDOW_DAYS = 7
+const DASHBOARD_STORAGE_KEY = `dashboard-layout:${__SITE_KEY__}`
+const DEFAULT_DASHBOARD_ORDER = [
+    'actionItems',
+    'upcomingMatches',
+    'earlyResignations',
+    'recentTimeouts',
+    'opponentRemovals',
+    'recentFinished',
+    'allLeagues',
+    'quickStats',
+]
+const DASHBOARD_TILES = [
+    { id: 'actionItems', label: 'Action Items' },
+    { id: 'upcomingMatches', label: 'Upcoming Matches' },
+    { id: 'earlyResignations', label: 'Early Resignations' },
+    { id: 'recentTimeouts', label: 'Recent Timeout History' },
+    { id: 'opponentRemovals', label: 'Opponent Roster Removals' },
+    { id: 'recentFinished', label: 'Recently Finished Matches' },
+    { id: 'allLeagues', label: 'All Leagues' },
+    { id: 'quickStats', label: 'Quick Stats' },
+]
+
+function getDefaultDashboardPreferences() {
+    return { order: [...DEFAULT_DASHBOARD_ORDER], hidden: [] }
+}
+
+function loadDashboardPreferences() {
+    const fallback = getDefaultDashboardPreferences()
+    try {
+        const saved = JSON.parse(window.localStorage.getItem(DASHBOARD_STORAGE_KEY) || 'null')
+        if (!saved) return fallback
+
+        const savedOrder = Array.isArray(saved.order) ? saved.order : []
+        const order = [
+            ...savedOrder.filter(id => DEFAULT_DASHBOARD_ORDER.includes(id)),
+            ...DEFAULT_DASHBOARD_ORDER.filter(id => !savedOrder.includes(id)),
+        ].filter((id, index, values) => values.indexOf(id) === index)
+        const hidden = Array.isArray(saved.hidden)
+            ? saved.hidden.filter(id => DEFAULT_DASHBOARD_ORDER.includes(id))
+            : []
+
+        return { order, hidden: [...new Set(hidden)] }
+    } catch {
+        return fallback
+    }
+}
 
 function toTimestamp(value) {
     if (value === null || value === undefined || value === '') return null
@@ -30,10 +76,10 @@ function getLeagueStats(leagueData) {
 
     Object.values(leagueData.subLeagues || {}).forEach(subLeague => {
         totalRounds += (subLeague.rounds || []).length
-        ; (subLeague.rounds || []).forEach(round => {
-            if (statusCounts[round.status] !== undefined) statusCounts[round.status]++
-        })
-        ; (subLeague.leaderboard || []).forEach(player => totalPlayers.add(player.username))
+            ; (subLeague.rounds || []).forEach(round => {
+                if (statusCounts[round.status] !== undefined) statusCounts[round.status]++
+            })
+            ; (subLeague.leaderboard || []).forEach(player => totalPlayers.add(player.username))
     })
 
     return { totalRounds, statusCounts, totalPlayers: totalPlayers.size }
@@ -141,8 +187,127 @@ function Home() {
     const [timeoutData, setTimeoutData] = useState(null)
     const [earlyResignData, setEarlyResignData] = useState(null)
     const [auditLogMatch, setAuditLogMatch] = useState(null)
+    const [dashboardPreferences, setDashboardPreferences] = useState(loadDashboardPreferences)
+    const [showDashboardSettings, setShowDashboardSettings] = useState(false)
+    const [draggedDashboardTile, setDraggedDashboardTile] = useState(null)
+    const [dragOverDashboardTile, setDragOverDashboardTile] = useState(null)
+    const dashboardPointerDrag = useRef(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(DASHBOARD_STORAGE_KEY, JSON.stringify(dashboardPreferences))
+        } catch {
+            // Preferences still work for the current session when storage is unavailable.
+        }
+    }, [dashboardPreferences])
+
+    const hiddenDashboardTiles = useMemo(() => new Set(dashboardPreferences.hidden), [dashboardPreferences.hidden])
+    const dashboardTileStyle = tileId => ({ order: dashboardPreferences.order.indexOf(tileId) })
+    const dashboardTileClass = (tileId, className = '') => (
+        `${className} h-full ${tileId === 'quickStats' ? '' : 'min-h-[22rem]'} flex flex-col ${hiddenDashboardTiles.has(tileId) ? 'hidden' : ''}`.trim()
+    )
+
+    const reorderDashboardTile = (sourceId, targetId, placeAfter = false) => {
+        setDashboardPreferences(previous => {
+            const order = [...previous.order]
+            const sourceIndex = order.indexOf(sourceId)
+            if (sourceIndex < 0) return previous
+
+            const [movedTile] = order.splice(sourceIndex, 1)
+            if (!targetId) {
+                order.push(movedTile)
+            } else {
+                const targetIndex = order.indexOf(targetId)
+                if (targetIndex < 0) return previous
+                order.splice(targetIndex + (placeAfter ? 1 : 0), 0, movedTile)
+            }
+
+            return { ...previous, order }
+        })
+    }
+
+    const getDashboardSettingsRowAtPoint = (clientX, clientY) => {
+        const target = document.elementFromPoint(clientX, clientY)?.closest('[data-dashboard-settings-tile-id]')
+        return target || null
+    }
+
+    const handleDashboardSettingsPointerDown = (event, tileId) => {
+        if (event.button !== 0 || event.target.closest('input, button')) return
+
+        event.preventDefault()
+
+        const drag = {
+            tileId,
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            isDragging: false,
+        }
+        const clearDrag = () => {
+            window.removeEventListener('pointermove', handlePointerMove)
+            window.removeEventListener('pointerup', handlePointerUp)
+            window.removeEventListener('pointercancel', clearDrag)
+            dashboardPointerDrag.current = null
+            setDraggedDashboardTile(null)
+            setDragOverDashboardTile(null)
+        }
+
+        const handlePointerMove = moveEvent => {
+            if (moveEvent.pointerId !== drag.pointerId) return
+
+            const distance = Math.hypot(moveEvent.clientX - drag.startX, moveEvent.clientY - drag.startY)
+            if (!drag.isDragging && distance < 8) return
+
+            if (!drag.isDragging) {
+                drag.isDragging = true
+                setDraggedDashboardTile(drag.tileId)
+            }
+
+            moveEvent.preventDefault()
+            const target = getDashboardSettingsRowAtPoint(moveEvent.clientX, moveEvent.clientY)
+            const targetId = target?.dataset.dashboardSettingsTileId || null
+            drag.targetId = targetId
+            setDragOverDashboardTile(previous => previous === targetId ? previous : targetId)
+        }
+
+        const handlePointerUp = upEvent => {
+            if (upEvent.pointerId !== drag.pointerId) return
+
+            if (drag.isDragging) {
+                upEvent.preventDefault()
+                const target = getDashboardSettingsRowAtPoint(upEvent.clientX, upEvent.clientY)
+                const targetId = target?.dataset.dashboardSettingsTileId || drag.targetId
+                if (targetId && targetId !== drag.tileId) {
+                    const targetBounds = target?.getBoundingClientRect()
+                    const placeAfter = targetBounds ? upEvent.clientY > targetBounds.top + (targetBounds.height / 2) : false
+                    reorderDashboardTile(drag.tileId, targetId, placeAfter)
+                }
+            }
+
+            clearDrag()
+        }
+
+        dashboardPointerDrag.current = drag
+        window.addEventListener('pointermove', handlePointerMove)
+        window.addEventListener('pointerup', handlePointerUp)
+        window.addEventListener('pointercancel', clearDrag)
+    }
+
+    const dashboardSettingsRowPointerProps = tileId => ({
+        'data-dashboard-settings-tile-id': tileId,
+        onPointerDown: event => handleDashboardSettingsPointerDown(event, tileId),
+    })
+
+    const toggleDashboardTile = tileId => {
+        setDashboardPreferences(previous => ({
+            ...previous,
+            hidden: previous.hidden.includes(tileId)
+                ? previous.hidden.filter(id => id !== tileId)
+                : [...previous.hidden, tileId],
+        }))
+    }
     useEffect(() => {
         Promise.all([
             fetch('/data/leagueData.json').then(response => {
@@ -269,19 +434,110 @@ function Home() {
     return (
         <div className="page-container">
             <div className="mb-8">
-                <div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Leagues Dashboard</h2>
-                    <p className="text-gray-600">
-                        Start with what needs attention, then browse the league details when you need more context.
-                    </p>
-                    <p className="mt-1 text-sm text-gray-500">
-                        Last updated: {new Date(data.lastUpdated).toLocaleString()}
-                    </p>
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Leagues Dashboard</h2>
+                        <p className="mt-1 text-sm text-gray-500">
+                            Last updated: {new Date(data.lastUpdated).toLocaleString()}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setShowDashboardSettings(previous => !previous)}
+                        aria-expanded={showDashboardSettings}
+                        className="shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-chess-green hover:text-chess-green"
+                    >
+                        Customize
+                    </button>
                 </div>
             </div>
 
-            <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <section className="card">
+            {showDashboardSettings && (
+                <section className="mb-8 card border border-gray-200" aria-label="Customize dashboard">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900">Customize dashboard</h3>
+                            <p className="mt-1 text-sm text-gray-600">
+                                Choose which tiles appear, then drag these rows to arrange the dashboard.
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setDashboardPreferences(getDefaultDashboardPreferences())}
+                            className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
+                        >
+                            Reset layout
+                        </button>
+                    </div>
+                    <p className="mt-4 text-sm text-gray-500">Drag a row to its new position. Your layout saves automatically.</p>
+                    <div className="mt-3 grid gap-2 [&>div>span]:hidden" role="list" aria-label="Dashboard tile visibility">
+                        {dashboardPreferences.order.map((tileId, index) => {
+                            const tile = DASHBOARD_TILES.find(item => item.id === tileId)
+                            const isVisible = !hiddenDashboardTiles.has(tileId)
+                            return (
+                                <div
+                                    key={tileId}
+                                    role="listitem"
+                                    aria-label={`Drag ${tile?.label || tileId} to reorder`}
+                                    {...dashboardSettingsRowPointerProps(tileId)}
+                                    className={`flex cursor-grab touch-none select-none items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-colors active:cursor-grabbing ${draggedDashboardTile === tileId
+                                        ? 'border-chess-green bg-green-50 opacity-60'
+                                        : dragOverDashboardTile === tileId
+                                            ? 'border-chess-green bg-green-50'
+                                            : 'border-gray-200 bg-white'
+                                        }`}
+                                >
+                                    <label className="flex min-w-0 items-center gap-2 text-sm text-gray-700">
+                                        <input
+                                            type="checkbox"
+                                            checked={isVisible}
+                                            onChange={() => toggleDashboardTile(tileId)}
+                                            className="h-4 w-4 rounded border-gray-300 text-chess-green focus:ring-chess-green"
+                                        />
+                                        <span className="truncate">{tile?.label || tileId}</span>
+                                    </label>
+                                    <button
+                                        type="button"
+                                        aria-hidden="true"
+                                        tabIndex={-1}
+                                        className="hidden"
+                                    >
+                                        Drag
+                                    </button>
+                                    <span className="shrink-0 text-lg leading-none text-gray-400" aria-hidden="true">☷</span>
+                                    <div className="hidden">
+                                        <button
+                                            type="button"
+                                            onClick={() => {}}
+                                            disabled={index === 0}
+                                            aria-label={`Move ${tile?.label || tileId} up`}
+                                            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                        >
+                                            ↑
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {}}
+                                            disabled={index === dashboardPreferences.order.length - 1}
+                                            aria-label={`Move ${tile?.label || tileId} down`}
+                                            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                        >
+                                            ↓
+                                        </button>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </section>
+            )}
+
+            <div className="mb-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="contents">
+                <section
+                    className={dashboardTileClass('actionItems', 'card')}
+                    style={dashboardTileStyle('actionItems')}
+                >
                     <div className="mb-4">
                         <div>
                             <h3 className="text-2xl font-bold text-gray-900">Action Items</h3>
@@ -338,7 +594,10 @@ function Home() {
                     )}
                 </section>
 
-                <section className="card">
+                <section
+                    className={dashboardTileClass('upcomingMatches', 'card')}
+                    style={dashboardTileStyle('upcomingMatches')}
+                >
                     <div className="mb-4">
                         <div>
                             <h3 className="text-2xl font-bold text-gray-900">Upcoming Matches</h3>
@@ -355,7 +614,7 @@ function Home() {
                             {upcomingMatches.slice(0, UPCOMING_MATCH_LIMIT).map(match => (
                                 <Link
                                     key={match.matchId || `${match.leagueName}-${match.subLeagueName}-${match.name}`}
-                                to={matchCalendarPath(match)}
+                                    to={matchCalendarPath(match)}
                                     className="block rounded-lg border border-gray-200 p-3 transition-colors hover:border-chess-green hover:bg-green-50"
                                 >
                                     <div className="flex items-start justify-between gap-3">
@@ -382,97 +641,106 @@ function Home() {
                 </section>
             </div>
 
-            <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="card">
-                <div className="mb-4">
-                    <h3 className="text-2xl font-bold text-gray-900">Early Resignations</h3>
-                    <p className="mt-1 text-sm text-gray-600">
-                        {recentEarlyResignations.length > 0
-                            ? `${recentEarlyResignations.reduce((sum, record) => sum + record.totalGames, 0)} early resignation${recentEarlyResignations.reduce((sum, record) => sum + record.totalGames, 0) === 1 ? '' : 's'} across ${recentEarlyResignations.length} match${recentEarlyResignations.length === 1 ? '' : 'es'} in the past 7 days`
-                            : 'No early resignations recorded in the past 7 days'}
-                    </p>
-                </div>
+            <div className="contents">
+            <section
+                className={dashboardTileClass('earlyResignations', 'card')}
+                style={dashboardTileStyle('earlyResignations')}
+            >
+                    <div className="mb-4">
+                        <h3 className="text-2xl font-bold text-gray-900">Early Resignations</h3>
+                        <p className="mt-1 text-sm text-gray-600">
+                            {recentEarlyResignations.length > 0
+                                ? `${recentEarlyResignations.reduce((sum, record) => sum + record.totalGames, 0)} early resignation${recentEarlyResignations.reduce((sum, record) => sum + record.totalGames, 0) === 1 ? '' : 's'} across ${recentEarlyResignations.length} match${recentEarlyResignations.length === 1 ? '' : 'es'} in the past 7 days`
+                                : 'No early resignations recorded in the past 7 days'}
+                        </p>
+                    </div>
 
-                {recentEarlyResignations.length > 0 && (
-                    <div className="space-y-3">
-                        {recentEarlyResignations.slice(0, 4).map(record => (
-                            <Link
-                                key={record.matchUrl}
-                                to="/early-resignations"
-                                className="block rounded-lg border border-gray-200 p-3 transition-colors hover:border-chess-green hover:bg-green-50"
-                            >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <div className="truncate text-sm font-semibold text-chess-dark">{record.subLeagueName}</div>
-                                        <div className="mt-1 truncate text-xs text-gray-600">{record.name}</div>
-                                        <div className="mt-2 text-xs text-gray-500">
-                                            {record.totalGames} early resignation{record.totalGames !== 1 ? 's' : ''} · {record.players.map(player => player.username).join(', ')}
+                    {recentEarlyResignations.length > 0 && (
+                        <div className="space-y-3">
+                            {recentEarlyResignations.slice(0, 4).map(record => (
+                                <Link
+                                    key={record.matchUrl}
+                                    to="/early-resignations"
+                                    className="block rounded-lg border border-gray-200 p-3 transition-colors hover:border-chess-green hover:bg-green-50"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <div className="truncate text-sm font-semibold text-chess-dark">{record.subLeagueName}</div>
+                                            <div className="mt-1 truncate text-xs text-gray-600">{record.name}</div>
+                                            <div className="mt-2 text-xs text-gray-500">
+                                                {record.totalGames} early resignation{record.totalGames !== 1 ? 's' : ''} · {record.players.map(player => player.username).join(', ')}
+                                            </div>
+                                        </div>
+                                        <span className="shrink-0 text-right text-xs text-gray-500">
+                                            {record.activityTime
+                                                ? new Date(record.activityTime * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                                                : 'Date unavailable'}
+                                        </span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+
+                    {earlyResignationHistory.length > 0 && (
+                        <div className="mt-4 border-t border-gray-200 pt-3 text-right">
+                            <Link to="/early-resignations" className="text-sm font-medium text-chess-green hover:underline">
+                                View full history ({earlyResignationHistory.length} matches)
+                            </Link>
+                        </div>
+                    )}
+                </section>
+
+                <section
+                    className={dashboardTileClass('recentTimeouts', 'card')}
+                    style={dashboardTileStyle('recentTimeouts')}
+                >
+                    <div className="mb-4">
+                        <h3 className="text-2xl font-bold text-gray-900">Recent Timeout History</h3>
+                        <p className="mt-1 text-sm text-gray-600">
+                            {recentTimeoutPlayers.length > 0
+                                ? `${recentTimeoutCount} timeout${recentTimeoutCount === 1 ? '' : 's'} by ${recentTimeoutPlayers.length} player${recentTimeoutPlayers.length === 1 ? '' : 's'} in the past 7 days`
+                                : 'No players have timed out in the past 7 days'}
+                        </p>
+                    </div>
+
+                    {recentTimeoutPlayers.length > 0 && (
+                        <div className="space-y-3">
+                            {recentTimeoutPlayers.slice(0, 4).map(player => (
+                                <Link
+                                    key={player.username}
+                                    to={`/timeouts?player=${encodeURIComponent(player.username)}`}
+                                    className="block rounded-lg border border-gray-200 p-3 transition-colors hover:border-chess-green hover:bg-green-50"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <div className="truncate text-sm font-semibold text-chess-dark">{player.username}</div>
+                                            <div className="mt-1 text-xs text-gray-600">
+                                                {player.totalTimeouts} timeout{player.totalTimeouts !== 1 ? 's' : ''} across {player.matches.length} match{player.matches.length !== 1 ? 'es' : ''}
+                                            </div>
+                                            <div className="mt-2 truncate text-xs text-gray-500">Most recent: {player.matches[0].name}</div>
                                         </div>
                                     </div>
-                                    <span className="shrink-0 text-right text-xs text-gray-500">
-                                        {record.activityTime
-                                            ? new Date(record.activityTime * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-                                            : 'Date unavailable'}
-                                    </span>
-                                </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+
+                    {timeoutHistory.players.length > 0 && (
+                        <div className="mt-4 border-t border-gray-200 pt-3 text-right">
+                            <Link to="/timeouts" className="text-sm font-medium text-chess-green hover:underline">
+                                View full timeout history ({timeoutHistory.players.length} players)
                             </Link>
-                        ))}
-                    </div>
-                )}
-
-                {earlyResignationHistory.length > 0 && (
-                    <div className="mt-4 border-t border-gray-200 pt-3 text-right">
-                        <Link to="/early-resignations" className="text-sm font-medium text-chess-green hover:underline">
-                            View full history ({earlyResignationHistory.length} matches)
-                        </Link>
-                    </div>
-                )}
-            </section>
-
-            <section className="card">
-                <div className="mb-4">
-                    <h3 className="text-2xl font-bold text-gray-900">Recent Timeout History</h3>
-                    <p className="mt-1 text-sm text-gray-600">
-                        {recentTimeoutPlayers.length > 0
-                            ? `${recentTimeoutCount} timeout${recentTimeoutCount === 1 ? '' : 's'} by ${recentTimeoutPlayers.length} player${recentTimeoutPlayers.length === 1 ? '' : 's'} in the past 7 days`
-                            : 'No players have timed out in the past 7 days'}
-                    </p>
-                </div>
-
-                {recentTimeoutPlayers.length > 0 && (
-                    <div className="space-y-3">
-                        {recentTimeoutPlayers.slice(0, 4).map(player => (
-                            <Link
-                                key={player.username}
-                                to={`/timeouts?player=${encodeURIComponent(player.username)}`}
-                                className="block rounded-lg border border-gray-200 p-3 transition-colors hover:border-chess-green hover:bg-green-50"
-                            >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <div className="truncate text-sm font-semibold text-chess-dark">{player.username}</div>
-                                        <div className="mt-1 text-xs text-gray-600">
-                                            {player.totalTimeouts} timeout{player.totalTimeouts !== 1 ? 's' : ''} across {player.matches.length} match{player.matches.length !== 1 ? 'es' : ''}
-                                        </div>
-                                        <div className="mt-2 truncate text-xs text-gray-500">Most recent: {player.matches[0].name}</div>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                )}
-
-                {timeoutHistory.players.length > 0 && (
-                    <div className="mt-4 border-t border-gray-200 pt-3 text-right">
-                        <Link to="/timeouts" className="text-sm font-medium text-chess-green hover:underline">
-                            View full timeout history ({timeoutHistory.players.length} players)
-                        </Link>
-                    </div>
-                )}
-            </section>
+                        </div>
+                    )}
+                </section>
             </div>
 
-            <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <section className="card">
+            <div className="contents">
+                <section
+                    className={dashboardTileClass('opponentRemovals', 'card')}
+                    style={dashboardTileStyle('opponentRemovals')}
+                >
                     <div className="mb-4">
                         <h3 className="text-xl font-bold text-gray-900">Opponent Roster Removals</h3>
                         <p className="mt-1 text-sm text-gray-600">
@@ -518,7 +786,10 @@ function Home() {
                     )}
                 </section>
 
-                <section className="card">
+                <section
+                    className={dashboardTileClass('recentFinished', 'card')}
+                    style={dashboardTileStyle('recentFinished')}
+                >
                     <div className="mb-4">
                         <h3 className="text-xl font-bold text-gray-900">Recently Finished Matches</h3>
                         <p className="mt-1 text-sm text-gray-600">
@@ -571,7 +842,10 @@ function Home() {
                 </section>
             </div>
 
-            <section>
+            <section
+                className={dashboardTileClass('allLeagues', 'card lg:col-span-2')}
+                style={dashboardTileStyle('allLeagues')}
+            >
                 <div className="mb-4">
                     <h3 className="text-2xl font-bold text-gray-900">All Leagues</h3>
                     <p className="mt-1 text-sm text-gray-600">Browse every tracked league and view its current activity.</p>
@@ -616,7 +890,10 @@ function Home() {
                 </div>
             </section>
 
-            <div className="mt-12 card bg-gradient-to-r from-chess-dark to-gray-700 text-white">
+            <div
+                className={dashboardTileClass('quickStats', 'card bg-gradient-to-r from-chess-dark to-gray-700 text-white lg:col-span-2')}
+                style={dashboardTileStyle('quickStats')}
+            >
                 <h3 className="mb-4 text-xl font-bold">Quick Stats</h3>
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                     <div className="text-center">
@@ -640,6 +917,8 @@ function Home() {
                         <div className="text-sm text-gray-300">Rounds</div>
                     </div>
                 </div>
+            </div>
+
             </div>
 
             <AuditLogModal

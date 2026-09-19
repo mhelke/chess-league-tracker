@@ -8,6 +8,7 @@ import AllMatches from './pages/AllMatches'
 import ActionItems from './pages/ActionItems'
 import NotFound from './pages/NotFound'
 import EmbedLeagueOverview from './pages/EmbedLeagueOverview'
+import About from './pages/About'
 import { collectActionItems } from './utils/actionItemUtils'
 import WhatsNewModal from './components/WhatsNewModal'
 import { WHATS_NEW_ANNOUNCEMENT } from './whatsNew'
@@ -209,6 +210,7 @@ function AppContent() {
                     <Route path="/league/:leagueName" element={<LeagueView />} />
                     <Route path="/league/:leagueName/:subLeagueName" element={<SubLeagueView />} />
                     <Route path="/global" element={<GlobalLeaderboard />} />
+                    <Route path="/about" element={<About />} />
                     <Route path="/league-overview" element={<EmbedLeagueOverview />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
@@ -226,6 +228,7 @@ function AppContent() {
                     <div className="text-center text-sm text-gray-300">
                         <p>Data from <a href="https://www.chess.com" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">Chess.com</a> API</p>
                         <p className="mt-2">Questions? Email <a href="mailto:chess@helkelabs.com" className="hover:text-chess-light">chess@helkelabs.com</a> or reach out to <a href="https://www.chess.com/member/MasterMatthew52" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">MasterMatthew52</a> on Chess.com</p>
+                        <p className="mt-3"><Link to="/about" className="hover:text-chess-light hover:underline">About &amp; Methodology</Link></p>
                         <p className="mt-4 text-xs text-gray-400">
                             © {new Date().getFullYear()} <a href="https://helkelabs.com" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">Helke Labs</a>. Released under the <a href="https://github.com/mhelke/chess-league-tracker/blob/master/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">MIT License</a>.
                         </p>

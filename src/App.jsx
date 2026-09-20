@@ -5,8 +5,15 @@ import LeagueView from './pages/LeagueView'
 import SubLeagueView from './pages/SubLeagueView'
 import GlobalLeaderboard from './pages/GlobalLeaderboard'
 import AllMatches from './pages/AllMatches'
+import ActionItems from './pages/ActionItems'
+import EarlyResignations from './pages/EarlyResignations'
+import TimeoutHistory from './pages/TimeoutHistory'
 import NotFound from './pages/NotFound'
 import EmbedLeagueOverview from './pages/EmbedLeagueOverview'
+import About from './pages/About'
+import { DashboardDataProvider, useDashboardData } from './context/DashboardDataContext'
+import WhatsNewModal from './components/WhatsNewModal'
+import { WHATS_NEW_ANNOUNCEMENT } from './whatsNew'
 
 const SITE_NAMES = {
     '1dpmc': '1 Day Per Move Club',
@@ -27,22 +34,35 @@ const CLUB_API_IDS = {
 }
 
 const NAV_LINKS = [
-    { to: '/', label: 'Leagues' },
+    { to: '/', label: 'Dashboard' },
+    { to: '/action-items', label: 'Action Items' },
     { to: '/matches', label: 'All Matches' },
     { to: '/league-overview', label: 'Overview' },
     { to: '/global', label: 'Global Leaderboard' },
 ]
 
-function NavLink({ to, label, onClick }) {
+function NavLink({ to, label, onClick, badgeCount = 0 }) {
     const location = useLocation()
     const active = location.pathname === to
+    const hasBadge = badgeCount > 0
     return (
         <Link
             to={to}
             onClick={onClick}
+            aria-label={hasBadge ? `${label}, ${badgeCount} requiring attention` : undefined}
             className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:text-chess-light hover:bg-white/10 ${active ? 'text-chess-light' : ''}`}
         >
-            {label}
+            <span className="inline-flex items-center gap-2">
+                {label}
+                {hasBadge && (
+                    <span
+                        aria-hidden="true"
+                        className="inline-flex min-w-5 items-center justify-center rounded-full bg-amber-400 px-1.5 py-0.5 text-[11px] font-bold leading-none text-chess-dark"
+                    >
+                        {badgeCount > 99 ? '99+' : badgeCount}
+                    </span>
+                )}
+            </span>
         </Link>
     )
 }
@@ -51,6 +71,8 @@ function AppContent() {
     const siteName = SITE_NAMES[__SITE_KEY__] || 'Chess League Tracker'
     const [menuOpen, setMenuOpen] = useState(false)
     const [clubIcon, setClubIcon] = useState(null)
+    const [showWhatsNew, setShowWhatsNew] = useState(false)
+    const { actionItems } = useDashboardData()
     const location = useLocation()
     const isEmbed = location.pathname === '/league-overview' && new URLSearchParams(location.search).get('embed') === '1'
 
@@ -62,6 +84,26 @@ function AppContent() {
             .then(data => { if (data?.icon) setClubIcon(data.icon) })
             .catch(() => { })
     }, [])
+
+    useEffect(() => {
+        if (isEmbed || !WHATS_NEW_ANNOUNCEMENT.enabled) return
+
+        try {
+            const storageKey = `whats-new:${WHATS_NEW_ANNOUNCEMENT.id}`
+            if (!window.localStorage.getItem(storageKey)) setShowWhatsNew(true)
+        } catch {
+            setShowWhatsNew(true)
+        }
+    }, [isEmbed])
+
+    const dismissWhatsNew = () => {
+        setShowWhatsNew(false)
+        try {
+            window.localStorage.setItem(`whats-new:${WHATS_NEW_ANNOUNCEMENT.id}`, 'dismissed')
+        } catch {
+            // The modal is still dismissed for the current session if storage is unavailable.
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -89,7 +131,13 @@ function AppContent() {
 
                         {/* Desktop nav */}
                         <nav className="hidden sm:flex items-center space-x-1">
-                            {NAV_LINKS.map(l => <NavLink key={l.to} {...l} />)}
+                            {NAV_LINKS.map(l => (
+                                <NavLink
+                                    key={l.to}
+                                    {...l}
+                                    badgeCount={l.to === '/action-items' ? actionItems.length : 0}
+                                />
+                            ))}
                             <a
                                 href={`https://www.chessteamdata.com/members?clubid=${MEMBER_CLUB_IDS[__SITE_KEY__] || __SITE_KEY__}`}
                                 target="_blank"
@@ -122,7 +170,14 @@ function AppContent() {
                     {/* Mobile dropdown */}
                     {menuOpen && (
                         <nav className="sm:hidden mt-2 pb-1 border-t border-white/20 pt-2 flex flex-col gap-0.5">
-                            {NAV_LINKS.map(l => <NavLink key={l.to} {...l} onClick={() => setMenuOpen(false)} />)}
+                            {NAV_LINKS.map(l => (
+                                <NavLink
+                                    key={l.to}
+                                    {...l}
+                                    badgeCount={l.to === '/action-items' ? actionItems.length : 0}
+                                    onClick={() => setMenuOpen(false)}
+                                />
+                            ))}
                             <a
                                 href={`https://www.chessteamdata.com/members?clubid=${MEMBER_CLUB_IDS[__SITE_KEY__] || __SITE_KEY__}`}
                                 target="_blank"
@@ -141,14 +196,24 @@ function AppContent() {
             <main>
                 <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/action-items" element={<ActionItems />} />
+                    <Route path="/early-resignations" element={<EarlyResignations />} />
+                    <Route path="/timeouts" element={<TimeoutHistory />} />
                     <Route path="/matches" element={<AllMatches />} />
                     <Route path="/league/:leagueName" element={<LeagueView />} />
                     <Route path="/league/:leagueName/:subLeagueName" element={<SubLeagueView />} />
                     <Route path="/global" element={<GlobalLeaderboard />} />
+                    <Route path="/about" element={<About />} />
                     <Route path="/league-overview" element={<EmbedLeagueOverview />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </main>
+
+            <WhatsNewModal
+                announcement={WHATS_NEW_ANNOUNCEMENT}
+                isOpen={showWhatsNew && !isEmbed}
+                onClose={dismissWhatsNew}
+            />
 
             {/* Footer */}
             {!isEmbed && <footer className="bg-chess-dark text-white mt-12">
@@ -156,6 +221,7 @@ function AppContent() {
                     <div className="text-center text-sm text-gray-300">
                         <p>Data from <a href="https://www.chess.com" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">Chess.com</a> API</p>
                         <p className="mt-2">Questions? Email <a href="mailto:chess@helkelabs.com" className="hover:text-chess-light">chess@helkelabs.com</a> or reach out to <a href="https://www.chess.com/member/MasterMatthew52" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">MasterMatthew52</a> on Chess.com</p>
+                        <p className="mt-3"><Link to="/about" className="hover:text-chess-light hover:underline">About &amp; Methodology</Link></p>
                         <p className="mt-4 text-xs text-gray-400">
                             © {new Date().getFullYear()} <a href="https://helkelabs.com" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">Helke Labs</a>. Released under the <a href="https://github.com/mhelke/chess-league-tracker/blob/master/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-chess-light">MIT License</a>.
                         </p>
@@ -169,7 +235,9 @@ function AppContent() {
 function App() {
     return (
         <Router basename="/">
-            <AppContent />
+            <DashboardDataProvider>
+                <AppContent />
+            </DashboardDataProvider>
         </Router>
     )
 }

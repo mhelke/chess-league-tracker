@@ -39,12 +39,14 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 
 INPUT_FILE:  str = ""
 OUTPUT_FILE: str = ""
+RATINGS_FILE: str = ""
+CACHED_PLAYER_DATA: Dict[str, Dict] = {}
 
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 
-# Players whose Chess.com timeout_percent (from open-match registration data)
-# exceeds this value are flagged for deep archive analysis.
+# Players whose selected timeout_percent exceeds this value are flagged for
+# deep archive analysis.
 RISK_THRESHOLD_PERCENT: float = 25.0
 
 # Rolling window used for "total league timeouts" count.
@@ -64,6 +66,8 @@ DAILY_TC_SECONDS: Dict[int, str] = {
 # Maximum number of calendar months to look back in the game archive when
 # searching for daily timeout games (0 = current month only).
 ARCHIVE_MAX_MONTHS_BACK: int = 2
+USE_MEMBER_SERVICE_TIMEOUT_FALLBACK: bool = False
+COMPARE_CHESS960_TIMEOUT_FOR_STANDARD: bool = False
 
 # ── Risk tier thresholds ───────────────────────────────────────────────────────
 # HIGH: a player is HIGH risk when at least HIGH_MIN_FACTORS of the three
@@ -86,15 +90,17 @@ LOW_RECENCY_DAYS: int = 60               # condition B: minimum days since last 
 
 def load_config(site_key: str) -> None:
     """Load per-site config (script_params.json) and set module globals."""
-    global INPUT_FILE, OUTPUT_FILE
+    global INPUT_FILE, OUTPUT_FILE, RATINGS_FILE
     global RISK_THRESHOLD_PERCENT, LEAGUE_TIMEOUT_WINDOW_DAYS
     global USER_AGENT, ARCHIVE_MAX_MONTHS_BACK
+    global USE_MEMBER_SERVICE_TIMEOUT_FALLBACK, COMPARE_CHESS960_TIMEOUT_FOR_STANDARD
     global HIGH_TIMEOUT_PCT, HIGH_DAILY_TIMEOUT_COUNT, HIGH_SUBLEAGUE_TIMEOUT_COUNT, HIGH_MIN_FACTORS
     global LOW_MAX_TIMEOUT_PCT, LOW_MAX_DAILY_TIMEOUT_COUNT, LOW_MAX_TIMEOUT_PCT_RECENT, LOW_RECENCY_DAYS
 
     data_dir    = os.path.join(PROJECT_ROOT, "public", "data", site_key)
     INPUT_FILE  = os.path.join(data_dir, "leagueData.json")
     OUTPUT_FILE = os.path.join(data_dir, "timeoutData.json")
+    RATINGS_FILE = os.path.join(data_dir, "playerRatings.json")
 
     # ── script_params.json (per-site, optional) ────────────────────────────────
     params_path = os.path.join(PROJECT_ROOT, "config", site_key, "script_params.json")
@@ -104,6 +110,12 @@ def load_config(site_key: str) -> None:
         RISK_THRESHOLD_PERCENT       = params.get("riskThresholdPercent",       RISK_THRESHOLD_PERCENT)
         LEAGUE_TIMEOUT_WINDOW_DAYS   = params.get("leagueTimeoutWindowDays",    LEAGUE_TIMEOUT_WINDOW_DAYS)
         ARCHIVE_MAX_MONTHS_BACK      = params.get("archiveMaxMonthsBack",       ARCHIVE_MAX_MONTHS_BACK)
+        USE_MEMBER_SERVICE_TIMEOUT_FALLBACK = params.get(
+            "useMemberServiceTimeoutFallback", USE_MEMBER_SERVICE_TIMEOUT_FALLBACK
+        )
+        COMPARE_CHESS960_TIMEOUT_FOR_STANDARD = params.get(
+            "compareChess960TimeoutForStandard", COMPARE_CHESS960_TIMEOUT_FOR_STANDARD
+        )
         USER_AGENT                   = params.get("userAgent",                  USER_AGENT)
         HIGH_TIMEOUT_PCT             = params.get("highTimeoutPct",             HIGH_TIMEOUT_PCT)
         HIGH_DAILY_TIMEOUT_COUNT     = params.get("highDailyTimeoutCount",      HIGH_DAILY_TIMEOUT_COUNT)
@@ -137,40 +149,25 @@ def fetch_json(url: str) -> Optional[Dict]:
     return None
 
 
-# ── Chess.com /stats timeout helper ──────────────────────────────────────────
+# ── Cached member-service fallback helper ────────────────────────────────────
 
-def fetch_player_stats(username_lower: str) -> Dict:
-    """
-    GET /pub/player/{username}/stats and return a dict with:
-        timeoutPercent  – max of chess_daily and chess960_daily timeout_percent
-        dailyRating     – chess_daily.last.rating
-        rating960       – chess960_daily.last.rating
+def get_cached_player_data(username_lower: str) -> Dict:
+    """Read ratings and the optional standard timeout fallback.
     All values may be None if the field is absent or the endpoint fails.
     """
-    result: Dict = {"timeoutPercent": None, "dailyRating": None, "rating960": None}
+    result: Dict = {
+        "memberServiceTimeoutPercent": None,
+        "dailyRating": None,
+        "rating960": None,
+    }
 
-    url = f"https://api.chess.com/pub/player/{username_lower}/stats"
-    data = fetch_json(url)
+    data = CACHED_PLAYER_DATA.get(username_lower, {})
     if not data:
         return result
 
-    pcts = []
-    for variant_key, rating_key in (("chess_daily", "dailyRating"), ("chess960_daily", "rating960")):
-        variant = data.get(variant_key) or {}
-        if not isinstance(variant, dict):
-            continue
-        record = variant.get("record") or {}
-        pct = record.get("timeout_percent") if isinstance(record, dict) else None
-        if pct is not None:
-            pcts.append(float(pct))
-        last = variant.get("last") or {}
-        rating = last.get("rating") if isinstance(last, dict) else None
-        if rating is not None:
-            result[rating_key] = int(rating)
-
-    # Note that Chess.com tracks timeout_percent for each variant separately, 
-    # but this can be misleading. So take the max between the variants to be conservative in flagging potential risk.
-    result["timeoutPercent"] = max(pcts) if pcts else None
+    result["memberServiceTimeoutPercent"] = data.get("memberServiceTimeoutPercent")
+    result["dailyRating"] = data.get("dailyRating")
+    result["rating960"] = data.get("rating960")
     return result
 
 
@@ -207,12 +204,13 @@ def collect_open_players(leagues: Dict) -> Dict[str, List[Dict]]:
     Scan every round with status == 'open' (registered, not yet started) and
     collect the unique players on our roster.
 
-    Players are read from registrationData.ourRoster, which is the only
-    populated source before a match begins.
+    Players and variant-specific timeout percentages are read from the
+    registration roster or assigned boards already fetched by the match API.
 
     Returns:
         lowercase_username → list of open-match descriptors:
-            {"league": str, "subLeague": str}
+            {"league": str, "subLeague": str, "variant": str,
+             "timeoutPercent": float | None}
     """
     players: Dict[str, List[Dict]] = defaultdict(list)
 
@@ -222,15 +220,89 @@ def collect_open_players(leagues: Dict) -> Dict[str, List[Dict]]:
 
         reg = round_data.get("registrationData") or {}
         our_roster = reg.get("ourRoster") or []
+        rules = ((round_data.get("apiMetadata") or {}).get("rules") or "").casefold()
+        variant = "chess960" if rules == "chess960" else "standard"
         for entry in our_roster:
             username = entry.get("username") or ""
             if username:
                 players[username.lower()].append({
                     "league":    league_name,
                     "subLeague": sl_name,
+                    "variant":   variant,
+                    "timeoutPercent": entry.get("timeoutPercent"),
+                })
+
+        # Once boards are assigned, the fetcher stores the same match-provided
+        # timeout value on each board rather than in registrationData.
+        for board in round_data.get("boardsData") or []:
+            if not isinstance(board, dict):
+                continue
+            username = board.get("ourPlayer") or ""
+            if username:
+                players[str(username).casefold()].append({
+                    "league":    league_name,
+                    "subLeague": sl_name,
+                    "variant":   variant,
+                    "timeoutPercent": board.get("ourTimeoutPercent"),
                 })
 
     return dict(players)
+
+
+def select_timeout_percent(
+    observations: List[Dict],
+    member_service_timeout: Optional[float],
+) -> Tuple[Optional[float], Optional[float], Optional[float], str]:
+    """Select standard/960 match values and the risk percentage.
+
+    A Chess960 match uses the highest available standard/960 value. Standard
+    matches use their standard value unless explicitly configured to compare a
+    cached Chess960 observation as well. The member-service standard value is
+    only a configured fallback when no standard match observation exists.
+    """
+    standard_values = []
+    chess960_values = []
+    for observation in observations:
+        value = observation.get("timeoutPercent")
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            continue
+        if value < 0:
+            continue
+        if observation.get("variant") == "chess960":
+            chess960_values.append(value)
+        else:
+            standard_values.append(value)
+
+    standard = max(standard_values) if standard_values else None
+    chess960 = max(chess960_values) if chess960_values else None
+    fallback_used = False
+    if standard is None and USE_MEMBER_SERVICE_TIMEOUT_FALLBACK:
+        standard = member_service_timeout
+        fallback_used = standard is not None
+
+    available = [value for value in (standard, chess960) if value is not None]
+    has_960 = bool(chess960_values)
+    is_960_match = any(observation.get("variant") == "chess960" for observation in observations)
+    if is_960_match or (COMPARE_CHESS960_TIMEOUT_FOR_STANDARD and has_960):
+        risk_percent = max(available) if available else None
+    else:
+        risk_percent = standard
+
+    if fallback_used and chess960 is not None:
+        source = "match-chess960+member-service-fallback"
+    elif fallback_used:
+        source = "member-service-fallback"
+    elif is_960_match and standard is not None and chess960 is not None:
+        source = "match-standard-and-chess960"
+    elif chess960 is not None:
+        source = "match-chess960"
+    elif standard is not None:
+        source = "match-standard"
+    else:
+        source = "unavailable"
+    return standard, chess960, risk_percent, source
 
 
 # ── Step 2: league-wide timeout count (rolling 90-day window) ─────────────────
@@ -531,6 +603,19 @@ def main() -> None:
     with open(INPUT_FILE, "r", encoding="utf-8") as fh:
         league_data = json.load(fh)
 
+    global CACHED_PLAYER_DATA
+    try:
+        with open(RATINGS_FILE, "r", encoding="utf-8") as fh:
+            ratings_data = json.load(fh)
+        cached_players = ratings_data.get("players", {}) if isinstance(ratings_data, dict) else {}
+        CACHED_PLAYER_DATA = {
+            str(username).casefold(): entry
+            for username, entry in cached_players.items()
+            if isinstance(entry, dict)
+        }
+    except (OSError, json.JSONDecodeError):
+        CACHED_PLAYER_DATA = {}
+
     leagues    = league_data.get("leagues", {})
     now_ts     = time.time()
     cutoff_90d = now_ts - LEAGUE_TIMEOUT_WINDOW_DAYS * 86400
@@ -547,9 +632,8 @@ def main() -> None:
         return
 
     # ── Per-player enrichment ─────────────────────────────────────────────────
-    # Caches keyed by lowercase username so players in multiple open matches
-    # are only fetched once.
-    stats_cache:   Dict[str, Dict]            = {}
+    # Archive results are keyed by lowercase username so players in multiple
+    # open matches are analyzed only once.
     archive_cache: Dict[str, Dict]            = {}
     output_players: Dict[str, Dict]           = {}
 
@@ -574,18 +658,18 @@ def main() -> None:
         )
         print(f"  Sub-league timeouts:    {sl_touts if sl_touts else 'none'}")
 
-        # 3c. Fetch /stats from Chess.com  (timeout%, daily rating, 960 rating) ─
-        if username in stats_cache:
-            pstats = stats_cache[username]
-        else:
-            print(f"  Fetching /stats …")
-            pstats = fetch_player_stats(username)
-            stats_cache[username] = pstats
-            time.sleep(0.3)
-        timeout_pct   = pstats["timeoutPercent"]
+        # 3c. Use timeout percentages already returned by match registration.
+        pstats = get_cached_player_data(username)
+        standard_timeout, chess960_timeout, timeout_pct, timeout_source = select_timeout_percent(
+            open_players[username], pstats["memberServiceTimeoutPercent"]
+        )
         daily_rating  = pstats["dailyRating"]
         rating_960    = pstats["rating960"]
-        print(f"  Timeout %: {timeout_pct}  Daily: {daily_rating}  960: {rating_960}")
+        print(
+            f"  Timeout %: {timeout_pct} ({timeout_source})  "
+            f"Standard: {standard_timeout}  960: {chess960_timeout}  "
+            f"Daily: {daily_rating}  960 rating: {rating_960}"
+        )
 
         risk_flag = timeout_pct is not None and timeout_pct > RISK_THRESHOLD_PERCENT
 
@@ -620,6 +704,10 @@ def main() -> None:
         # 3f. Assemble record ───────────────────────────────────────────────────
         output_players[username] = {
             "timeoutPercent":            timeout_pct,
+            "standardTimeoutPercent":    standard_timeout,
+            "chess960TimeoutPercent":    chess960_timeout,
+            "timeoutPercentSource":      timeout_source,
+            "memberServiceTimeoutPercent": pstats["memberServiceTimeoutPercent"],
             "dailyRating":               daily_rating,
             "rating960":                 rating_960,
             "totalLeagueTimeouts90Days": total_90d,

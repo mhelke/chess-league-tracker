@@ -22,7 +22,14 @@ const STICKY_BG = {
     LOW: 'bg-blue-50',
 }
 
-function RiskBadge({ level, reason }) {
+function removalGuidance(player) {
+    if (player.riskLevel === 'HIGH' || player.riskLevel === 'MEDIUM') {
+        return player.safeRemoval ? 'Safe to remove' : 'Unsafe to remove'
+    }
+    return null
+}
+
+function RiskBadge({ level, reason, compact = false }) {
     const [visible, setVisible] = useState(false)
     const [pos, setPos] = useState({ top: 0, left: 0 })
     const badgeRef = useRef(null)
@@ -38,7 +45,7 @@ function RiskBadge({ level, reason }) {
     }
 
     return (
-        <div className="inline-flex justify-center w-full">
+        <div className={`inline-flex justify-center ${compact ? '' : 'w-full'}`}>
             <span
                 ref={badgeRef}
                 onMouseEnter={handleMouseEnter}
@@ -70,6 +77,18 @@ function NumCell({ value, warn, danger }) {
     return <span className={cls}>{v}</span>
 }
 
+function getTimeoutSummary(player) {
+    const daily = player.dailyTimeouts || {}
+    const allDates = ['1day', '2day', '3day']
+        .map(key => daily[key]?.lastTimeoutDate)
+        .filter(Boolean)
+    return {
+        daily,
+        lastDate: allDates.length > 0 ? [...allDates].sort().at(-1) : null,
+        pct: player.timeoutPercent,
+    }
+}
+
 function TimeoutModal({ isOpen, onClose, title, players, threshold = 25, highPct = 50 }) {
     useEffect(() => {
         if (isOpen) {
@@ -93,18 +112,18 @@ function TimeoutModal({ isOpen, onClose, title, players, threshold = 25, highPct
         })
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
             {/* Modal */}
-            <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-[95vw] xl:max-w-7xl max-h-[90vh] flex flex-col">
+            <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-[95vw] xl:max-w-7xl max-h-[94vh] sm:max-h-[90vh] flex flex-col">
 
                 {/* Header */}
-                <div className="flex justify-between items-start px-6 py-5 border-b border-gray-200 flex-shrink-0">
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-900">{title}</h3>
-                        <p className="text-sm text-gray-500 mt-0.5">
+                <div className="flex justify-between items-start gap-3 px-3 py-4 sm:px-6 sm:py-5 border-b border-gray-200 flex-shrink-0">
+                    <div className="min-w-0">
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h3>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
                             {sortedPlayers.length === 0
                                 ? 'No at-risk players in this match'
                                 : `${sortedPlayers.length} at-risk player${sortedPlayers.length !== 1 ? 's' : ''} · hover the risk badge for details`}
@@ -112,21 +131,94 @@ function TimeoutModal({ isOpen, onClose, title, players, threshold = 25, highPct
                     </div>
                     <button
                         onClick={onClose}
-                        className="ml-4 text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none flex-shrink-0"
+                        className="ml-2 sm:ml-4 text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none flex-shrink-0"
                         aria-label="Close"
                     >×</button>
                 </div>
 
                 {/* Table */}
-                <div className="overflow-auto flex-1 px-6 py-4">
+                <div className="overflow-auto flex-1 px-3 py-3 sm:px-6 sm:py-4">
                     {sortedPlayers.length === 0 ? (
                         <p className="text-gray-500 text-center py-8">No at-risk players to display</p>
                     ) : (
+                        <>
+                            <div className="space-y-3 sm:hidden">
+                                {sortedPlayers.map((player, idx) => {
+                                    const bg = ROW_BG[player.riskLevel] || (idx % 2 === 0 ? 'bg-gray-50' : 'bg-white')
+                                    const { daily, lastDate, pct } = getTimeoutSummary(player)
+                                    const impact = removalGuidance(player)
+
+                                    return (
+                                        <div key={player.username} className={`${bg} rounded-lg border border-gray-200 p-3 shadow-sm`}>
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <a
+                                                        href={`https://www.chess.com/member/${player.username}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="block break-all font-medium text-chess-green hover:text-green-700 hover:underline"
+                                                    >
+                                                        {player.username}
+                                                    </a>
+                                                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                                                        <RiskBadge level={player.riskLevel} reason={player.riskReason} compact />
+                                                        {impact && <span className="rounded border border-gray-300 bg-white/70 px-1.5 py-0.5 text-gray-700">{impact}</span>}
+                                                    </div>
+                                                </div>
+                                                <div className="shrink-0 text-right">
+                                                    <div className="text-[10px] uppercase tracking-wide text-gray-500">Timeout</div>
+                                                    <div className={`text-sm font-bold ${pct > highPct ? 'text-red-700' : pct > threshold ? 'text-amber-700' : 'text-gray-500'}`}>
+                                                        {pct != null ? `${pct.toFixed(1)}%` : '—'}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-gray-200/80 pt-3 text-xs">
+                                                <div>
+                                                    <div className="text-[10px] uppercase tracking-wide text-gray-500">Daily rating</div>
+                                                    <div className="font-medium text-gray-800">{player.dailyRating ?? '—'}</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] uppercase tracking-wide text-gray-500">960 rating</div>
+                                                    <div className="font-medium text-gray-800">{player.rating960 ?? '—'}</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] uppercase tracking-wide text-gray-500">League TOs · 90d</div>
+                                                    <NumCell value={player.totalLeagueTimeouts90Days} warn />
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] uppercase tracking-wide text-gray-500">Subleague TOs</div>
+                                                    <NumCell value={player.subleagueTimeouts} danger />
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] uppercase tracking-wide text-gray-500">1-day TOs</div>
+                                                    <NumCell value={daily['1day']?.count} warn />
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] uppercase tracking-wide text-gray-500">2-day TOs</div>
+                                                    <NumCell value={daily['2day']?.count} warn />
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] uppercase tracking-wide text-gray-500">3-day TOs</div>
+                                                    <NumCell value={daily['3day']?.count} warn />
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] uppercase tracking-wide text-gray-500">Last TO date</div>
+                                                    <div className="text-gray-600">{lastDate ?? '—'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+
+                            <div className="hidden sm:block">
                         <table className="w-full text-sm border-separate border-spacing-0">
                             <thead>
                                 <tr className="bg-gray-100 text-gray-600 uppercase text-[11px] tracking-wide">
                                     <th className="text-left py-2.5 px-3 font-semibold sticky left-0 bg-gray-100 z-10 whitespace-nowrap rounded-tl-lg">Username</th>
                                     <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">Risk</th>
+                                    <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">Removal impact</th>
                                     <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">Daily&nbsp;Rating</th>
                                     <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">960&nbsp;Rating</th>
                                     <th className="text-center py-2.5 px-3 font-semibold whitespace-nowrap">Timeout&nbsp;%</th>
@@ -142,12 +234,7 @@ function TimeoutModal({ isOpen, onClose, title, players, threshold = 25, highPct
                                 {sortedPlayers.map((player, idx) => {
                                     const bg = ROW_BG[player.riskLevel] || (idx % 2 === 0 ? 'bg-gray-50' : 'bg-white')
                                     const stickyBg = STICKY_BG[player.riskLevel] || (idx % 2 === 0 ? 'bg-gray-50' : 'bg-white')
-                                    const daily = player.dailyTimeouts || {}
-                                    const allDates = ['1day', '2day', '3day']
-                                        .map(k => daily[k]?.lastTimeoutDate)
-                                        .filter(Boolean)
-                                    const lastDate = allDates.length > 0 ? [...allDates].sort().at(-1) : null
-                                    const pct = player.timeoutPercent
+                                    const { daily, lastDate, pct } = getTimeoutSummary(player)
 
                                     return (
                                         <tr key={player.username} className={`${bg} border-b border-gray-100 hover:brightness-[0.97] transition-colors`}>
@@ -166,6 +253,11 @@ function TimeoutModal({ isOpen, onClose, title, players, threshold = 25, highPct
                                             {/* Risk badge */}
                                             <td className="py-3 px-3 text-center whitespace-nowrap">
                                                 <RiskBadge level={player.riskLevel} reason={player.riskReason} />
+                                            </td>
+
+                                            {/* Removal impact */}
+                                            <td className="py-3 px-3 text-center text-xs whitespace-nowrap">
+                                                {removalGuidance(player) || <span className="text-gray-300">—</span>}
                                             </td>
 
                                             {/* Daily Rating */}
@@ -219,15 +311,17 @@ function TimeoutModal({ isOpen, onClose, title, players, threshold = 25, highPct
                                 })}
                             </tbody>
                         </table>
+                            </div>
+                        </>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-between items-center px-6 py-4 border-t border-gray-200 flex-shrink-0">
+                <div className="flex flex-col gap-3 px-3 py-4 border-t border-gray-200 flex-shrink-0 sm:flex-row sm:justify-between sm:items-center sm:px-6">
                     <p className="text-xs text-gray-400">TO = Timeout &nbsp;·&nbsp; Subleague TOs count only active sub-leagues (last 2 months)</p>
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium text-sm"
+                        className="self-end px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium text-sm sm:self-auto"
                     >
                         Close
                     </button>

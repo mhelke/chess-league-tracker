@@ -1,4 +1,4 @@
-function Leaderboard({ players, showRank = false }) {
+function Leaderboard({ players, showRank = false, rankOffset = 0 }) {
     if (!players || players.length === 0) {
         return (
             <div className="text-center py-8 text-gray-500">
@@ -49,7 +49,7 @@ function Leaderboard({ players, showRank = false }) {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                     {players.map((player, index) => {
-                        const rank = index + 1
+                        const rank = rankOffset + index + 1
                         const winRate = player.games > 0
                             ? ((player.wins / player.games) * 100).toFixed(1)
                             : '0.0'

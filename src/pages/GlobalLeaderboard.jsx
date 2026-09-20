@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Leaderboard from '../components/Leaderboard'
 
+const GLOBAL_PAGE_SIZE = 50
+
 function GlobalLeaderboard() {
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [currentPage, setCurrentPage] = useState(1)
 
     useEffect(() => {
         fetch('/data/leagueData.json')
@@ -41,6 +44,13 @@ function GlobalLeaderboard() {
             </div>
         )
     }
+
+    const players = data.globalLeaderboard || []
+    const totalPages = Math.max(1, Math.ceil(players.length / GLOBAL_PAGE_SIZE))
+    const page = Math.min(currentPage, totalPages)
+    const pageStart = (page - 1) * GLOBAL_PAGE_SIZE
+    const pagePlayers = players.slice(pageStart, pageStart + GLOBAL_PAGE_SIZE)
+    const pageEnd = Math.min(pageStart + GLOBAL_PAGE_SIZE, players.length)
 
     return (
         <div className="page-container">
@@ -89,7 +99,42 @@ function GlobalLeaderboard() {
             {/* Leaderboard */}
             <div className="card">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">All Players</h3>
-                <Leaderboard players={data.globalLeaderboard} showRank />
+                <Leaderboard players={pagePlayers} showRank rankOffset={pageStart} />
+
+                {players.length > 0 && totalPages > 1 && (
+                    <nav
+                        className="mt-6 flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between"
+                        aria-label="Global leaderboard pagination"
+                    >
+                        <p className="text-sm text-gray-600" aria-live="polite">
+                            Showing {pageStart + 1}-{pageEnd} of {players.length} players
+                        </p>
+
+                        <div className="flex items-center justify-between gap-3 sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setCurrentPage(page - 1)}
+                                disabled={page === 1}
+                                className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label="Show previous leaderboard page"
+                            >
+                                Previous
+                            </button>
+                            <span className="text-sm text-gray-600" aria-current="page">
+                                Page {page} of {totalPages}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => setCurrentPage(page + 1)}
+                                disabled={page === totalPages}
+                                className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label="Show next leaderboard page"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </nav>
+                )}
             </div>
         </div>
     )

@@ -5,24 +5,37 @@ import { useEffect, useState } from 'react'
  *
  * Each history entry looks like:
  *   { ts, our: { added: [], removed: [] }, opp: { added: [], removed: [] } }
+ * Added/removed items are either a plain username string (older cached data)
+ * or a `{ username, rating }` object capturing the rating at that event.
  *
  * Returns an array of player objects:
- *   { username, team: 'our'|'opp', joinedTs, removedTs, isRemoved }
+ *   { username, team: 'our'|'opp', joinedTs, removedTs, isRemoved, rating }
  *
  * Players who were removed and later re-added show their most-recent join date.
  * The removedTs is set to the most-recent removal (null if currently active).
  */
-export function derivePlayerTimeline(history) {
+export function derivePlayerTimeline(history, ratingsByTeam = {}) {
     if (!history || history.length === 0) return []
 
     // Track join/remove events per username per team
     // Map key: `${team}:${username}`
     const events = new Map()
 
+    const lookupRating = (team, username) => {
+        const teamRatings = ratingsByTeam?.[team]
+        if (!teamRatings) return null
+        return teamRatings.get(username.toLowerCase()) ?? null
+    }
+
+    // Normalizes an added/removed history item into { username, rating }.
+    const normalizeItem = item => (
+        typeof item === 'string' ? { username: item, rating: null } : { username: item.username, rating: item.rating ?? null }
+    )
+
     const ensureEntry = (team, username) => {
         const key = `${team}:${username}`
         if (!events.has(key)) {
-            events.set(key, { username, team, joinedTs: null, removedTs: null })
+            events.set(key, { username, team, joinedTs: null, removedTs: null, rating: lookupRating(team, username) })
         }
         return events.get(key)
     }
@@ -32,15 +45,19 @@ export function derivePlayerTimeline(history) {
         for (const team of ['our', 'opp']) {
             const side = entry[team]
             if (!side) continue
-            for (const username of (side.added || [])) {
+            for (const item of (side.added || [])) {
+                const { username, rating } = normalizeItem(item)
                 const e = ensureEntry(team, username)
                 e.joinedTs = ts
                 // If they were re-added, clear any previous removal
                 e.removedTs = null
+                if (rating) e.rating = rating
             }
-            for (const username of (side.removed || [])) {
+            for (const item of (side.removed || [])) {
+                const { username, rating } = normalizeItem(item)
                 const e = ensureEntry(team, username)
                 e.removedTs = ts
+                if (rating) e.rating = rating
             }
         }
     }
@@ -57,6 +74,15 @@ function formatTs(isoString) {
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+/** Builds a lowercase-username -> rating lookup Map from a roster array of { username, rating }. */
+function buildRatingMap(roster) {
+    const map = new Map()
+    for (const p of roster ?? []) {
+        if (p?.username && p?.rating) map.set(p.username.toLowerCase(), p.rating)
+    }
+    return map
+}
+
 function PlayerRow({ player }) {
     return (
         <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
@@ -69,6 +95,7 @@ function PlayerRow({ player }) {
                         className="text-chess-green hover:text-green-700 hover:underline text-sm"
                     >
                         {player.username}
+                        {player.rating && <span className="text-gray-500 font-normal"> ({player.rating})</span>}
                     </a>
                     {player.isRemoved && (
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">
@@ -153,8 +180,10 @@ function CollapsibleTeamSection({ teamName, players, accentColor }) {
  *   onClose    (fn)
  *   matchName  (string)
  *   history    ([{ ts, our: { added, removed }, opp: { added, removed } }])
+ *   ourRoster  ([{ username, rating }]) — current roster snapshot, used to show ratings
+ *   oppRoster  ([{ username, rating }])
  */
-function AuditLogModal({ isOpen, onClose, matchName, history, ourTeamName = 'Our Team', oppTeamName = 'Opponent' }) {
+function AuditLogModal({ isOpen, onClose, matchName, history, ourTeamName = 'Our Team', oppTeamName = 'Opponent', ourRoster = [], oppRoster = [] }) {
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden'
@@ -173,7 +202,8 @@ function AuditLogModal({ isOpen, onClose, matchName, history, ourTeamName = 'Our
 
     if (!isOpen) return null
 
-    const timeline = derivePlayerTimeline(history)
+    const ratingsByTeam = { our: buildRatingMap(ourRoster), opp: buildRatingMap(oppRoster) }
+    const timeline = derivePlayerTimeline(history, ratingsByTeam)
     const ourPlayers = timeline.filter(p => p.team === 'our')
     const oppPlayers = timeline.filter(p => p.team === 'opp')
 
@@ -193,9 +223,6 @@ function AuditLogModal({ isOpen, onClose, matchName, history, ourTeamName = 'Our
                         <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                             <span>📋</span>
                             Audit Log
-                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                                BETA
-                            </span>
                         </h3>
                         <p className="text-sm text-gray-600 mt-0.5 line-clamp-1">{matchName}</p>
                         <p className="text-xs text-gray-500 mt-2">

@@ -108,9 +108,9 @@ across all sites.
          ▼
 ┌─────────────────┐
 │ public/data/     │  ← Static JSON committed to repo
-│   1dpmc/         │     leagueData.json, timeoutData.json
-│   teamusa/       │     leagueData.json, timeoutData.json
-│   mn/            │     leagueData.json, timeoutData.json
+│   1dpmc/         │     leagueData.json, timeout_history.json, timeoutData.json
+│   teamusa/       │     leagueData.json, timeout_history.json, timeoutData.json
+│   mn/            │     leagueData.json, timeout_history.json, timeoutData.json
 └────────┬────────┘
          │
          ▼
@@ -150,9 +150,11 @@ chess-league-tracker/
 │   └── data/
 │       ├── 1dpmc/
 │       │   ├── leagueData.json      # Generated
+│       │   ├── timeout_history.json # Durable detected-timeout ledger
 │       │   └── timeoutData.json     # Generated
 │       └── teamusa/
 │           ├── leagueData.json      # Generated
+│           ├── timeout_history.json # Durable detected-timeout ledger
 │           └── timeoutData.json     # Generated
 ├── src/
 │   ├── components/
@@ -209,9 +211,27 @@ python scripts/fetch_league_data.py --site-key 1dpmc
 python scripts/fetch_league_data.py --site-key teamusa
 ```
 
+After upgrading sub-league detection, run the one-time historical repair for
+each site to re-key ambiguous stored matches using Chess.com team names and
+semantic season/stage normalization:
+
+```bash
+python scripts/fetch_league_data.py --site-key 1dpmc --repair-subleagues
+python scripts/fetch_league_data.py --site-key teamusa --repair-subleagues
+python scripts/fetch_league_data.py --site-key mn --repair-subleagues
+```
+
+The repair mode updates existing league data only; it does not create
+placeholder matches for missing rounds. Ambiguous schedule-based matches stay
+separate and are recorded in each sub-league's diagnostics.
+
 - Reads club ID and league patterns from `config/<siteKey>/league_config.json`
 - Reads variant normalization rules from `config/shared/variant_patterns.json`
 - Writes output to `public/data/<siteKey>/leagueData.json`
+- Maintains `public/data/<siteKey>/timeout_history.json`, recording only when
+  a timeout is first detected by a successful fetch. The dashboard uses this
+  detection time for its recent-timeout window; it is not the exact game-end
+  time.
 
 ### 2. Enrich Timeout Data
 
@@ -268,6 +288,17 @@ Chess.com club to track and which league title patterns to match.
 | `leagues[].root_pattern` | Regex pattern matched against match titles (case-insensitive) |
 | `leagues[].name` | Canonical league name written to the output JSON |
 
+### Ratings service availability
+
+Current player ratings, timeout percentages, and membership validation are
+imported from the optional member service at `https://chessteamdata.com/api/members`. That service only
+supports clubs provisioned by the site owner; adding a new `clubId` here does
+not automatically make its ratings available. A fork that tracks an
+unsupported club must either provide its own compatible member-data service or
+disable the member service and rating-based recruitment. Match-based timeout
+risk analysis remains available without it.
+League fetching and historical/audit data remain usable without this service.
+
 ### script_params.json
 
 Located at `config/<siteKey>/script_params.json`. Controls timeout
@@ -279,6 +310,11 @@ enrichment thresholds and behaviour.
   "leagueTimeoutWindowDays": 90,
   "archiveMaxMonthsBack": 2,
   "userAgent": "ChessLeagueTracker/1.0",
+  "memberServiceEnabled": true,
+  "memberServiceUrl": "https://chessteamdata.com/api/members",
+  "useMemberServiceTimeoutFallback": true,
+  "compareChess960TimeoutForStandard": false,
+  "recruitmentEnabled": true,
 
   "highTimeoutPct": 50.0,
   "highDailyTimeoutCount": 10,
@@ -298,6 +334,11 @@ enrichment thresholds and behaviour.
 | `leagueTimeoutWindowDays` | Rolling window (days) for league-wide timeout count | `90` |
 | `archiveMaxMonthsBack` | Calendar months to look back in the game archive | `2` |
 | `userAgent` | User-Agent header sent to Chess.com API | `ChessLeagueTracker/1.0` |
+| `memberServiceEnabled` | Enable the optional member-data service for ratings/membership | `false` |
+| `memberServiceUrl` | Member-data endpoint URL | `https://chessteamdata.com/api/members` |
+| `useMemberServiceTimeoutFallback` | Use the member service's standard timeout when match data has none | `false` |
+| `compareChess960TimeoutForStandard` | Also compare a cached Chess960 timeout during standard risk checks | `false` |
+| `recruitmentEnabled` | Enable rating-based recruitment suggestions | `false` |
 | `highTimeoutPct` | Timeout % that satisfies the HIGH-risk timeout-ratio factor | `50.0` |
 | `highDailyTimeoutCount` | Recent daily timeout count that satisfies the HIGH-risk daily factor | `10` |
 | `highSubLeagueTimeoutCount` | Sub-league timeout count that satisfies the HIGH-risk sub-league factor | `2` |
@@ -401,6 +442,11 @@ Adding support for a new Chess.com club is straightforward:
      "leagueTimeoutWindowDays": 90,
      "archiveMaxMonthsBack": 2,
      "userAgent": "ChessLeagueTracker/1.0",
+     "memberServiceEnabled": false,
+     "memberServiceUrl": "https://chessteamdata.com/api/members",
+     "useMemberServiceTimeoutFallback": false,
+     "compareChess960TimeoutForStandard": false,
+     "recruitmentEnabled": false,
 
      "highTimeoutPct": 50.0,
      "highDailyTimeoutCount": 10,

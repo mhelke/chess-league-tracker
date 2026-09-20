@@ -2,10 +2,28 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 
+const STATUS_FILTERS = [
+    { key: 'open', label: 'Open', color: 'text-green-700', activeColor: 'bg-green-50 border-green-200' },
+    { key: 'in_progress', label: 'In progress', color: 'text-blue-700', activeColor: 'bg-blue-50 border-blue-200' },
+    { key: 'finished', label: 'Finished', color: 'text-gray-700', activeColor: 'bg-gray-50 border-gray-200' },
+]
+
+const chessMatchWebUrl = (matchId) => {
+    const idMatch = String(matchId || '').match(/(?:\/match\/)?(\d+)\/?$/)
+    return idMatch ? `https://www.chess.com/club/matches/${idMatch[1]}` : null
+}
+
 function LeagueView() {
     const { leagueName } = useParams()
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [subLeagueSearch, setSubLeagueSearch] = useState('')
+    const [visibleStatuses, setVisibleStatuses] = useState({
+        open: true,
+        in_progress: true,
+        finished: true,
+    })
+    const [diagnosticsCopied, setDiagnosticsCopied] = useState(false)
 
     useEffect(() => {
         fetch('/data/leagueData.json')
@@ -19,6 +37,11 @@ function LeagueView() {
                 setLoading(false)
             })
     }, [])
+
+    useEffect(() => {
+        setVisibleStatuses({ open: true, in_progress: true, finished: true })
+        setDiagnosticsCopied(false)
+    }, [leagueName])
 
     if (loading) {
         return (
@@ -84,6 +107,83 @@ function LeagueView() {
         })
     }
 
+    const normalizedSubLeagueSearch = subLeagueSearch.trim().toLowerCase()
+    const subLeagueEntries = Object.entries(league.subLeagues || {})
+    const diagnosticEntries = subLeagueEntries.map(([subLeagueName, subLeagueData]) => {
+        const diagnostics = subLeagueData.diagnostics || {}
+        const ambiguousMatches = Array.isArray(diagnostics.ambiguousMatches) ? diagnostics.ambiguousMatches : []
+        const unresolvedMatches = ambiguousMatches.map(match => {
+            const matchingRound = subLeagueData.rounds.find(round =>
+                (match?.matchId && round.matchId === match.matchId) ||
+                (match?.name && round.name === match.name)
+            )
+            return {
+                ...match,
+                matchWebUrl: matchingRound?.matchWebUrl || chessMatchWebUrl(match?.matchId),
+            }
+        })
+        return {
+            subLeagueName,
+            mergedFrom: Array.isArray(diagnostics.mergedFrom) ? diagnostics.mergedFrom : [],
+            dateResolvedMatches: Array.isArray(diagnostics.dateResolvedMatches) ? diagnostics.dateResolvedMatches : [],
+            unresolvedMatches,
+        }
+    })
+    const diagnosticSummary = diagnosticEntries.reduce((summary, entry) => ({
+        merged: summary.merged + entry.mergedFrom.length,
+        dateResolved: summary.dateResolved + entry.dateResolvedMatches.length,
+        unresolved: summary.unresolved + entry.unresolvedMatches.length,
+    }), { merged: 0, dateResolved: 0, unresolved: 0 })
+    const diagnosticIssues = diagnosticEntries.filter(entry => entry.unresolvedMatches.length > 0)
+    const diagnosticActivity = diagnosticEntries.filter(entry =>
+        entry.mergedFrom.length > 0 || entry.dateResolvedMatches.length > 0
+    )
+    const statusSubLeagueCounts = STATUS_FILTERS.reduce((counts, status) => {
+        counts[status.key] = subLeagueEntries.filter(([, subLeagueData]) =>
+            subLeagueData.rounds.some(round => round.status === status.key)
+        ).length
+        return counts
+    }, {})
+    const anyStatusVisible = Object.values(visibleStatuses).some(Boolean)
+    const visibleSubLeagues = sortSubLeagues(subLeagueEntries).filter(([subLeagueName, subLeagueData]) => {
+        const matchesSearch = subLeagueName.toLowerCase().includes(normalizedSubLeagueSearch)
+        const matchesStatus = anyStatusVisible && Object.entries(visibleStatuses).some(([status, visible]) =>
+            visible && subLeagueData.rounds.some(round => round.status === status)
+        )
+        return matchesSearch && matchesStatus
+    })
+
+    const toggleStatus = (status) => {
+        setVisibleStatuses(current => ({ ...current, [status]: !current[status] }))
+    }
+
+    const copyDiagnosticsReport = async () => {
+        const lines = [
+            `League diagnostics: ${leagueName}`,
+            `Merges: ${diagnosticSummary.merged}; date-resolved matches: ${diagnosticSummary.dateResolved}; unresolved groupings: ${diagnosticSummary.unresolved}`,
+        ]
+        diagnosticActivity.forEach(entry => {
+            if (entry.mergedFrom.length > 0) {
+                lines.push(`${entry.subLeagueName}: merged ${entry.mergedFrom.join(', ')}`)
+            }
+        })
+        diagnosticIssues.forEach(entry => {
+            entry.unresolvedMatches.forEach(match => {
+                const title = match.name || match.matchId || 'Unknown match'
+                const identifier = match.matchId && match.matchId !== title ? ` (${match.matchId})` : ''
+                const reason = match.reason || 'No reason recorded'
+                const link = match.matchWebUrl ? ` - ${match.matchWebUrl}` : ''
+                lines.push(`${entry.subLeagueName}: ${title}${identifier} - ${reason}${link}`)
+            })
+        })
+        try {
+            await navigator.clipboard.writeText(lines.join('\n'))
+            setDiagnosticsCopied(true)
+        } catch (error) {
+            console.error('Unable to copy diagnostics report:', error)
+        }
+    }
+
     return (
         <div className="page-container">
             {/* Breadcrumb */}
@@ -101,9 +201,129 @@ function LeagueView() {
                 </p>
             </div>
 
+            <div className="mb-6 max-w-md">
+                <label htmlFor="sub-league-search" className="block text-sm font-medium text-gray-700 mb-1">
+                    Find a sub-league
+                </label>
+                <div className="relative">
+                    <input
+                        id="sub-league-search"
+                        type="search"
+                        value={subLeagueSearch}
+                        onChange={(event) => setSubLeagueSearch(event.target.value)}
+                        placeholder="Search sub-leagues by name"
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm shadow-sm outline-none transition focus:border-chess-green focus:ring-2 focus:ring-chess-green/20"
+                    />
+                    {subLeagueSearch && (
+                        <button
+                            type="button"
+                            onClick={() => setSubLeagueSearch('')}
+                            className="absolute inset-y-0 right-2 px-2 text-sm text-gray-500 hover:text-gray-800"
+                            aria-label="Clear sub-league search"
+                        >
+                            ×
+                        </button>
+                    )}
+                </div>
+                {normalizedSubLeagueSearch && (
+                    <p className="mt-2 text-sm text-gray-500">
+                        {visibleSubLeagues.length} sub-league{visibleSubLeagues.length === 1 ? '' : 's'} shown
+                    </p>
+                )}
+            </div>
+
+            <div className="mb-5 flex flex-wrap items-center gap-2 text-sm">
+                <span className="font-semibold text-gray-700 mr-1">Show:</span>
+                {STATUS_FILTERS.map(status => (
+                    <label
+                        key={status.key}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 cursor-pointer transition-colors ${visibleStatuses[status.key] ? status.activeColor : 'bg-white border-gray-200 opacity-60'}`}
+                    >
+                        <input
+                            type="checkbox"
+                            checked={visibleStatuses[status.key]}
+                            onChange={() => toggleStatus(status.key)}
+                            className="h-3.5 w-3.5 rounded border-gray-300 text-chess-green focus:ring-chess-green"
+                        />
+                        <span className={`font-medium ${status.color}`}>{status.label}</span>
+                        <span className="text-xs text-gray-500">{statusSubLeagueCounts[status.key]}</span>
+                    </label>
+                ))}
+                <span className="hidden sm:inline text-gray-300">|</span>
+                <button
+                    type="button"
+                    onClick={() => setVisibleStatuses({ open: true, in_progress: true, finished: true })}
+                    className="text-xs font-medium text-chess-green hover:underline"
+                >
+                    All
+                </button>
+            </div>
+
+            <details className="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm font-semibold text-gray-700">
+                    <span>Admin diagnostics</span>
+                    <span className="text-xs font-normal text-gray-500">
+                        {diagnosticSummary.unresolved > 0
+                            ? `${diagnosticSummary.unresolved} unresolved`
+                            : 'No unresolved issues'}
+                    </span>
+                </summary>
+                <div className="border-t border-gray-100 px-3 py-3 text-xs text-gray-600">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <span>Merges: <strong>{diagnosticSummary.merged}</strong></span>
+                        <span>Date-resolved: <strong>{diagnosticSummary.dateResolved}</strong></span>
+                        <span>Unresolved groupings: <strong>{diagnosticSummary.unresolved}</strong></span>
+                    </div>
+                    {diagnosticIssues.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                            {diagnosticIssues.map(entry => (
+                                <div key={entry.subLeagueName} className="rounded border border-amber-200 bg-amber-50 px-2 py-1.5">
+                                    <div className="font-semibold text-gray-800">{entry.subLeagueName}</div>
+                                    {entry.unresolvedMatches.map((match, index) => (
+                                        <div key={`${match.matchId || match.name}-${index}`} className="mt-1 first:mt-0">
+                                            <div className="font-medium text-gray-800">
+                                                {match.name || match.matchId || 'Unknown match'}
+                                                {match.matchWebUrl && (
+                                                    <a
+                                                        href={match.matchWebUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="ml-2 text-chess-green hover:underline"
+                                                    >
+                                                        Open match
+                                                    </a>
+                                                )}
+                                            </div>
+                                            <div>{match.reason || 'No reason recorded'}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={copyDiagnosticsReport}
+                            className="rounded border border-gray-300 px-2 py-1 font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                            {diagnosticsCopied ? 'Copied' : 'Copy report'}
+                        </button>
+                        <a
+                            href="https://www.chess.com/member/MasterMatthew52"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-chess-green hover:underline"
+                        >
+                            Contact MasterMatthew52
+                        </a>
+                    </div>
+                </div>
+            </details>
+
             {/* Sub-league Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {sortSubLeagues(Object.entries(league.subLeagues || {})).map(([subLeagueName, subLeagueData]) => {
+                {visibleSubLeagues.map(([subLeagueName, subLeagueData]) => {
                     const stats = getSubLeagueStats(subLeagueData)
                     const topPlayer = subLeagueData.leaderboard[0]
 
@@ -159,6 +379,14 @@ function LeagueView() {
                     )
                 })}
             </div>
+
+            {visibleSubLeagues.length === 0 && (
+                <div className="rounded-lg border border-dashed border-gray-300 bg-white px-4 py-8 text-center text-gray-600">
+                    {!anyStatusVisible
+                        ? 'All status filters are hidden. Select a status above to show sub-leagues.'
+                        : `No sub-leagues match “${subLeagueSearch.trim()}” with the selected statuses.`}
+                </div>
+            )}
         </div>
     )
 }

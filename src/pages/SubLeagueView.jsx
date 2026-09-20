@@ -4,6 +4,7 @@ import Leaderboard from '../components/Leaderboard'
 import MatchCard from '../components/MatchCard'
 import { buildEarlyResignIndex } from '../utils/earlyResignUtils'
 import { GameLinksModal } from '../components/EarlyResignModal'
+import MatchDetails from '../components/MatchDetails'
 
 function SubLeagueView() {
     const { leagueName, subLeagueName } = useParams()
@@ -14,6 +15,7 @@ function SubLeagueView() {
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('rounds')
     const [gameLinksFor, setGameLinksFor] = useState(null)
+    const [matchDetails, setMatchDetails] = useState(null)
 
     useEffect(() => {
         Promise.all([
@@ -37,7 +39,7 @@ function SubLeagueView() {
 
     const subLeague = data?.leagues?.[leagueName]?.subLeagues?.[subLeagueName]
 
-    const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData), [earlyResignData])
+    const earlyResignIndex = useMemo(() => buildEarlyResignIndex(earlyResignData, data), [earlyResignData, data])
 
     // Aggregate early resignations for this specific sub-league
     const subLeagueEarlyResigns = useMemo(() => {
@@ -177,6 +179,7 @@ function SubLeagueView() {
                                         leagueName={leagueName}
                                         subLeagueName={subLeagueName}
                                         earlyResignIndex={earlyResignIndex}
+                                        onViewDetails={(r) => setMatchDetails(r)}
                                         clubIcons={clubIcons}
                                     />
                                 ))}
@@ -199,6 +202,7 @@ function SubLeagueView() {
                                         leagueName={leagueName}
                                         subLeagueName={subLeagueName}
                                         earlyResignIndex={earlyResignIndex}
+                                        onViewDetails={(r) => setMatchDetails(r)}
                                         clubIcons={clubIcons}
                                     />
                                 ))}
@@ -221,6 +225,7 @@ function SubLeagueView() {
                                         leagueName={leagueName}
                                         subLeagueName={subLeagueName}
                                         earlyResignIndex={earlyResignIndex}
+                                        onViewDetails={(r) => setMatchDetails(r)}
                                         clubIcons={clubIcons}
                                     />
                                 ))}
@@ -290,6 +295,22 @@ function SubLeagueView() {
                 username={gameLinksFor?.username ?? ''}
                 games={gameLinksFor?.games ?? []}
             />
+
+            {/* Match Details Modal (opens when a MatchCard requests details) */}
+            {matchDetails && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setMatchDetails(null)} />
+                    <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-auto p-4">
+                        <div className="flex justify-between items-start mb-3">
+                            <h3 className="text-xl font-bold">Match Details</h3>
+                            <button onClick={() => setMatchDetails(null)} className="text-2xl font-bold leading-none">×</button>
+                        </div>
+                        <MatchDetails
+                            round={matchDetails}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

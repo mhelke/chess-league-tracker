@@ -3,6 +3,11 @@
   "leagueTimeoutWindowDays": 90,
   "archiveMaxMonthsBack": 2,
   "userAgent": "ChessLeagueTracker/1.0",
+  "memberServiceEnabled": true,
+  "memberServiceUrl": "https://chessteamdata.com/api/members",
+  "useMemberServiceTimeoutFallback": true,
+  "compareChess960TimeoutForStandard": false,
+  "recruitmentEnabled": true,
 
   "highTimeoutPct": 50.0,
   "highDailyTimeoutCount": 10,

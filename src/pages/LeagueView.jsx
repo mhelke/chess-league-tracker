@@ -8,6 +8,11 @@ const STATUS_FILTERS = [
     { key: 'finished', label: 'Finished', color: 'text-gray-700', activeColor: 'bg-gray-50 border-gray-200' },
 ]
 
+const chessMatchWebUrl = (matchId) => {
+    const idMatch = String(matchId || '').match(/(?:\/match\/)?(\d+)\/?$/)
+    return idMatch ? `https://www.chess.com/club/matches/${idMatch[1]}` : null
+}
+
 function LeagueView() {
     const { leagueName } = useParams()
     const [data, setData] = useState(null)
@@ -107,26 +112,29 @@ function LeagueView() {
     const diagnosticEntries = subLeagueEntries.map(([subLeagueName, subLeagueData]) => {
         const diagnostics = subLeagueData.diagnostics || {}
         const ambiguousMatches = Array.isArray(diagnostics.ambiguousMatches) ? diagnostics.ambiguousMatches : []
-        const unresolvedMatches = ambiguousMatches.filter(match =>
-            !String(match?.reason || '').toLowerCase().includes('retained existing sub-league key')
-        )
+        const unresolvedMatches = ambiguousMatches.map(match => {
+            const matchingRound = subLeagueData.rounds.find(round =>
+                (match?.matchId && round.matchId === match.matchId) ||
+                (match?.name && round.name === match.name)
+            )
+            return {
+                ...match,
+                matchWebUrl: matchingRound?.matchWebUrl || chessMatchWebUrl(match?.matchId),
+            }
+        })
         return {
             subLeagueName,
             mergedFrom: Array.isArray(diagnostics.mergedFrom) ? diagnostics.mergedFrom : [],
             dateResolvedMatches: Array.isArray(diagnostics.dateResolvedMatches) ? diagnostics.dateResolvedMatches : [],
             unresolvedMatches,
-            missingRounds: Array.isArray(diagnostics.missingRounds) ? diagnostics.missingRounds : [],
         }
     })
     const diagnosticSummary = diagnosticEntries.reduce((summary, entry) => ({
         merged: summary.merged + entry.mergedFrom.length,
         dateResolved: summary.dateResolved + entry.dateResolvedMatches.length,
         unresolved: summary.unresolved + entry.unresolvedMatches.length,
-        missingRounds: summary.missingRounds + entry.missingRounds.length,
-    }), { merged: 0, dateResolved: 0, unresolved: 0, missingRounds: 0 })
-    const diagnosticIssues = diagnosticEntries.filter(entry =>
-        entry.unresolvedMatches.length > 0 || entry.missingRounds.length > 0
-    )
+    }), { merged: 0, dateResolved: 0, unresolved: 0 })
+    const diagnosticIssues = diagnosticEntries.filter(entry => entry.unresolvedMatches.length > 0)
     const diagnosticActivity = diagnosticEntries.filter(entry =>
         entry.mergedFrom.length > 0 || entry.dateResolvedMatches.length > 0
     )
@@ -152,7 +160,7 @@ function LeagueView() {
     const copyDiagnosticsReport = async () => {
         const lines = [
             `League diagnostics: ${leagueName}`,
-            `Merges: ${diagnosticSummary.merged}; date-resolved matches: ${diagnosticSummary.dateResolved}; unresolved groupings: ${diagnosticSummary.unresolved}; missing rounds: ${diagnosticSummary.missingRounds}`,
+            `Merges: ${diagnosticSummary.merged}; date-resolved matches: ${diagnosticSummary.dateResolved}; unresolved groupings: ${diagnosticSummary.unresolved}`,
         ]
         diagnosticActivity.forEach(entry => {
             if (entry.mergedFrom.length > 0) {
@@ -160,11 +168,12 @@ function LeagueView() {
             }
         })
         diagnosticIssues.forEach(entry => {
-            if (entry.missingRounds.length > 0) {
-                lines.push(`${entry.subLeagueName}: missing ${entry.missingRounds.join(', ')}`)
-            }
             entry.unresolvedMatches.forEach(match => {
-                lines.push(`${entry.subLeagueName}: ${match.matchId || 'unknown match'} - ${match.reason}`)
+                const title = match.name || match.matchId || 'Unknown match'
+                const identifier = match.matchId && match.matchId !== title ? ` (${match.matchId})` : ''
+                const reason = match.reason || 'No reason recorded'
+                const link = match.matchWebUrl ? ` - ${match.matchWebUrl}` : ''
+                lines.push(`${entry.subLeagueName}: ${title}${identifier} - ${reason}${link}`)
             })
         })
         try {
@@ -254,8 +263,8 @@ function LeagueView() {
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm font-semibold text-gray-700">
                     <span>Admin diagnostics</span>
                     <span className="text-xs font-normal text-gray-500">
-                        {diagnosticSummary.unresolved + diagnosticSummary.missingRounds > 0
-                            ? `${diagnosticSummary.unresolved} unresolved · ${diagnosticSummary.missingRounds} missing`
+                        {diagnosticSummary.unresolved > 0
+                            ? `${diagnosticSummary.unresolved} unresolved`
                             : 'No unresolved issues'}
                     </span>
                 </summary>
@@ -264,19 +273,28 @@ function LeagueView() {
                         <span>Merges: <strong>{diagnosticSummary.merged}</strong></span>
                         <span>Date-resolved: <strong>{diagnosticSummary.dateResolved}</strong></span>
                         <span>Unresolved groupings: <strong>{diagnosticSummary.unresolved}</strong></span>
-                        <span>Missing rounds: <strong>{diagnosticSummary.missingRounds}</strong></span>
                     </div>
                     {diagnosticIssues.length > 0 && (
                         <div className="mt-3 space-y-2">
                             {diagnosticIssues.map(entry => (
                                 <div key={entry.subLeagueName} className="rounded border border-amber-200 bg-amber-50 px-2 py-1.5">
                                     <div className="font-semibold text-gray-800">{entry.subLeagueName}</div>
-                                    {entry.missingRounds.length > 0 && (
-                                        <div>Missing: {entry.missingRounds.join(', ')}</div>
-                                    )}
                                     {entry.unresolvedMatches.map((match, index) => (
-                                        <div key={`${match.matchId || match.name}-${index}`}>
-                                            Unresolved grouping: {match.matchId || match.name}
+                                        <div key={`${match.matchId || match.name}-${index}`} className="mt-1 first:mt-0">
+                                            <div className="font-medium text-gray-800">
+                                                {match.name || match.matchId || 'Unknown match'}
+                                                {match.matchWebUrl && (
+                                                    <a
+                                                        href={match.matchWebUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="ml-2 text-chess-green hover:underline"
+                                                    >
+                                                        Open match
+                                                    </a>
+                                                )}
+                                            </div>
+                                            <div>{match.reason || 'No reason recorded'}</div>
                                         </div>
                                     ))}
                                 </div>

@@ -1,7 +1,7 @@
 {
   "clubId": "1-day-per-move-club",
-  "subleague_rules": [
-    {"pattern": "\\bU1800\\b", "max_rating": 1800}
+  "subleague_normalization": [
+    ["\\b(U\\d+)\\s*/\\s*(20\\d{2})\\s*/\\s*([A-Z]\\d+)\\b", "\\1 \\2 (div \\3)"]
   ],
   "leagues": [
     {"root_pattern": "\\b1WL\\b", "name": "1WL"},

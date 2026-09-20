@@ -531,7 +531,12 @@ def process_match(match_url: str, parsed_title: Dict, status: str) -> Optional[D
         if isinstance(team_data, dict) and team_data.get("name")
     ]
     contextual_title = parse_match_title(match_data.get("name", ""), team_names)
-    if contextual_title and contextual_title.get("subLeague") != "__unresolved__":
+    if (
+        len(team_names) >= 2
+        and contextual_title
+        and contextual_title.get("subLeague") != "__unresolved__"
+        and contextual_title.get("confidence") == "high"
+    ):
         parsed_title = contextual_title
     
     for team_key, team_data in teams.items():
@@ -1046,12 +1051,19 @@ def _title_has_round_before_teams(title: str) -> bool:
 def _parse_existing_round(league_name: str, old_subleague: str, round_data: Dict) -> Dict[str, str]:
     """Recover a stable identity from stored data without making API calls."""
     title = round_data.get("name", "")
-    parsed = parse_match_title(title)
+    raw_teams = round_data.get("teams")
+    stored_team_names = [
+        team.get("name", "")
+        for team in raw_teams
+        if isinstance(team, dict) and team.get("name")
+    ] if isinstance(raw_teams, list) else []
+    has_stored_team_context = len(stored_team_names) >= 2
+    parsed = parse_match_title(title, stored_team_names if has_stored_team_context else None)
     if (
         parsed
         and parsed.get("subLeague") != "__unresolved__"
         and parsed.get("league") == league_name
-        and _title_has_round_before_teams(title)
+        and (has_stored_team_context or _title_has_round_before_teams(title))
     ):
         return parsed
 
@@ -1080,8 +1092,19 @@ def _parse_round_with_api_context(league_name: str, old_subleague: str, round_da
         for team_data in teams.values()
         if isinstance(team_data, dict) and team_data.get("name")
     ]
+    if len(team_names) < 2:
+        return _parse_existing_round(league_name, old_subleague, round_data)
     parsed = parse_match_title(match_json.get("name") or round_data.get("name", ""), team_names)
-    if parsed and parsed.get("subLeague") != "__unresolved__":
+    if (
+        parsed
+        and parsed.get("subLeague") != "__unresolved__"
+        and parsed.get("confidence") == "high"
+    ):
+        # Persist the small amount of authoritative context needed to make a
+        # historical repair durable. Future ordinary rebuilds can then parse
+        # bare ``vs`` titles without fetching the match endpoint again.
+        round_data["teams"] = _teams_from_match_payload(teams)
+        round_data["apiMetadata"] = _api_metadata_from_match_payload(match_json)
         return parsed
     return _parse_existing_round(league_name, old_subleague, round_data)
 
@@ -2143,13 +2166,11 @@ def _build_subleague_diagnostics(
             if match
         }
     )
-    missing = [f"R{number}" for number in range(observed[0], observed[-1] + 1) if number not in observed] if len(observed) >= 2 else []
     return {
         "mergedFrom": sorted(set(merged_from), key=str.casefold),
         "ambiguousMatches": ambiguous,
         "dateResolvedMatches": date_resolved or [],
         "observedRounds": [f"R{number}" for number in observed],
-        "missingRounds": missing,
     }
 
 

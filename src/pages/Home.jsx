@@ -436,7 +436,7 @@ function Home() {
             <div className="mb-8">
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Leagues Dashboard</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h2>
                         <p className="mt-1 text-sm text-gray-500">
                             Last updated: {new Date(data.lastUpdated).toLocaleString()}
                         </p>

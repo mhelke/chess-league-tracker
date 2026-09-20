@@ -205,7 +205,11 @@ class SubLeagueDetectionTests(unittest.TestCase):
             [round_data["round"] for round_data in merged["rounds"]],
             ["R1", "R2", "R3", "R4", "R5", "R6", "R8", "R9"],
         )
-        self.assertEqual(merged["diagnostics"]["missingRounds"], ["R7"])
+        self.assertEqual(
+            merged["diagnostics"]["observedRounds"],
+            ["R1", "R2", "R3", "R4", "R5", "R6", "R8", "R9"],
+        )
+        self.assertNotIn("missingRounds", merged["diagnostics"])
         self.assertEqual(
             {item["matchId"] for item in merged["diagnostics"]["dateResolvedMatches"]},
             {"a1", "a2", "a3", "a4", "a5", "b8"},
@@ -430,6 +434,19 @@ class SubLeagueDetectionTests(unittest.TestCase):
         self.assertEqual(parsed_2026["subLeague"], "Chess960 2026 Six4Us Winter Masters")
         self.assertNotEqual(parsed_2025["canonicalSubLeague"], parsed_2026["canonicalSubLeague"])
 
+    def test_slash_delimited_tmcl_division_uses_standard_identity(self):
+        fetcher.load_config("1dpmc")
+        parsed = fetcher.parse_match_title(
+            "TMCL U1400/2025/D3/ Sahovska sekcija TQM Aradac vs 1 day per move club",
+            ["Sahovska sekcija TQM Aradac", "1 day per move club"],
+        )
+
+        self.assertEqual(parsed["subLeague"], "U1400 2025 (div D3)")
+        self.assertEqual(
+            parsed["canonicalSubLeague"],
+            fetcher.canonical_subleague_key("U1400 2025 (div D3)"),
+        )
+
     def test_case_and_punctuation_variants_share_key(self):
         fetcher.load_config("teamusa")
         self.assertEqual(
@@ -488,7 +505,183 @@ class SubLeagueDetectionTests(unittest.TestCase):
         self.assertEqual(match["_parsedTitle"]["subLeague"], "Chess960 2026 Six4Us Winter Masters")
         self.assertEqual(match["_parsedTitle"]["confidence"], "high")
 
-    def test_rebuild_reports_gap_without_creating_match(self):
+    def test_historical_repair_persists_context_for_future_rebuilds(self):
+        fetcher.load_config("1dpmc")
+        match_url = "https://api.chess.com/pub/match/1781452"
+        round_data = {
+            "round": "NA",
+            "status": "finished",
+            "matchId": match_url,
+            "matchUrl": match_url,
+            "name": "TMCL U1400/2025/D3/ Sahovska sekcija TQM Aradac vs 1 day per move club",
+            "playerStats": {},
+            "matchResult": {"result": "win"},
+        }
+        payload = {
+            "@id": match_url,
+            "name": round_data["name"],
+            "boards": 7,
+            "settings": {"max_rating": 1400, "rules": "chess"},
+            "teams": {
+                "team1": {
+                    "@id": "https://api.chess.com/pub/club/sahovska-sekcija-tqm-aradac",
+                    "name": "Sahovska sekcija TQM Aradac",
+                },
+                "team2": {
+                    "@id": "https://api.chess.com/pub/club/1-day-per-move-club",
+                    "name": "1 day per move club",
+                },
+            },
+        }
+
+        original_fetch_json = fetcher.fetch_json
+        fetcher.fetch_json = lambda _: payload
+        try:
+            repaired = fetcher._parse_round_with_api_context(
+                "TMCL", "Undefined Subleague", round_data
+            )
+        finally:
+            fetcher.fetch_json = original_fetch_json
+
+        self.assertEqual(repaired["subLeague"], "U1400 2025 (div D3)")
+        self.assertEqual(len(round_data["teams"]), 2)
+        self.assertEqual(round_data["apiMetadata"]["maxRating"], 1400)
+
+        # The next ordinary rebuild must use stored context, not the API.
+        reparsed = fetcher._parse_existing_round(
+            "TMCL", "U1400 2025 (div D3)", round_data
+        )
+        self.assertEqual(reparsed["confidence"], "high")
+        self.assertEqual(reparsed["subLeague"], "U1400 2025 (div D3)")
+
+    def test_historical_repair_keeps_incomplete_team_context_unresolved(self):
+        fetcher.load_config("1dpmc")
+        match_url = "https://api.chess.com/pub/match/incomplete"
+        round_data = {
+            "round": "NA",
+            "status": "finished",
+            "matchId": match_url,
+            "matchUrl": match_url,
+            "name": "1WL 2026 Spring Masters Team A vs 1 day per move club",
+            "playerStats": {},
+            "matchResult": {"result": "unknown"},
+        }
+        payload = {
+            "name": round_data["name"],
+            "settings": {},
+            "teams": {
+                "team1": {
+                    "@id": "https://api.chess.com/pub/club/1-day-per-move-club",
+                    "name": "1 day per move club",
+                },
+            },
+        }
+
+        original_fetch_json = fetcher.fetch_json
+        fetcher.fetch_json = lambda _: payload
+        try:
+            repaired = fetcher._parse_round_with_api_context(
+                "1WL", "Undefined Subleague", round_data
+            )
+        finally:
+            fetcher.fetch_json = original_fetch_json
+
+        self.assertEqual(repaired["confidence"], "low")
+        self.assertEqual(repaired["subLeague"], "Undefined Subleague")
+        self.assertNotIn("teams", round_data)
+        self.assertNotIn("apiMetadata", round_data)
+
+    def test_stored_team_context_repairs_1dpmc_legacy_groupings(self):
+        fetcher.load_config("1dpmc")
+
+        def stored_round(match_id, title, round_name, team_names):
+            return {
+                "round": round_name,
+                "status": "finished",
+                "matchId": f"https://api.chess.com/pub/match/{match_id}",
+                "name": title,
+                "teams": [
+                    {"name": name, "clubId": name.casefold().replace(" ", "-")}
+                    for name in team_names
+                ],
+                "playerStats": {},
+                "matchResult": {"result": "win"},
+            }
+
+        our_club = "1 day per move club"
+        repaired_960 = stored_round(
+            1905217,
+            "1WL 2026 960 Six4Us Winter Masters The Ge-Winner vs 1 day per move club",
+            "NA",
+            ["The Ge-Winner", our_club],
+        )
+        repaired_tmcl = stored_round(
+            1781452,
+            "TMCL U1400/2025/D3/ Sahovska sekcija TQM Aradac vs 1 day per move club",
+            "NA",
+            ["Sahovska sekcija TQM Aradac", our_club],
+        )
+        corrected_year = stored_round(
+            1758397,
+            "1WL 2025 1400-1600 Spring Masters The Pandora's box club. vs 1 day per move club",
+            "NA",
+            ["The Pandora's box club.", our_club],
+        )
+        existing = {
+            "1WL": {"subLeagues": {
+                "Chess960 2026 Six4Us Winter Masters": {"rounds": [stored_round(
+                    "base-960",
+                    "1WL 2026 960 Six4Us Winter Masters R1: Chess Team Europe vs 1 day per move club",
+                    "R1",
+                    ["Chess Team Europe", our_club],
+                )]},
+                "2025 1400-1600 Spring Masters": {"rounds": [stored_round(
+                    "base-2025",
+                    "1WL 2025 1400-1600 Spring Masters R1: Team Australia vs 1 day per move club",
+                    "R1",
+                    ["Team Australia", our_club],
+                )]},
+                "2026 1400-1600 Spring Masters": {"rounds": [corrected_year]},
+                "Undefined Subleague": {"rounds": [repaired_960]},
+            }},
+            "TMCL": {"subLeagues": {
+                "U1400 2025 (div D3)": {"rounds": [stored_round(
+                    "base-tmcl",
+                    "TMCL U1400 2025 (div D3) R2: Vedic Warriors vs 1 day per move club",
+                    "R2",
+                    ["Vedic Warriors", our_club],
+                )]},
+                "Undefined Subleague": {"rounds": [repaired_tmcl]},
+            }},
+        }
+
+        output = fetcher.rebuild_leagues_output(existing, {}, {}, {})
+        locations = {
+            round_data["matchId"]: (league_name, subleague_name)
+            for league_name, league_data in output.items()
+            for subleague_name, subleague_data in league_data["subLeagues"].items()
+            for round_data in subleague_data["rounds"]
+        }
+
+        self.assertEqual(
+            locations[repaired_960["matchId"]],
+            ("1WL", "Chess960 2026 Six4Us Winter Masters"),
+        )
+        self.assertEqual(
+            locations[repaired_tmcl["matchId"]],
+            ("TMCL", "U1400 2025 (div D3)"),
+        )
+        self.assertEqual(
+            locations[corrected_year["matchId"]],
+            ("1WL", "2025 1400-1600 Spring Masters"),
+        )
+        self.assertFalse(any(
+            "undefined" in subleague_name.casefold()
+            for league_data in output.values()
+            for subleague_name in league_data["subLeagues"]
+        ))
+
+    def test_rebuild_records_observed_rounds_without_classifying_gaps(self):
         fetcher.load_config("teamusa")
         rounds = [
             {
@@ -518,7 +711,8 @@ class SubLeagueDetectionTests(unittest.TestCase):
 
         subleague = output["WL"]["subLeagues"]["2026"]
         self.assertEqual([r["matchId"] for r in subleague["rounds"]], ["m1", "m3"])
-        self.assertEqual(subleague["diagnostics"]["missingRounds"], ["R2"])
+        self.assertEqual(subleague["diagnostics"]["observedRounds"], ["R1", "R3"])
+        self.assertNotIn("missingRounds", subleague["diagnostics"])
 
     def test_same_day_non_numbered_matches_get_simultaneous_ids(self):
         fetcher.load_config("1dpmc")

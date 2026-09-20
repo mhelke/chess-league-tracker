@@ -106,11 +106,19 @@ function formatMatchScore(matchResult) {
 }
 
 function getMatchResultLabel(result) {
-    const normalizedResult = String(result || '').toLowerCase()
-    if (normalizedResult.includes('win')) return 'Win'
-    if (normalizedResult.includes('draw')) return 'Draw'
-    if (normalizedResult) return 'Loss'
-    return 'Result unavailable'
+    switch (String(result || '').trim().toLowerCase()) {
+        case 'win':
+        case 'win by forfeit':
+            return 'Win'
+        case 'draw':
+            return 'Draw'
+        case 'lose':
+        case 'forfeit':
+        case 'double forfeit':
+            return 'Loss'
+        default:
+            return 'Result unavailable'
+    }
 }
 
 function getMatchResultClass(result) {

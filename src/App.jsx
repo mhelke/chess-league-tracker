@@ -11,7 +11,7 @@ import TimeoutHistory from './pages/TimeoutHistory'
 import NotFound from './pages/NotFound'
 import EmbedLeagueOverview from './pages/EmbedLeagueOverview'
 import About from './pages/About'
-import { collectActionItems } from './utils/actionItemUtils'
+import { DashboardDataProvider, useDashboardData } from './context/DashboardDataContext'
 import WhatsNewModal from './components/WhatsNewModal'
 import { WHATS_NEW_ANNOUNCEMENT } from './whatsNew'
 
@@ -71,8 +71,8 @@ function AppContent() {
     const siteName = SITE_NAMES[__SITE_KEY__] || 'Chess League Tracker'
     const [menuOpen, setMenuOpen] = useState(false)
     const [clubIcon, setClubIcon] = useState(null)
-    const [actionItemCount, setActionItemCount] = useState(0)
     const [showWhatsNew, setShowWhatsNew] = useState(false)
+    const { actionItems } = useDashboardData()
     const location = useLocation()
     const isEmbed = location.pathname === '/league-overview' && new URLSearchParams(location.search).get('embed') === '1'
 
@@ -82,17 +82,6 @@ function AppContent() {
         fetch(`https://api.chess.com/pub/club/${apiId}`)
             .then(r => r.json())
             .then(data => { if (data?.icon) setClubIcon(data.icon) })
-            .catch(() => { })
-    }, [])
-
-    useEffect(() => {
-        Promise.all([
-            fetch('/data/leagueData.json').then(response => response.json()),
-            fetch('/data/timeoutData.json').then(response => response.json()).catch(() => null),
-        ])
-            .then(([leagueData, timeoutData]) => {
-                setActionItemCount(collectActionItems(leagueData, timeoutData).length)
-            })
             .catch(() => { })
     }, [])
 
@@ -146,7 +135,7 @@ function AppContent() {
                                 <NavLink
                                     key={l.to}
                                     {...l}
-                                    badgeCount={l.to === '/action-items' ? actionItemCount : 0}
+                                    badgeCount={l.to === '/action-items' ? actionItems.length : 0}
                                 />
                             ))}
                             <a
@@ -185,7 +174,7 @@ function AppContent() {
                                 <NavLink
                                     key={l.to}
                                     {...l}
-                                    badgeCount={l.to === '/action-items' ? actionItemCount : 0}
+                                    badgeCount={l.to === '/action-items' ? actionItems.length : 0}
                                     onClick={() => setMenuOpen(false)}
                                 />
                             ))}
@@ -246,7 +235,9 @@ function AppContent() {
 function App() {
     return (
         <Router basename="/">
-            <AppContent />
+            <DashboardDataProvider>
+                <AppContent />
+            </DashboardDataProvider>
         </Router>
     )
 }

@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 import AuditLogModal from '../components/AuditLogModal'
-import { collectActionItems, normalizeMatchId } from '../utils/actionItemUtils'
+import { normalizeMatchId } from '../utils/actionItemUtils'
 import { buildEarlyResignationHistory, getRecentEarlyResignations } from '../utils/earlyResignUtils'
 import { buildTimeoutHistory, getRecentDetectedTimeoutPlayers } from '../utils/timeoutHistoryUtils'
+import { useDashboardData } from '../context/DashboardDataContext'
 
 const UPCOMING_MATCH_LIMIT = 5
 const RECENT_ACTIVITY_LIMIT = 3
@@ -191,8 +192,7 @@ function matchCalendarPath(match) {
 }
 
 function Home() {
-    const [data, setData] = useState(null)
-    const [timeoutData, setTimeoutData] = useState(null)
+    const { leagueData: data, timeoutData, actionItems, loading: dataLoading, error: dataError } = useDashboardData()
     const [timeoutHistoryData, setTimeoutHistoryData] = useState(null)
     const [earlyResignData, setEarlyResignData] = useState(null)
     const [auditLogMatch, setAuditLogMatch] = useState(null)
@@ -201,8 +201,8 @@ function Home() {
     const [draggedDashboardTile, setDraggedDashboardTile] = useState(null)
     const [dragOverDashboardTile, setDragOverDashboardTile] = useState(null)
     const dashboardPointerDrag = useRef(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [supplementalLoading, setSupplementalLoading] = useState(true)
+    const [supplementalError, setSupplementalError] = useState(null)
 
     useEffect(() => {
         try {
@@ -319,28 +319,22 @@ function Home() {
     }
     useEffect(() => {
         Promise.all([
-            fetch('/data/leagueData.json').then(response => {
-                if (!response.ok) throw new Error('Failed to load league data')
-                return response.json()
-            }),
-            fetch('/data/timeoutData.json').then(response => response.json()).catch(() => null),
             fetch('/data/timeout_history.json').then(response => response.json()).catch(() => null),
             fetch('/data/earlyResignations.json').then(response => response.json()).catch(() => null),
         ])
-            .then(([leagueData, timeoutJson, timeoutHistoryJson, earlyResignJson]) => {
-                setData(leagueData)
-                setTimeoutData(timeoutJson)
+            .then(([timeoutHistoryJson, earlyResignJson]) => {
                 setTimeoutHistoryData(timeoutHistoryJson)
                 setEarlyResignData(earlyResignJson)
-                setLoading(false)
+                setSupplementalLoading(false)
             })
             .catch(err => {
-                setError(err.message)
-                setLoading(false)
+                setSupplementalError(err.message)
+                setSupplementalLoading(false)
             })
     }, [])
 
-    const actionItems = useMemo(() => collectActionItems(data, timeoutData), [data, timeoutData])
+    const loading = dataLoading || supplementalLoading
+    const error = dataError || supplementalError
     const pressingActionItems = useMemo(() => {
         const now = Date.now() / 1000
         const nextWeek = now + (7 * 24 * 60 * 60)
@@ -420,23 +414,23 @@ function Home() {
         [data]
     )
 
-    if (loading) {
-        return (
-            <div className="page-container">
-                <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-chess-green mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading league data...</p>
-                </div>
-            </div>
-        )
-    }
-
     if (error) {
         return (
             <div className="page-container">
                 <div className="card bg-red-50 border border-red-200">
                     <h2 className="text-xl font-bold text-red-800 mb-2">Error</h2>
                     <p className="text-red-600">{error}</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (loading) {
+        return (
+            <div className="page-container">
+                <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-chess-green mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading league data...</p>
                 </div>
             </div>
         )

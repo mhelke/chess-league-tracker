@@ -132,6 +132,9 @@ export function buildEarlyResignationHistory(rawData, leagueData) {
                     }))
                     .sort((left, right) => right.matchEarlyResignations - left.matchEarlyResignations
                         || left.username.localeCompare(right.username))
+
+                if (players.length === 0) return
+
                 const activityTime = details.endTime || details.startTime || null
 
                 history.push({

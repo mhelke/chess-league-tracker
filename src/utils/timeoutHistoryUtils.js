@@ -36,6 +36,7 @@ export function buildTimeoutHistory(data) {
 
                 const match = {
                     matchId: round.matchId || round.matchUrl,
+                    matchUrl: round.matchUrl || round.matchId,
                     matchWebUrl: round.matchWebUrl,
                     leagueName,
                     subLeagueName,
@@ -63,6 +64,7 @@ export function buildTimeoutHistory(data) {
                     player.latestActivityTime = Math.max(player.latestActivityTime, activityTime(match))
                     player.matches.push({
                         matchId: match.matchId,
+                        matchUrl: match.matchUrl,
                         matchWebUrl: match.matchWebUrl,
                         leagueName,
                         subLeagueName,
@@ -94,23 +96,74 @@ export function buildTimeoutHistory(data) {
     }
 }
 
-export function getRecentTimeoutPlayers(history, days = 30, now = Date.now() / 1000) {
-    const cutoff = now - (days * 24 * 60 * 60)
+function detectedTime(event) {
+    const value = event?.detectedAt
+    const numericValue = Number(value)
+    if (Number.isFinite(numericValue) && numericValue > 0) {
+        return numericValue > 100000000000 ? numericValue / 1000 : numericValue
+    }
 
-    return history.players
-        .map(player => {
-            const recentMatches = player.matches.filter(match => {
-                const time = activityTime(match)
-                return time >= cutoff && time <= now
-            })
-            return {
-                ...player,
-                matches: recentMatches,
-                totalTimeouts: recentMatches.reduce((sum, match) => sum + match.timeouts, 0),
-            }
+    const parsedValue = Date.parse(value)
+    return Number.isFinite(parsedValue) ? parsedValue / 1000 : 0
+}
+
+/**
+ * Return timeout events detected by tracker fetches within the requested window.
+ * Historical aggregate counts intentionally do not participate because they
+ * predate the ledger and have no trustworthy detection timestamp.
+ */
+export function getRecentDetectedTimeoutPlayers(history, timeoutHistory, days = 30, now = Date.now() / 1000) {
+    const cutoff = now - (days * 24 * 60 * 60)
+    const matchesByPlayer = new Map()
+
+    history.players.forEach(player => {
+        player.matches.forEach(match => {
+            const matchUrl = String(match.matchUrl || match.matchId || '').trim()
+            if (matchUrl) matchesByPlayer.set(`${matchUrl}|${player.username.toLowerCase()}`, { player, match })
         })
-        .filter(player => player.matches.length > 0)
+    })
+
+    const playersByUsername = new Map()
+    ; (timeoutHistory?.events || []).forEach(event => {
+        const occurredAt = detectedTime(event)
+        if (occurredAt < cutoff || occurredAt > now) return
+
+        const matchUrl = String(event?.matchUrl || '').trim()
+        const username = String(event?.username || '').trim().toLowerCase()
+        const source = matchesByPlayer.get(`${matchUrl}|${username}`)
+        if (!source) return
+
+        let player = playersByUsername.get(username)
+        if (!player) {
+            player = {
+                username: source.player.username,
+                totalTimeouts: 0,
+                latestDetectedAt: 0,
+                matchesByUrl: new Map(),
+            }
+            playersByUsername.set(username, player)
+        }
+
+        let match = player.matchesByUrl.get(matchUrl)
+        if (!match) {
+            match = { ...source.match, timeouts: 0, detectedAt: occurredAt }
+            player.matchesByUrl.set(matchUrl, match)
+        }
+        match.timeouts += 1
+        match.detectedAt = Math.max(match.detectedAt, occurredAt)
+        player.totalTimeouts += 1
+        player.latestDetectedAt = Math.max(player.latestDetectedAt, occurredAt)
+    })
+
+    return [...playersByUsername.values()]
+        .map(player => ({
+            username: player.username,
+            totalTimeouts: player.totalTimeouts,
+            latestDetectedAt: player.latestDetectedAt,
+            matches: [...player.matchesByUrl.values()].sort((left, right) => right.detectedAt - left.detectedAt
+                || left.name.localeCompare(right.name)),
+        }))
         .sort((left, right) => right.totalTimeouts - left.totalTimeouts
-            || right.latestActivityTime - left.latestActivityTime
+            || right.latestDetectedAt - left.latestDetectedAt
             || left.username.localeCompare(right.username))
 }

@@ -42,6 +42,7 @@ CLUB_ID: str           = ""
 CLUB_MATCHES_URL: str  = ""
 OUTPUT_FILE: str       = ""
 REG_HISTORY_CACHE_FILE: str = ""
+TIMEOUT_HISTORY_FILE: str = ""
 LEAGUE_CONFIG: list          = []
 VARIANT_PATTERNS: list       = []
 SUBLEAGUE_NORMALIZATION: list = []
@@ -52,7 +53,7 @@ _TITLE_ROUND_CACHE: Dict[str, Optional[str]] = {}
 
 def load_config(site_key: str) -> None:
     """Load per-site and shared config files from `config/` and set globals."""
-    global CLUB_ID, CLUB_MATCHES_URL, OUTPUT_FILE, REG_HISTORY_CACHE_FILE, LEAGUE_CONFIG, VARIANT_PATTERNS, SUBLEAGUE_NORMALIZATION, SUBLEAGUE_RULES, USER_AGENT
+    global CLUB_ID, CLUB_MATCHES_URL, OUTPUT_FILE, REG_HISTORY_CACHE_FILE, TIMEOUT_HISTORY_FILE, LEAGUE_CONFIG, VARIANT_PATTERNS, SUBLEAGUE_NORMALIZATION, SUBLEAGUE_RULES, USER_AGENT
 
     config_dir = os.path.join(PROJECT_ROOT, "config", site_key)
 
@@ -101,6 +102,7 @@ def load_config(site_key: str) -> None:
     # ── Output file
     OUTPUT_FILE = os.path.join(PROJECT_ROOT, "public", "data", site_key, "leagueData.json")
     REG_HISTORY_CACHE_FILE = os.path.join(PROJECT_ROOT, "public", "data", site_key, "registration_history_cache.json")
+    TIMEOUT_HISTORY_FILE = os.path.join(PROJECT_ROOT, "public", "data", site_key, "timeout_history.json")
 
     # ── User agent (env override > script_params.json > default)
     params_path = os.path.join(config_dir, "script_params.json")
@@ -928,6 +930,116 @@ def save_registration_history_cache(cache: Dict) -> None:
             json.dump(cache, f, indent=2, ensure_ascii=False)
     except Exception as e:
         print(f"Warning: Could not save registration history cache: {e}", file=sys.stderr)
+
+
+TIMEOUT_HISTORY_SCHEMA_VERSION = 1
+
+
+def _timeout_count(value: Any) -> int:
+    """Return a non-negative integer timeout count from source data."""
+    try:
+        return max(0, int(value))
+    except (TypeError, ValueError):
+        return 0
+
+
+def collect_timeout_counts(leagues: Dict) -> Dict[str, Dict[str, int]]:
+    """Collect current per-match/player timeout counts from final league data."""
+    counts: Dict[str, Dict[str, int]] = {}
+    for league_data in leagues.values():
+        for subleague_data in league_data.get("subLeagues", {}).values():
+            for round_data in subleague_data.get("rounds", []):
+                if round_data.get("status") not in ("in_progress", "finished"):
+                    continue
+                match_url = str(round_data.get("matchUrl") or round_data.get("matchId") or "").strip()
+                if not match_url:
+                    continue
+                for username, stats in (round_data.get("playerStats") or {}).items():
+                    count = _timeout_count((stats or {}).get("timeouts")) if isinstance(stats, dict) else 0
+                    if count > 0 and str(username).strip():
+                        counts.setdefault(match_url, {})[str(username).casefold()] = count
+    return counts
+
+
+def _load_timeout_history() -> Optional[Dict]:
+    """Load the durable detected-timeout ledger, if a valid one exists."""
+    if not os.path.exists(TIMEOUT_HISTORY_FILE):
+        return None
+    try:
+        with open(TIMEOUT_HISTORY_FILE, "r", encoding="utf-8") as f:
+            history = json.load(f)
+        if (
+            isinstance(history, dict)
+            and history.get("schemaVersion") == TIMEOUT_HISTORY_SCHEMA_VERSION
+            and isinstance(history.get("observedCounts"), dict)
+            and isinstance(history.get("events"), list)
+        ):
+            return history
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"Warning: Could not load timeout history ledger: {exc}", file=sys.stderr)
+    return None
+
+
+def update_timeout_history(leagues: Dict, detected_at: str) -> Dict:
+    """Record timeout count increases without assigning dates to old data.
+
+    The first ledger creation is a baseline: all existing timeout counts are
+    remembered but create no events. Subsequent fetches append one event for
+    every count increase. High-water counts deliberately never decrease so an
+    API correction or temporary stale response cannot duplicate an event.
+    """
+    current_counts = collect_timeout_counts(leagues)
+    history = _load_timeout_history()
+    if history is None:
+        history = {
+            "schemaVersion": TIMEOUT_HISTORY_SCHEMA_VERSION,
+            "lastUpdated": detected_at,
+            "observedCounts": current_counts,
+            "events": [],
+        }
+        return history
+
+    observed_counts = history["observedCounts"]
+    events = history["events"]
+    existing_ids = {
+        event.get("id")
+        for event in events
+        if isinstance(event, dict) and isinstance(event.get("id"), str)
+    }
+
+    for match_url, player_counts in current_counts.items():
+        stored_players = observed_counts.setdefault(match_url, {})
+        if not isinstance(stored_players, dict):
+            stored_players = {}
+            observed_counts[match_url] = stored_players
+        for username, current_count in player_counts.items():
+            previous_count = _timeout_count(stored_players.get(username))
+            for ordinal in range(previous_count + 1, current_count + 1):
+                event_id = f"{match_url}|{username}|{ordinal}"
+                if event_id not in existing_ids:
+                    events.append({
+                        "id": event_id,
+                        "matchUrl": match_url,
+                        "username": username,
+                        "ordinal": ordinal,
+                        "detectedAt": detected_at,
+                    })
+                    existing_ids.add(event_id)
+            if current_count > previous_count:
+                stored_players[username] = current_count
+
+    history["lastUpdated"] = detected_at
+    return history
+
+
+def save_timeout_history(history: Dict) -> None:
+    """Persist the detected-timeout ledger for the next fetch and the UI."""
+    try:
+        os.makedirs(os.path.dirname(TIMEOUT_HISTORY_FILE), exist_ok=True)
+        with open(TIMEOUT_HISTORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(history, f, indent=2, ensure_ascii=False)
+    except OSError as exc:
+        print(f"Warning: Could not save timeout history ledger: {exc}", file=sys.stderr)
 
 
 def _diff_roster(old_ratings: Dict[str, Optional[int]], new_ratings: Dict[str, Optional[int]]):
@@ -2706,6 +2818,8 @@ def main():
         "leagues": leagues_output,
         "globalLeaderboard": global_leaderboard
     }
+
+    timeout_history = update_timeout_history(leagues_output, output["lastUpdated"])
     
     # Ensure output directory exists
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
@@ -2713,6 +2827,8 @@ def main():
     # Write JSON file
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
+
+    save_timeout_history(timeout_history)
 
     # ── Build clubIcons.json ────────────────────────────────────────────────────
     # Collect all unique opponent club IDs referenced across all rounds.

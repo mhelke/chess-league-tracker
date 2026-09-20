@@ -4,7 +4,7 @@ import StatusBadge from '../components/StatusBadge'
 import AuditLogModal from '../components/AuditLogModal'
 import { collectActionItems, normalizeMatchId } from '../utils/actionItemUtils'
 import { buildEarlyResignationHistory, getRecentEarlyResignations } from '../utils/earlyResignUtils'
-import { buildTimeoutHistory, getRecentTimeoutPlayers } from '../utils/timeoutHistoryUtils'
+import { buildTimeoutHistory, getRecentDetectedTimeoutPlayers } from '../utils/timeoutHistoryUtils'
 
 const UPCOMING_MATCH_LIMIT = 5
 const RECENT_ACTIVITY_LIMIT = 3
@@ -185,6 +185,7 @@ function matchCalendarPath(match) {
 function Home() {
     const [data, setData] = useState(null)
     const [timeoutData, setTimeoutData] = useState(null)
+    const [timeoutHistoryData, setTimeoutHistoryData] = useState(null)
     const [earlyResignData, setEarlyResignData] = useState(null)
     const [auditLogMatch, setAuditLogMatch] = useState(null)
     const [dashboardPreferences, setDashboardPreferences] = useState(loadDashboardPreferences)
@@ -315,11 +316,13 @@ function Home() {
                 return response.json()
             }),
             fetch('/data/timeoutData.json').then(response => response.json()).catch(() => null),
+            fetch('/data/timeout_history.json').then(response => response.json()).catch(() => null),
             fetch('/data/earlyResignations.json').then(response => response.json()).catch(() => null),
         ])
-            .then(([leagueData, timeoutJson, earlyResignJson]) => {
+            .then(([leagueData, timeoutJson, timeoutHistoryJson, earlyResignJson]) => {
                 setData(leagueData)
                 setTimeoutData(timeoutJson)
+                setTimeoutHistoryData(timeoutHistoryJson)
                 setEarlyResignData(earlyResignJson)
                 setLoading(false)
             })
@@ -349,8 +352,8 @@ function Home() {
     )
     const timeoutHistory = useMemo(() => buildTimeoutHistory(data), [data])
     const recentTimeoutPlayers = useMemo(
-        () => getRecentTimeoutPlayers(timeoutHistory, 7),
-        [timeoutHistory]
+        () => getRecentDetectedTimeoutPlayers(timeoutHistory, timeoutHistoryData, 7),
+        [timeoutHistory, timeoutHistoryData]
     )
     const recentTimeoutCount = recentTimeoutPlayers.reduce((sum, player) => sum + player.totalTimeouts, 0)
     const leagueEntries = data ? Object.entries(data.leagues || {}) : []
@@ -699,8 +702,8 @@ function Home() {
                         <h3 className="text-2xl font-bold text-gray-900">Recent Timeout History</h3>
                         <p className="mt-1 text-sm text-gray-600">
                             {recentTimeoutPlayers.length > 0
-                                ? `${recentTimeoutCount} timeout${recentTimeoutCount === 1 ? '' : 's'} by ${recentTimeoutPlayers.length} player${recentTimeoutPlayers.length === 1 ? '' : 's'} in the past 7 days`
-                                : 'No players have timed out in the past 7 days'}
+                                ? `${recentTimeoutCount} timeout${recentTimeoutCount === 1 ? '' : 's'} detected for ${recentTimeoutPlayers.length} player${recentTimeoutPlayers.length === 1 ? '' : 's'} in the past 7 days`
+                                : 'No timeouts detected in the past 7 days'}
                         </p>
                     </div>
 

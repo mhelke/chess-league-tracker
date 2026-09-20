@@ -1,4 +1,5 @@
 import sys
+import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 
@@ -8,6 +9,61 @@ import fetch_league_data as fetcher
 
 
 class SubLeagueDetectionTests(unittest.TestCase):
+    def test_timeout_history_baselines_then_records_only_count_increases(self):
+        def leagues(alpha_timeouts, beta_timeouts, second_match_timeouts):
+            return {
+                "League": {"subLeagues": {"Division": {"rounds": [
+                    {
+                        "status": "in_progress",
+                        "matchUrl": "https://api.chess.com/pub/match/alpha",
+                        "playerStats": {
+                            "Player": {"timeouts": alpha_timeouts},
+                            "Beta": {"timeouts": beta_timeouts},
+                        },
+                    },
+                    {
+                        "status": "finished",
+                        "matchUrl": "https://api.chess.com/pub/match/second",
+                        "playerStats": {"Player": {"timeouts": second_match_timeouts}},
+                    },
+                ]}}}
+            }
+
+        original_path = fetcher.TIMEOUT_HISTORY_FILE
+        with tempfile.TemporaryDirectory() as directory:
+            fetcher.TIMEOUT_HISTORY_FILE = f"{directory}/timeout_history.json"
+            try:
+                baseline = fetcher.update_timeout_history(leagues(1, 0, 1), "2026-09-01T00:00:00Z")
+                self.assertEqual(baseline["events"], [])
+                fetcher.save_timeout_history(baseline)
+
+                increased = fetcher.update_timeout_history(leagues(3, 1, 2), "2026-09-02T00:00:00Z")
+                self.assertEqual(
+                    {(event["matchUrl"], event["username"], event["ordinal"]) for event in increased["events"]},
+                    {
+                        ("https://api.chess.com/pub/match/alpha", "player", 2),
+                        ("https://api.chess.com/pub/match/alpha", "player", 3),
+                        ("https://api.chess.com/pub/match/alpha", "beta", 1),
+                        ("https://api.chess.com/pub/match/second", "player", 2),
+                    },
+                )
+                fetcher.save_timeout_history(increased)
+
+                repeated = fetcher.update_timeout_history(leagues(3, 1, 2), "2026-09-03T00:00:00Z")
+                self.assertEqual(len(repeated["events"]), 4)
+                fetcher.save_timeout_history(repeated)
+
+                corrected = fetcher.update_timeout_history(leagues(1, 0, 1), "2026-09-04T00:00:00Z")
+                self.assertEqual(len(corrected["events"]), 4)
+                fetcher.save_timeout_history(corrected)
+
+                increased_again = fetcher.update_timeout_history(leagues(4, 0, 1), "2026-09-05T00:00:00Z")
+                self.assertEqual(len(increased_again["events"]), 5)
+                self.assertEqual(increased_again["events"][-1]["ordinal"], 4)
+                self.assertEqual(increased_again["events"][-1]["detectedAt"], "2026-09-05T00:00:00Z")
+            finally:
+                fetcher.TIMEOUT_HISTORY_FILE = original_path
+
     def test_equivalent_season_spans_share_one_key(self):
         fetcher.load_config("1dpmc")
         keys = {

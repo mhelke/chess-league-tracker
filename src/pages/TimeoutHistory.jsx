@@ -9,16 +9,17 @@ function subLeaguePath(leagueName, subLeagueName) {
     return `/league/${encodeURIComponent(leagueName)}/${encodeURIComponent(subLeagueName)}`
 }
 
-function formatActivityDate(match) {
+function formatMatchActivityDate(match) {
     const timestamp = Number(match.endTime || match.startTime)
-    if (!Number.isFinite(timestamp) || timestamp <= 0) return 'Date unavailable'
+    if (!Number.isFinite(timestamp) || timestamp <= 0) return 'Match date unavailable'
 
-    return new Date(timestamp * 1000).toLocaleDateString(undefined, {
+    const date = new Date(timestamp * 1000).toLocaleDateString(undefined, {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
         year: 'numeric',
     })
+    return match.endTime ? `Match completed ${date}` : `Match started ${date}`
 }
 
 function PaginationControls({ currentPage, totalPages, onPageChange, label }) {
@@ -234,7 +235,7 @@ function TimeoutHistory() {
                                                 <div className="mt-1 truncate text-xs text-gray-500">{match.leagueName} · {match.subLeagueName}</div>
                                                 <div className="mt-2 flex items-center justify-between gap-3 text-xs text-gray-500">
                                                     <span>{match.timeouts} timeout{match.timeouts !== 1 ? 's' : ''}</span>
-                                                    <span>{formatActivityDate(match)}</span>
+                                                    <span>{formatMatchActivityDate(match)}</span>
                                                 </div>
                                             </Link>
                                             ))}

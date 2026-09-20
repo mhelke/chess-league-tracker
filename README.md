@@ -108,9 +108,9 @@ across all sites.
          ▼
 ┌─────────────────┐
 │ public/data/     │  ← Static JSON committed to repo
-│   1dpmc/         │     leagueData.json, timeoutData.json
-│   teamusa/       │     leagueData.json, timeoutData.json
-│   mn/            │     leagueData.json, timeoutData.json
+│   1dpmc/         │     leagueData.json, timeout_history.json, timeoutData.json
+│   teamusa/       │     leagueData.json, timeout_history.json, timeoutData.json
+│   mn/            │     leagueData.json, timeout_history.json, timeoutData.json
 └────────┬────────┘
          │
          ▼
@@ -150,9 +150,11 @@ chess-league-tracker/
 │   └── data/
 │       ├── 1dpmc/
 │       │   ├── leagueData.json      # Generated
+│       │   ├── timeout_history.json # Durable detected-timeout ledger
 │       │   └── timeoutData.json     # Generated
 │       └── teamusa/
 │           ├── leagueData.json      # Generated
+│           ├── timeout_history.json # Durable detected-timeout ledger
 │           └── timeoutData.json     # Generated
 ├── src/
 │   ├── components/
@@ -226,6 +228,10 @@ separate and are recorded in each sub-league's diagnostics.
 - Reads club ID and league patterns from `config/<siteKey>/league_config.json`
 - Reads variant normalization rules from `config/shared/variant_patterns.json`
 - Writes output to `public/data/<siteKey>/leagueData.json`
+- Maintains `public/data/<siteKey>/timeout_history.json`, recording only when
+  a timeout is first detected by a successful fetch. The dashboard uses this
+  detection time for its recent-timeout window; it is not the exact game-end
+  time.
 
 ### 2. Enrich Timeout Data
 

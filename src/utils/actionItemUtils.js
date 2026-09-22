@@ -1,4 +1,4 @@
-import { computeMatchupRatings } from './ratingUtils'
+import { computeMatchupRatings } from './ratingUtils.js'
 
 export const BALANCE_THRESHOLD = 50
 export const DEFAULT_PLAYER_DEFICIT_THRESHOLD = 3

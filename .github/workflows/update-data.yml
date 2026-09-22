@@ -26,6 +26,11 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -40,6 +45,9 @@ jobs:
       - name: Enrich timeout data — 1dpmc
         run: python scripts/enrich_timeouts.py --site-key 1dpmc
 
+      - name: Generate action-item feed — 1dpmc
+        run: node scripts/generate_action_items.mjs --site-key 1dpmc
+
       - name: Detect early resignations — 1dpmc
         run: python scripts/detect_early_resignations.py --site-key 1dpmc --threshold 4
 
@@ -52,6 +60,9 @@ jobs:
       - name: Enrich timeout data — teamusa
         run: python scripts/enrich_timeouts.py --site-key teamusa
 
+      - name: Generate action-item feed — teamusa
+        run: node scripts/generate_action_items.mjs --site-key teamusa
+
       - name: Detect early resignations — teamusa
         run: python scripts/detect_early_resignations.py --site-key teamusa --threshold 4
 
@@ -63,6 +74,9 @@ jobs:
 
       - name: Enrich timeout data — mn
         run: python scripts/enrich_timeouts.py --site-key mn
+
+      - name: Generate action-item feed — mn
+        run: node scripts/generate_action_items.mjs --site-key mn
 
       - name: Detect early resignations — mn
         run: python scripts/detect_early_resignations.py --site-key mn --threshold 4

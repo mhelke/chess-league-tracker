@@ -1,9 +1,9 @@
 name: Update League Data
 
 on:
-  # Run nightly at 2 AM UTC
+  # Run nightly at 11 PM UTC (6 PM CDT / 5 PM CST)
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 23 * * *'
 
   # Allow manual trigger
   workflow_dispatch:

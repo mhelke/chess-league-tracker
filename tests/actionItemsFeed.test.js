@@ -79,10 +79,12 @@ test('feed is an exact compact projection of the shared action-item evaluator', 
         assert.equal(feed.actionItems[0].id, 'teamusa:12345')
         assert.equal(feed.actionItems[0].matchName, evaluated[0].name)
         assert.equal(feed.actionItems[0].startTime, evaluated[0].startTime)
+        assert.equal(feed.actionItems[0].actionItemUrl, 'https://teamusa.chessteamdata.com/action-items?matchId=12345')
         assert.equal(feed.actionItems[0].severity, evaluated[0].warnings.statusLevel)
-        const { highRiskTimeoutPlayers, ...expectedWarnings } = evaluated[0].warnings
+        const { highRiskTimeoutPlayers, recentOpponentAdditions, ...expectedWarnings } = evaluated[0].warnings
         assert.deepEqual(feed.actionItems[0].warnings, expectedWarnings)
         assert.equal('highRiskTimeoutPlayers' in feed.actionItems[0].warnings, false)
+        assert.equal('recentOpponentAdditions' in feed.actionItems[0].warnings, false)
         assert.equal(feed.actionItems[0].warnings.mismatchedBoardCount, 3)
         assert.equal(feed.actionItems[0].warnings.playersWithHighTimeout, 1)
         assert.equal(feed.actionItems[0].warnings.surgeRecruitment, true)

@@ -8,11 +8,17 @@ import { collectActionItems, normalizeMatchId } from '../src/utils/actionItemUti
 
 export const ACTION_ITEMS_SCHEMA_VERSION = 1
 
+const SITE_ORIGINS = Object.freeze({
+    '1dpmc': 'https://1dpmc.chessteamdata.com',
+    teamusa: 'https://teamusa.chessteamdata.com',
+    mn: 'https://mn.chessteamdata.com',
+})
+
 function projectWarningsForFeed(warnings = {}) {
     // The dashboard keeps the complete evaluator output in memory. The public
     // feed needs only the aggregate timeout signal, already supplied by
     // playersWithHighTimeout, rather than a roster-level player list.
-    const { highRiskTimeoutPlayers, ...feedWarnings } = warnings
+    const { highRiskTimeoutPlayers, recentOpponentAdditions, ...feedWarnings } = warnings
     return feedWarnings
 }
 
@@ -27,16 +33,21 @@ function stableItemId(siteKey, match) {
 }
 
 export function projectActionItem(siteKey, match) {
+    const matchId = normalizeMatchId(match.matchId || match.matchUrl) || null
+    const siteOrigin = SITE_ORIGINS[siteKey]
     return {
         id: stableItemId(siteKey, match),
         siteKey,
-        matchId: normalizeMatchId(match.matchId || match.matchUrl) || null,
+        matchId,
         matchName: match.name || null,
         leagueName: match.leagueName,
         subLeagueName: match.subLeagueName,
         startTime: match.startTime ?? null,
         endTime: match.endTime ?? null,
         matchWebUrl: match.matchWebUrl || null,
+        actionItemUrl: matchId && siteOrigin
+            ? `${siteOrigin}/action-items?matchId=${encodeURIComponent(matchId)}`
+            : null,
         severity: match.warnings?.statusLevel || null,
         warnings: projectWarningsForFeed(match.warnings),
     }

@@ -18,8 +18,24 @@ function projectWarningsForFeed(warnings = {}) {
     // The dashboard keeps the complete evaluator output in memory. The public
     // feed needs only the aggregate timeout signal, already supplied by
     // playersWithHighTimeout, rather than a roster-level player list.
-    const { highRiskTimeoutPlayers, recentOpponentAdditions, ...feedWarnings } = warnings
-    return feedWarnings
+    const {
+        highRiskTimeoutPlayers,
+        recentOpponentAdditions,
+        statusLevel,
+        statusReasons,
+        status,
+        ...feedWarnings
+    } = warnings
+    return {
+        ...feedWarnings,
+        status: status
+            ? {
+                level: status.level,
+                label: status.label,
+                reasons: status.reasons,
+            }
+            : null,
+    }
 }
 
 function stableItemId(siteKey, match) {
@@ -48,7 +64,6 @@ export function projectActionItem(siteKey, match) {
         actionItemUrl: matchId && siteOrigin
             ? `${siteOrigin}/action-items?matchId=${encodeURIComponent(matchId)}`
             : null,
-        severity: match.warnings?.statusLevel || null,
         warnings: projectWarningsForFeed(match.warnings),
     }
 }

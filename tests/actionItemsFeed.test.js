@@ -80,11 +80,30 @@ test('feed is an exact compact projection of the shared action-item evaluator', 
         assert.equal(feed.actionItems[0].matchName, evaluated[0].name)
         assert.equal(feed.actionItems[0].startTime, evaluated[0].startTime)
         assert.equal(feed.actionItems[0].actionItemUrl, 'https://teamusa.chessteamdata.com/action-items?matchId=12345')
-        assert.equal(feed.actionItems[0].severity, evaluated[0].warnings.statusLevel)
-        const { highRiskTimeoutPlayers, recentOpponentAdditions, ...expectedWarnings } = evaluated[0].warnings
+        assert.equal('severity' in feed.actionItems[0], false)
+        const {
+            highRiskTimeoutPlayers,
+            recentOpponentAdditions,
+            statusLevel,
+            statusReasons,
+            status,
+            ...expectedWarnings
+        } = evaluated[0].warnings
+        expectedWarnings.status = {
+            level: status.level,
+            label: status.label,
+            reasons: status.reasons,
+        }
         assert.deepEqual(feed.actionItems[0].warnings, expectedWarnings)
         assert.equal('highRiskTimeoutPlayers' in feed.actionItems[0].warnings, false)
         assert.equal('recentOpponentAdditions' in feed.actionItems[0].warnings, false)
+        assert.equal('statusLevel' in feed.actionItems[0].warnings, false)
+        assert.equal('statusReasons' in feed.actionItems[0].warnings, false)
+        assert.deepEqual(feed.actionItems[0].warnings.status, {
+            level: evaluated[0].warnings.status.level,
+            label: evaluated[0].warnings.status.label,
+            reasons: evaluated[0].warnings.status.reasons,
+        })
         assert.equal(feed.actionItems[0].warnings.mismatchedBoardCount, 3)
         assert.equal(feed.actionItems[0].warnings.playersWithHighTimeout, 1)
         assert.equal(feed.actionItems[0].warnings.surgeRecruitment, true)

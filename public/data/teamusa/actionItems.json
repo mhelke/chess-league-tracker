@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "siteKey": "teamusa",
-  "generatedAt": "2026-09-22T02:51:30.572Z",
+  "generatedAt": "2026-09-22T02:55:49.609Z",
   "actionItems": [
     {
       "id": "teamusa:2000776",
@@ -14,7 +14,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/2000776",
       "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=2000776",
-      "severity": "urgent",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -204,
@@ -25,20 +24,6 @@
         "opponentPlayersAdded24h": 14,
         "matchStartsInDays": 4,
         "activeBoardCount": 276,
-        "statusLevel": "urgent",
-        "status": {
-          "level": "urgent",
-          "icon": "🔴",
-          "label": "URGENT: Action Required",
-          "className": "border-red-300 bg-red-50 text-red-900",
-          "reasonClassName": "text-red-800",
-          "reasons": [
-            "Surge compounds a roster or rating deficit"
-          ]
-        },
-        "statusReasons": [
-          "Surge compounds a roster or rating deficit"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": 70,
         "mismatchedBoardCount": 44,
@@ -48,7 +33,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": true,
         "playersWithHighTimeout": 1,
-        "hasTimeoutWarning": true
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "urgent",
+          "label": "URGENT: Action Required",
+          "reasons": [
+            "Surge compounds a roster or rating deficit"
+          ]
+        }
       }
     },
     {
@@ -62,7 +54,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/2001534",
       "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=2001534",
-      "severity": "advisory",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -121,
@@ -73,22 +64,6 @@
         "opponentPlayersAdded24h": 5,
         "matchStartsInDays": 9,
         "activeBoardCount": 127,
-        "statusLevel": "advisory",
-        "status": {
-          "level": "advisory",
-          "icon": "🟡",
-          "label": "ADVISORY: Match Monitoring",
-          "className": "border-amber-300 bg-amber-50 text-amber-900",
-          "reasonClassName": "text-amber-800",
-          "reasons": [
-            "27 boards need monitoring",
-            "High-risk player can be removed safely"
-          ]
-        },
-        "statusReasons": [
-          "27 boards need monitoring",
-          "High-risk player can be removed safely"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": 20,
         "mismatchedBoardCount": 27,
@@ -98,7 +73,15 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": true,
         "playersWithHighTimeout": 7,
-        "hasTimeoutWarning": true
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "27 boards need monitoring",
+            "High-risk player can be removed safely"
+          ]
+        }
       }
     },
     {
@@ -112,7 +95,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/1999734",
       "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=1999734",
-      "severity": "advisory",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -97,
@@ -123,20 +105,6 @@
         "opponentPlayersAdded24h": 2,
         "matchStartsInDays": 10,
         "activeBoardCount": 42,
-        "statusLevel": "advisory",
-        "status": {
-          "level": "advisory",
-          "icon": "🟡",
-          "label": "ADVISORY: Match Monitoring",
-          "className": "border-amber-300 bg-amber-50 text-amber-900",
-          "reasonClassName": "text-amber-800",
-          "reasons": [
-            "High-risk player can be removed safely"
-          ]
-        },
-        "statusReasons": [
-          "High-risk player can be removed safely"
-        ],
         "ratingDisadvantage": false,
         "avgDiff": 103,
         "mismatchedBoardCount": 0,
@@ -146,7 +114,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": true,
         "playersWithHighTimeout": 2,
-        "hasTimeoutWarning": true
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "High-risk player can be removed safely"
+          ]
+        }
       }
     },
     {
@@ -160,7 +135,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/1999738",
       "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=1999738",
-      "severity": "advisory",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -235,
@@ -171,20 +145,6 @@
         "opponentPlayersAdded24h": 0,
         "matchStartsInDays": 10,
         "activeBoardCount": 20,
-        "statusLevel": "advisory",
-        "status": {
-          "level": "advisory",
-          "icon": "🟡",
-          "label": "ADVISORY: Match Monitoring",
-          "className": "border-amber-300 bg-amber-50 text-amber-900",
-          "reasonClassName": "text-amber-800",
-          "reasons": [
-            "High-risk player can be removed safely"
-          ]
-        },
-        "statusReasons": [
-          "High-risk player can be removed safely"
-        ],
         "ratingDisadvantage": false,
         "avgDiff": 706,
         "mismatchedBoardCount": 0,
@@ -194,7 +154,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": true,
         "playersWithHighTimeout": 2,
-        "hasTimeoutWarning": true
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "High-risk player can be removed safely"
+          ]
+        }
       }
     }
   ]

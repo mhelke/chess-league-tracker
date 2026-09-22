@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "siteKey": "1dpmc",
-  "generatedAt": "2026-09-22T02:51:30.155Z",
+  "generatedAt": "2026-09-22T02:55:49.160Z",
   "actionItems": [
     {
       "id": "1dpmc:1998364",
@@ -14,7 +14,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/1998364",
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=1998364",
-      "severity": "urgent",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -1,
@@ -25,20 +24,6 @@
         "opponentPlayersAdded24h": 0,
         "matchStartsInDays": 6,
         "activeBoardCount": 3,
-        "statusLevel": "urgent",
-        "status": {
-          "level": "urgent",
-          "icon": "🔴",
-          "label": "URGENT: Action Required",
-          "className": "border-red-300 bg-red-50 text-red-900",
-          "reasonClassName": "text-red-800",
-          "reasons": [
-            "More than half of boards mismatched"
-          ]
-        },
-        "statusReasons": [
-          "More than half of boards mismatched"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": -85,
         "mismatchedBoardCount": 3,
@@ -48,7 +33,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": false,
         "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "urgent",
+          "label": "URGENT: Action Required",
+          "reasons": [
+            "More than half of boards mismatched"
+          ]
+        }
       }
     },
     {
@@ -62,7 +54,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/1998598",
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=1998598",
-      "severity": "urgent",
       "warnings": {
         "minNotMet": true,
         "needPlayers": 1,
@@ -73,22 +64,6 @@
         "opponentPlayersAdded24h": 0,
         "matchStartsInDays": 6,
         "activeBoardCount": 1,
-        "statusLevel": "urgent",
-        "status": {
-          "level": "urgent",
-          "icon": "🔴",
-          "label": "URGENT: Action Required",
-          "className": "border-red-300 bg-red-50 text-red-900",
-          "reasonClassName": "text-red-800",
-          "reasons": [
-            "Minimum roster unmet",
-            "More than half of boards mismatched"
-          ]
-        },
-        "statusReasons": [
-          "Minimum roster unmet",
-          "More than half of boards mismatched"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": -136,
         "mismatchedBoardCount": 1,
@@ -98,7 +73,15 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": false,
         "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "urgent",
+          "label": "URGENT: Action Required",
+          "reasons": [
+            "Minimum roster unmet",
+            "More than half of boards mismatched"
+          ]
+        }
       }
     },
     {
@@ -112,7 +95,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/1998378",
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=1998378",
-      "severity": "advisory",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -16,
@@ -123,20 +105,6 @@
         "opponentPlayersAdded24h": 0,
         "matchStartsInDays": 6,
         "activeBoardCount": 8,
-        "statusLevel": "advisory",
-        "status": {
-          "level": "advisory",
-          "icon": "🟡",
-          "label": "ADVISORY: Match Monitoring",
-          "className": "border-amber-300 bg-amber-50 text-amber-900",
-          "reasonClassName": "text-amber-800",
-          "reasons": [
-            "1 board need monitoring"
-          ]
-        },
-        "statusReasons": [
-          "1 board need monitoring"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": 84,
         "mismatchedBoardCount": 1,
@@ -146,7 +114,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": false,
         "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "1 board need monitoring"
+          ]
+        }
       }
     },
     {
@@ -160,7 +135,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/1999240",
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=1999240",
-      "severity": "advisory",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -11,
@@ -171,20 +145,6 @@
         "opponentPlayersAdded24h": 0,
         "matchStartsInDays": 6,
         "activeBoardCount": 8,
-        "statusLevel": "advisory",
-        "status": {
-          "level": "advisory",
-          "icon": "🟡",
-          "label": "ADVISORY: Match Monitoring",
-          "className": "border-amber-300 bg-amber-50 text-amber-900",
-          "reasonClassName": "text-amber-800",
-          "reasons": [
-            "1 board need monitoring"
-          ]
-        },
-        "statusReasons": [
-          "1 board need monitoring"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": 190,
         "mismatchedBoardCount": 1,
@@ -194,7 +154,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": false,
         "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "1 board need monitoring"
+          ]
+        }
       }
     },
     {
@@ -208,7 +175,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/1998504",
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=1998504",
-      "severity": "urgent",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -12,
@@ -219,20 +185,6 @@
         "opponentPlayersAdded24h": 0,
         "matchStartsInDays": 6,
         "activeBoardCount": 8,
-        "statusLevel": "urgent",
-        "status": {
-          "level": "urgent",
-          "icon": "🔴",
-          "label": "URGENT: Action Required",
-          "className": "border-red-300 bg-red-50 text-red-900",
-          "reasonClassName": "text-red-800",
-          "reasons": [
-            "More than half of boards mismatched"
-          ]
-        },
-        "statusReasons": [
-          "More than half of boards mismatched"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": -235,
         "mismatchedBoardCount": 8,
@@ -242,7 +194,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": false,
         "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "urgent",
+          "label": "URGENT: Action Required",
+          "reasons": [
+            "More than half of boards mismatched"
+          ]
+        }
       }
     },
     {
@@ -256,7 +215,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/2002470",
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=2002470",
-      "severity": "urgent",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -16,
@@ -267,20 +225,6 @@
         "opponentPlayersAdded24h": 1,
         "matchStartsInDays": 11,
         "activeBoardCount": 4,
-        "statusLevel": "urgent",
-        "status": {
-          "level": "urgent",
-          "icon": "🔴",
-          "label": "URGENT: Action Required",
-          "className": "border-red-300 bg-red-50 text-red-900",
-          "reasonClassName": "text-red-800",
-          "reasons": [
-            "More than half of boards mismatched"
-          ]
-        },
-        "statusReasons": [
-          "More than half of boards mismatched"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": -112,
         "mismatchedBoardCount": 3,
@@ -290,7 +234,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": false,
         "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "urgent",
+          "label": "URGENT: Action Required",
+          "reasons": [
+            "More than half of boards mismatched"
+          ]
+        }
       }
     },
     {
@@ -304,7 +255,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/2002236",
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=2002236",
-      "severity": "advisory",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -11,
@@ -315,20 +265,6 @@
         "opponentPlayersAdded24h": 0,
         "matchStartsInDays": 11,
         "activeBoardCount": 10,
-        "statusLevel": "advisory",
-        "status": {
-          "level": "advisory",
-          "icon": "🟡",
-          "label": "ADVISORY: Match Monitoring",
-          "className": "border-amber-300 bg-amber-50 text-amber-900",
-          "reasonClassName": "text-amber-800",
-          "reasons": [
-            "5 boards need monitoring"
-          ]
-        },
-        "statusReasons": [
-          "5 boards need monitoring"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": -26,
         "mismatchedBoardCount": 5,
@@ -338,7 +274,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": false,
         "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "5 boards need monitoring"
+          ]
+        }
       }
     },
     {
@@ -352,7 +295,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/2002626",
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=2002626",
-      "severity": "urgent",
       "warnings": {
         "minNotMet": true,
         "needPlayers": 3,
@@ -363,20 +305,6 @@
         "opponentPlayersAdded24h": 0,
         "matchStartsInDays": 13,
         "activeBoardCount": 14,
-        "statusLevel": "urgent",
-        "status": {
-          "level": "urgent",
-          "icon": "🔴",
-          "label": "URGENT: Action Required",
-          "className": "border-red-300 bg-red-50 text-red-900",
-          "reasonClassName": "text-red-800",
-          "reasons": [
-            "Minimum roster unmet"
-          ]
-        },
-        "statusReasons": [
-          "Minimum roster unmet"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": 285,
         "mismatchedBoardCount": 1,
@@ -386,7 +314,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": false,
         "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "urgent",
+          "label": "URGENT: Action Required",
+          "reasons": [
+            "Minimum roster unmet"
+          ]
+        }
       }
     },
     {
@@ -400,7 +335,6 @@
       "endTime": null,
       "matchWebUrl": "https://www.chess.com/club/matches/2001042",
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=2001042",
-      "severity": "advisory",
       "warnings": {
         "minNotMet": false,
         "needPlayers": -6,
@@ -411,20 +345,6 @@
         "opponentPlayersAdded24h": 1,
         "matchStartsInDays": 13,
         "activeBoardCount": 10,
-        "statusLevel": "advisory",
-        "status": {
-          "level": "advisory",
-          "icon": "🟡",
-          "label": "ADVISORY: Match Monitoring",
-          "className": "border-amber-300 bg-amber-50 text-amber-900",
-          "reasonClassName": "text-amber-800",
-          "reasons": [
-            "4 boards need monitoring"
-          ]
-        },
-        "statusReasons": [
-          "4 boards need monitoring"
-        ],
         "ratingDisadvantage": true,
         "avgDiff": -26,
         "mismatchedBoardCount": 4,
@@ -434,7 +354,14 @@
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": false,
         "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "4 boards need monitoring"
+          ]
+        }
       }
     }
   ]

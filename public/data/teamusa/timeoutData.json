@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T23:16:23Z",
+  "generatedAt": "2026-09-28T23:17:35Z",
   "riskThresholdPercent": 25.0,
   "riskConfig": {
     "highTimeoutPct": 50.0,
@@ -48,6 +48,34 @@
       "memberServiceTimeoutPercent": 0.0,
       "dailyRating": 1633,
       "rating960": 1540,
+      "totalLeagueTimeouts90Days": 0,
+      "subLeagueTimeouts": {},
+      "dailyTimeouts": {
+        "1day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "2day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "3day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        }
+      },
+      "riskFlag": false,
+      "riskLevel": null,
+      "riskReason": null
+    },
+    "55gra23": {
+      "timeoutPercent": 0.0,
+      "standardTimeoutPercent": 0.0,
+      "chess960TimeoutPercent": 0.0,
+      "timeoutPercentSource": "match-chess960+member-service-fallback",
+      "memberServiceTimeoutPercent": 0.0,
+      "dailyRating": 1373,
+      "rating960": 1209,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -906,8 +934,8 @@
       "riskReason": null
     },
     "bachiconicid": {
-      "timeoutPercent": 7.0,
-      "standardTimeoutPercent": 7.0,
+      "timeoutPercent": 8.0,
+      "standardTimeoutPercent": 8.0,
       "chess960TimeoutPercent": 0.0,
       "timeoutPercentSource": "match-standard-and-chess960",
       "memberServiceTimeoutPercent": 7.0,
@@ -1810,8 +1838,8 @@
       "riskReason": null
     },
     "christopher22869": {
-      "timeoutPercent": 9.0,
-      "standardTimeoutPercent": 9.0,
+      "timeoutPercent": 10.0,
+      "standardTimeoutPercent": 10.0,
       "chess960TimeoutPercent": 0.0,
       "timeoutPercentSource": "match-standard-and-chess960",
       "memberServiceTimeoutPercent": 9.0,
@@ -1927,8 +1955,8 @@
       "riskReason": null
     },
     "clarkbart": {
-      "timeoutPercent": 6.0,
-      "standardTimeoutPercent": 6.0,
+      "timeoutPercent": 7.0,
+      "standardTimeoutPercent": 7.0,
       "chess960TimeoutPercent": null,
       "timeoutPercentSource": "match-standard",
       "memberServiceTimeoutPercent": 6.0,
@@ -2899,8 +2927,8 @@
       "riskReason": null
     },
     "egressor": {
-      "timeoutPercent": 37.0,
-      "standardTimeoutPercent": 37.0,
+      "timeoutPercent": 36.0,
+      "standardTimeoutPercent": 36.0,
       "chess960TimeoutPercent": null,
       "timeoutPercentSource": "match-standard",
       "memberServiceTimeoutPercent": 38.0,
@@ -2928,7 +2956,7 @@
       },
       "riskFlag": true,
       "riskLevel": "MEDIUM",
-      "riskReason": "Medium risk: timeout ratio 37%, 2 sub-league timeout(s), 2 recent daily timeout(s)."
+      "riskReason": "Medium risk: timeout ratio 36%, 2 sub-league timeout(s), 2 recent daily timeout(s)."
     },
     "ehesfarkas": {
       "timeoutPercent": 0.0,
@@ -3154,6 +3182,34 @@
       "riskLevel": null,
       "riskReason": null
     },
+    "fibo7679": {
+      "timeoutPercent": 0.0,
+      "standardTimeoutPercent": 0.0,
+      "chess960TimeoutPercent": 0.0,
+      "timeoutPercentSource": "match-standard-and-chess960",
+      "memberServiceTimeoutPercent": 0.0,
+      "dailyRating": 1434,
+      "rating960": 1304,
+      "totalLeagueTimeouts90Days": 0,
+      "subLeagueTimeouts": {},
+      "dailyTimeouts": {
+        "1day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "2day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "3day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        }
+      },
+      "riskFlag": false,
+      "riskLevel": null,
+      "riskReason": null
+    },
     "finiteshine-hejocoding": {
       "timeoutPercent": 0.0,
       "standardTimeoutPercent": 0.0,
@@ -3351,8 +3407,8 @@
       "riskReason": null
     },
     "galflam": {
-      "timeoutPercent": 14.0,
-      "standardTimeoutPercent": 14.0,
+      "timeoutPercent": 15.0,
+      "standardTimeoutPercent": 15.0,
       "chess960TimeoutPercent": 0.0,
       "timeoutPercentSource": "match-standard-and-chess960",
       "memberServiceTimeoutPercent": 14.0,
@@ -3407,8 +3463,8 @@
       "riskReason": null
     },
     "gescott01": {
-      "timeoutPercent": 21.0,
-      "standardTimeoutPercent": 21.0,
+      "timeoutPercent": 22.0,
+      "standardTimeoutPercent": 22.0,
       "chess960TimeoutPercent": 0.0,
       "timeoutPercentSource": "match-standard-and-chess960",
       "memberServiceTimeoutPercent": 21.0,
@@ -3435,9 +3491,9 @@
       "riskReason": null
     },
     "getquaked": {
-      "timeoutPercent": 15.0,
+      "timeoutPercent": 8.0,
       "standardTimeoutPercent": 7.0,
-      "chess960TimeoutPercent": 15.0,
+      "chess960TimeoutPercent": 8.0,
       "timeoutPercentSource": "match-chess960+member-service-fallback",
       "memberServiceTimeoutPercent": 7.0,
       "dailyRating": 1338,
@@ -3888,8 +3944,8 @@
       "riskReason": null
     },
     "immortui_arrhabonem": {
-      "timeoutPercent": 12.0,
-      "standardTimeoutPercent": 12.0,
+      "timeoutPercent": 11.0,
+      "standardTimeoutPercent": 11.0,
       "chess960TimeoutPercent": 0.0,
       "timeoutPercentSource": "match-standard-and-chess960",
       "memberServiceTimeoutPercent": 12.0,
@@ -4194,6 +4250,38 @@
       "riskFlag": false,
       "riskLevel": null,
       "riskReason": null
+    },
+    "jaxon1718": {
+      "timeoutPercent": 100.0,
+      "standardTimeoutPercent": 100.0,
+      "chess960TimeoutPercent": 0.0,
+      "timeoutPercentSource": "match-chess960+member-service-fallback",
+      "memberServiceTimeoutPercent": 100.0,
+      "dailyRating": 1249,
+      "rating960": 1268,
+      "totalLeagueTimeouts90Days": 3,
+      "subLeagueTimeouts": {
+        "WL": {
+          "2026": 4
+        }
+      },
+      "dailyTimeouts": {
+        "1day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "2day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "3day": {
+          "count": 4,
+          "lastTimeoutDate": "2026-09-23"
+        }
+      },
+      "riskFlag": true,
+      "riskLevel": "HIGH",
+      "riskReason": "High risk: timeout ratio 100%, 4 sub-league timeouts."
     },
     "jcohen42": {
       "timeoutPercent": 0.0,
@@ -4939,6 +5027,34 @@
       "memberServiceTimeoutPercent": 0.0,
       "dailyRating": 1075,
       "rating960": 1224,
+      "totalLeagueTimeouts90Days": 0,
+      "subLeagueTimeouts": {},
+      "dailyTimeouts": {
+        "1day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "2day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "3day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        }
+      },
+      "riskFlag": false,
+      "riskLevel": null,
+      "riskReason": null
+    },
+    "kingbanana11": {
+      "timeoutPercent": 0.0,
+      "standardTimeoutPercent": 0.0,
+      "chess960TimeoutPercent": null,
+      "timeoutPercentSource": "match-standard",
+      "memberServiceTimeoutPercent": null,
+      "dailyRating": null,
+      "rating960": null,
       "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {},
       "dailyTimeouts": {
@@ -5804,9 +5920,9 @@
       "riskReason": null
     },
     "luxemvia": {
-      "timeoutPercent": 11.0,
+      "timeoutPercent": 14.0,
       "standardTimeoutPercent": 0.0,
-      "chess960TimeoutPercent": 11.0,
+      "chess960TimeoutPercent": 14.0,
       "timeoutPercentSource": "match-chess960+member-service-fallback",
       "memberServiceTimeoutPercent": 0.0,
       "dailyRating": 1304,
@@ -6618,8 +6734,8 @@
     "natebunnyfield": {
       "timeoutPercent": 0.0,
       "standardTimeoutPercent": 0.0,
-      "chess960TimeoutPercent": null,
-      "timeoutPercentSource": "match-standard",
+      "chess960TimeoutPercent": 0.0,
+      "timeoutPercentSource": "match-standard-and-chess960",
       "memberServiceTimeoutPercent": 0.0,
       "dailyRating": 1211,
       "rating960": 946,
@@ -7073,14 +7189,14 @@
       "riskReason": null
     },
     "papillian": {
-      "timeoutPercent": 80.0,
+      "timeoutPercent": 82.0,
       "standardTimeoutPercent": 58.0,
-      "chess960TimeoutPercent": 80.0,
+      "chess960TimeoutPercent": 82.0,
       "timeoutPercentSource": "match-chess960+member-service-fallback",
       "memberServiceTimeoutPercent": 58.0,
       "dailyRating": 1721,
       "rating960": 1782,
-      "totalLeagueTimeouts90Days": 4,
+      "totalLeagueTimeouts90Days": 2,
       "subLeagueTimeouts": {
         "WL": {
           "2026": 2,
@@ -7103,7 +7219,7 @@
       },
       "riskFlag": true,
       "riskLevel": "HIGH",
-      "riskReason": "High risk: timeout ratio 80%, 62 recent daily timeouts, 6 sub-league timeouts."
+      "riskReason": "High risk: timeout ratio 82%, 62 recent daily timeouts, 6 sub-league timeouts."
     },
     "patwright73": {
       "timeoutPercent": 0.0,
@@ -7134,8 +7250,8 @@
       "riskReason": null
     },
     "patzer165": {
-      "timeoutPercent": 23.0,
-      "standardTimeoutPercent": 23.0,
+      "timeoutPercent": 21.0,
+      "standardTimeoutPercent": 21.0,
       "chess960TimeoutPercent": null,
       "timeoutPercentSource": "match-standard",
       "memberServiceTimeoutPercent": 23.0,
@@ -7620,7 +7736,7 @@
     },
     "praisethegoodlordjesus": {
       "timeoutPercent": 30.0,
-      "standardTimeoutPercent": 14.0,
+      "standardTimeoutPercent": 15.0,
       "chess960TimeoutPercent": 30.0,
       "timeoutPercentSource": "match-standard-and-chess960",
       "memberServiceTimeoutPercent": 15.0,
@@ -8106,6 +8222,34 @@
       "riskLevel": null,
       "riskReason": null
     },
+    "rooketamine": {
+      "timeoutPercent": 0.0,
+      "standardTimeoutPercent": 0.0,
+      "chess960TimeoutPercent": null,
+      "timeoutPercentSource": "match-standard",
+      "memberServiceTimeoutPercent": null,
+      "dailyRating": null,
+      "rating960": null,
+      "totalLeagueTimeouts90Days": 0,
+      "subLeagueTimeouts": {},
+      "dailyTimeouts": {
+        "1day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "2day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "3day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        }
+      },
+      "riskFlag": false,
+      "riskLevel": null,
+      "riskReason": null
+    },
     "rostislow": {
       "timeoutPercent": 0.0,
       "standardTimeoutPercent": 0.0,
@@ -8302,6 +8446,38 @@
       "riskLevel": null,
       "riskReason": null
     },
+    "samcasm": {
+      "timeoutPercent": 43.0,
+      "standardTimeoutPercent": 43.0,
+      "chess960TimeoutPercent": 0.0,
+      "timeoutPercentSource": "match-standard-and-chess960",
+      "memberServiceTimeoutPercent": 44.0,
+      "dailyRating": 897,
+      "rating960": 953,
+      "totalLeagueTimeouts90Days": 2,
+      "subLeagueTimeouts": {
+        "1WL": {
+          "2026 U1200 16+": 5
+        }
+      },
+      "dailyTimeouts": {
+        "1day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "2day": {
+          "count": 0,
+          "lastTimeoutDate": null
+        },
+        "3day": {
+          "count": 10,
+          "lastTimeoutDate": "2026-09-26"
+        }
+      },
+      "riskFlag": true,
+      "riskLevel": "HIGH",
+      "riskReason": "High risk: 10 recent daily timeouts, 5 sub-league timeouts."
+    },
     "samsimaan": {
       "timeoutPercent": 0.0,
       "standardTimeoutPercent": 0.0,
@@ -8394,7 +8570,7 @@
       "memberServiceTimeoutPercent": 50.0,
       "dailyRating": 1246,
       "rating960": 1100,
-      "totalLeagueTimeouts90Days": 1,
+      "totalLeagueTimeouts90Days": 0,
       "subLeagueTimeouts": {
         "WL": {
           "Chess960 2026": 1
@@ -8561,7 +8737,7 @@
     "sekaj1778": {
       "timeoutPercent": 25.0,
       "standardTimeoutPercent": 25.0,
-      "chess960TimeoutPercent": 16.0,
+      "chess960TimeoutPercent": 15.0,
       "timeoutPercentSource": "match-standard-and-chess960",
       "memberServiceTimeoutPercent": 25.0,
       "dailyRating": 1423,
@@ -8676,7 +8852,7 @@
     },
     "shoebodh": {
       "timeoutPercent": 33.0,
-      "standardTimeoutPercent": 14.0,
+      "standardTimeoutPercent": 13.0,
       "chess960TimeoutPercent": 33.0,
       "timeoutPercentSource": "match-standard-and-chess960",
       "memberServiceTimeoutPercent": 15.0,

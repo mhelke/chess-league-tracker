@@ -1,15 +1,37 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { buildTimeoutHistory } from '../utils/timeoutHistoryUtils'
+import { buildTimeoutHistory, filterTimeoutHistory } from '../utils/timeoutHistoryUtils'
 
 const PLAYERS_PER_PAGE = 20
 const MATCHES_PER_PLAYER_PAGE = 5
+const DATE_RANGE_OPTIONS = [
+    { value: '7', label: '7 days' },
+    { value: '14', label: '14 days' },
+    { value: '30', label: '30 days' },
+    { value: '90', label: '90 days' },
+    { value: '365', label: '1 year' },
+    { value: 'all', label: 'All' },
+]
 
-function subLeaguePath(leagueName, subLeagueName) {
-    return `/league/${encodeURIComponent(leagueName)}/${encodeURIComponent(subLeagueName)}`
+function chessMatchWebUrl(match) {
+    if (match.matchWebUrl) return match.matchWebUrl
+
+    const idMatch = String(match.matchId || match.matchUrl || '').match(/(?:\/match\/)?(\d+)\/?$/)
+    return idMatch ? `https://www.chess.com/club/matches/${idMatch[1]}` : null
 }
 
 function formatMatchActivityDate(match) {
+    const recordedTimestamp = Number(match.detectedAt)
+    if (Number.isFinite(recordedTimestamp) && recordedTimestamp > 0) {
+        const date = new Date(recordedTimestamp * 1000).toLocaleDateString(undefined, {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        })
+        return `Timeout recorded ${date}`
+    }
+
     const timestamp = Number(match.endTime || match.startTime)
     if (!Number.isFinite(timestamp) || timestamp <= 0) return 'Match date unavailable'
 
@@ -57,23 +79,30 @@ function PaginationControls({ currentPage, totalPages, onPageChange, label }) {
 
 function TimeoutHistory() {
     const [data, setData] = useState(null)
+    const [timeoutHistoryData, setTimeoutHistoryData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [expandedPlayers, setExpandedPlayers] = useState({})
     const [expandedPlayerPages, setExpandedPlayerPages] = useState({})
     const [currentPage, setCurrentPage] = useState(1)
     const [highlightedPlayer, setHighlightedPlayer] = useState(null)
+    const [dateRange, setDateRange] = useState('90')
     const [searchParams] = useSearchParams()
     const targetUsername = (searchParams.get('player') || '').trim().toLowerCase()
 
     useEffect(() => {
-        fetch('/data/leagueData.json')
-            .then(response => {
+        Promise.all([
+            fetch('/data/leagueData.json').then(response => {
                 if (!response.ok) throw new Error('Failed to load league data')
                 return response.json()
-            })
-            .then(leagueData => {
+            }),
+            fetch('/data/timeout_history.json')
+                .then(response => response.ok ? response.json() : null)
+                .catch(() => null),
+        ])
+            .then(([leagueData, timeoutHistoryJson]) => {
                 setData(leagueData)
+                setTimeoutHistoryData(timeoutHistoryJson)
                 setLoading(false)
             })
             .catch(err => {
@@ -82,7 +111,10 @@ function TimeoutHistory() {
             })
     }, [])
 
-    const history = useMemo(() => buildTimeoutHistory(data), [data])
+    const history = useMemo(() => {
+        const fullHistory = buildTimeoutHistory(data)
+        return filterTimeoutHistory(fullHistory, timeoutHistoryData, dateRange)
+    }, [data, dateRange, timeoutHistoryData])
     const totalPages = Math.max(1, Math.ceil(history.players.length / PLAYERS_PER_PAGE))
     const page = Math.min(currentPage, totalPages)
     const pageStart = (page - 1) * PLAYERS_PER_PAGE
@@ -95,6 +127,13 @@ function TimeoutHistory() {
     useEffect(() => {
         setCurrentPage(current => Math.min(current, totalPages))
     }, [totalPages])
+
+    useEffect(() => {
+        setCurrentPage(1)
+        setExpandedPlayers({})
+        setExpandedPlayerPages({})
+        setHighlightedPlayer(null)
+    }, [dateRange])
 
     useEffect(() => {
         if (!targetUsername || targetPlayerIndex < 0 || targetPage === null) return undefined
@@ -175,6 +214,21 @@ function TimeoutHistory() {
                 <p className="text-gray-600">
                     Review recorded timeouts by player and the matches where they occurred.
                 </p>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <label htmlFor="timeout-date-range" className="text-sm font-medium text-gray-700">
+                        Date range
+                    </label>
+                    <select
+                        id="timeout-date-range"
+                        value={dateRange}
+                        onChange={event => setDateRange(event.target.value)}
+                        className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-chess-green focus:outline-none focus:ring-1 focus:ring-chess-green"
+                    >
+                        {DATE_RANGE_OPTIONS.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
+                </div>
                 <p className="mt-2 text-sm text-gray-500">
                     {history.totalTimeouts} timeout{history.totalTimeouts !== 1 ? 's' : ''} across {history.matches.length} match{history.matches.length !== 1 ? 'es' : ''} · {history.players.length} player{history.players.length !== 1 ? 's' : ''}
                 </p>
@@ -182,7 +236,7 @@ function TimeoutHistory() {
 
             {history.players.length === 0 ? (
                 <div className="card border border-gray-200 bg-gray-50 text-center text-gray-600">
-                    No timeouts have been recorded in in-progress or finished matches.
+                    No timeouts have been recorded in the selected date range.
                 </div>
             ) : (
                 <div className="card divide-y divide-gray-200 p-0">
@@ -226,9 +280,11 @@ function TimeoutHistory() {
                                     <div className="mt-4 border-t border-gray-100 pt-4">
                                         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                                         {pageMatches.map(match => (
-                                            <Link
+                                            <a
                                                 key={`${match.matchId}-${match.subLeagueName}`}
-                                                to={subLeaguePath(match.leagueName, match.subLeagueName)}
+                                                href={chessMatchWebUrl(match) || '#'}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
                                                 className="rounded-lg border border-gray-200 bg-gray-50 p-3 transition-colors hover:border-chess-green hover:bg-green-50"
                                             >
                                                 <div className="truncate text-sm font-medium text-gray-900">{match.name}</div>
@@ -237,7 +293,7 @@ function TimeoutHistory() {
                                                     <span>{match.timeouts} timeout{match.timeouts !== 1 ? 's' : ''}</span>
                                                     <span>{formatMatchActivityDate(match)}</span>
                                                 </div>
-                                            </Link>
+                                            </a>
                                             ))}
                                         </div>
                                         <div className="mt-3">

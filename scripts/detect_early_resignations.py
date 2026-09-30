@@ -103,6 +103,54 @@ def find_player_played_entries(obj: Any) -> Iterable[Tuple[str, Dict]]:
             yield from find_player_played_entries(item)
 
 
+def timestamp_to_iso(value: Any) -> str | None:
+    """Normalize a Unix timestamp or ISO timestamp to UTC ISO-8601."""
+    try:
+        numeric = float(value)
+        if numeric > 0:
+            return datetime.fromtimestamp(numeric, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+    except (TypeError, ValueError, OverflowError, OSError):
+        pass
+
+    if value:
+        try:
+            parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        except ValueError:
+            pass
+    return None
+
+
+def backfill_detected_at(results: Dict, league_data: Dict) -> None:
+    """Backfill legacy early-resignation entries from match dates.
+
+    The start date is preferred because it is the requested historical
+    fallback; the end date is used only when no start date exists.
+    """
+    match_dates = {}
+    for league_value in (league_data.get("leagues", {}) or {}).values():
+        for subleague_value in (league_value.get("subLeagues", {}) or {}).values():
+            for match in subleague_value.get("rounds", []) or []:
+                match_url = match.get("matchUrl") or match.get("matchId")
+                if not match_url:
+                    continue
+                match_dates[match_url] = timestamp_to_iso(
+                    match.get("startTime") or match.get("endTime")
+                )
+
+    for league_value in (results.get("leagues", {}) or {}).values():
+        for subleague_value in (league_value.get("subLeagues", {}) or {}).values():
+            for match in subleague_value.get("matches", []) or []:
+                fallback = match_dates.get(match.get("matchUrl"))
+                if not fallback:
+                    continue
+                for player in match.get("players", []) or []:
+                    if not player.get("detectedAt"):
+                        player["detectedAt"] = fallback
+
+
 def insert_result(results: Dict, league: str, subleague: str, match_key: str, match_info: Dict, entry: Dict) -> None:
     leagues = results.setdefault("leagues", {})
     league_map = leagues.setdefault(league, {})
@@ -138,6 +186,7 @@ def main() -> None:
     ap.add_argument("--timeout", type=int, default=DEFAULT_HTTP_TIMEOUT, help="HTTP timeout seconds per request")
     ap.add_argument("--retries", type=int, default=DEFAULT_HTTP_RETRIES, help="HTTP retries per request")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG","INFO","WARNING","ERROR","CRITICAL"], help="Logging level")
+    ap.add_argument("--backfill-only", action="store_true", help="Add legacy detectedAt values without fetching board data")
     args = ap.parse_args()
 
     site = args.site_key
@@ -171,6 +220,19 @@ def main() -> None:
 
     with open(league_path, "r", encoding="utf-8") as f:
         league_data = json.load(f)
+
+    if args.backfill_only:
+        if not os.path.exists(out_path):
+            logging.info("No early resignation results to backfill for site %s", site)
+            return
+        with open(out_path, "r", encoding="utf-8") as f:
+            existing_results = json.load(f)
+        backfill_detected_at(existing_results, league_data)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(existing_results, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        logging.info("Backfilled early resignation detectedAt values for site %s", site)
+        return
 
     cache: Dict = {}
     if os.path.exists(cache_path):
@@ -342,7 +404,8 @@ def main() -> None:
     if not candidates_by_board:
         logging.info("No unchecked players with board URLs found in finished matches.")
 
-    results: Dict = {"lastUpdated": datetime.now(timezone.utc).isoformat(), "leagues": {}}
+    detected_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    results: Dict = {"lastUpdated": detected_at, "leagues": {}}
 
     # Result codes that mean a game is permanently over
     DEFINITIVE_RESULTS = {
@@ -426,6 +489,7 @@ def main() -> None:
                             "moves_ply": moves,
                             "game_api": game_api_link,
                             "board_api": board_url,
+                            "detectedAt": detected_at,
                         }
                         league_name = match_info.get("league") or "unknown"
                         subleague_name = match_info.get("subLeague") or "unknown"
@@ -478,6 +542,8 @@ def main() -> None:
             existing = {"leagues": {}, "lastUpdated": None}
     except Exception:
         existing = {"leagues": {}, "lastUpdated": None}
+
+    backfill_detected_at(existing, league_data)
 
     # Merge leagues by appending matches/players when new
     for league_key, league_val in results.get("leagues", {}).items():

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { buildTimeoutHistory, getRecentDetectedTimeoutPlayers } from '../src/utils/timeoutHistoryUtils.js'
+import { buildTimeoutHistory, filterTimeoutHistory, getRecentDetectedTimeoutPlayers } from '../src/utils/timeoutHistoryUtils.js'
 
 const NOW = 2_000_000
 const DAY = 24 * 60 * 60
@@ -67,4 +67,21 @@ test('recent timeout players use only resolved ledger events inside the detectio
 test('aggregate history without a ledger never creates a recent timeout result', () => {
     const history = buildTimeoutHistory(leagueData())
     assert.deepEqual(getRecentDetectedTimeoutPlayers(history, null, 7, NOW), [])
+})
+
+test('timeout history filters matches and player totals by rolling date range', () => {
+    const history = buildTimeoutHistory(leagueData())
+    const timeoutHistory = {
+        events: [
+            { matchUrl: 'https://api.chess.com/pub/match/one', username: 'alice', ordinal: 1, detectedAt: new Date((NOW - DAY) * 1000).toISOString() },
+            { matchUrl: 'https://api.chess.com/pub/match/two', username: 'alice', ordinal: 1, detectedAt: new Date((NOW - (30 * DAY)) * 1000).toISOString() },
+        ],
+    }
+    const filtered = filterTimeoutHistory(history, timeoutHistory, 7, NOW)
+
+    assert.deepEqual(filtered.matches.map(match => match.name), ['Match One'])
+    assert.deepEqual(filtered.players.map(player => player.username), ['Alice'])
+    assert.equal(filtered.totalTimeouts, 1)
+    assert.equal(filtered.players[0].totalTimeouts, 1)
+    assert.equal(filtered.players[0].matches[0].detectedAt, NOW - DAY)
 })

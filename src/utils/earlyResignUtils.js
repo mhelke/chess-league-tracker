@@ -51,6 +51,7 @@ export function getModalPlayersForMatch(index, matchUrl) {
                 game_api: entry.game_api,
                 board_api: entry.board_api,
                 moves_ply: entry.moves_ply,
+                detectedAt: entry.detectedAt,
             })
         }
     })
@@ -66,7 +67,10 @@ export function getModalPlayersForMatch(index, matchUrl) {
 
 function timestamp(value) {
     const parsed = Number(value)
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+    if (Number.isFinite(parsed) && parsed > 0) return parsed
+
+    const parsedDate = Date.parse(value)
+    return Number.isFinite(parsedDate) ? parsedDate / 1000 : null
 }
 
 import { getClubPlayerNames, isClubPlayer } from './clubPlayerUtils.js'
@@ -106,6 +110,7 @@ export function buildEarlyResignationHistory(rawData, leagueData) {
                 if (!matchUrl) return
 
                 const details = matchDetails[matchUrl] || {}
+                const legacyDetectedAt = details.startTime || details.endTime || null
                 const playersByUsername = {}
                 ; (match.players || []).forEach((player, index) => {
                     const username = (player.username || '').toLowerCase()
@@ -121,6 +126,7 @@ export function buildEarlyResignationHistory(rawData, leagueData) {
                             game_api: player.game_api,
                             board_api: player.board_api,
                             moves_ply: player.moves_ply,
+                            detectedAt: timestamp(player.detectedAt) || legacyDetectedAt,
                         })
                     }
                 })
@@ -135,7 +141,11 @@ export function buildEarlyResignationHistory(rawData, leagueData) {
 
                 if (players.length === 0) return
 
-                const activityTime = details.endTime || details.startTime || null
+                const activityTime = details.startTime || details.endTime || null
+                const latestDetectedAt = Math.max(
+                    ...players.flatMap(player => player.games.map(game => game.detectedAt || 0)),
+                    0
+                ) || null
 
                 history.push({
                     matchUrl,
@@ -148,6 +158,7 @@ export function buildEarlyResignationHistory(rawData, leagueData) {
                     startTime: details.startTime,
                     endTime: details.endTime,
                     activityTime,
+                    latestDetectedAt,
                     players,
                     totalGames: players.reduce((sum, player) => sum + player.games.length, 0),
                 })
@@ -155,17 +166,106 @@ export function buildEarlyResignationHistory(rawData, leagueData) {
         })
     })
 
-    return history.sort((left, right) => (right.activityTime || 0) - (left.activityTime || 0)
+    return history.sort((left, right) => (right.latestDetectedAt || right.activityTime || 0) - (left.latestDetectedAt || left.activityTime || 0)
         || left.leagueName.localeCompare(right.leagueName)
         || left.subLeagueName.localeCompare(right.subLeagueName)
         || left.name.localeCompare(right.name))
 }
 
+export function filterEarlyResignationHistory(history, days, now = Date.now() / 1000) {
+    const rangeDays = Number(days)
+    if (!Number.isFinite(rangeDays) || rangeDays <= 0) return history
+
+    const cutoff = now - (rangeDays * 24 * 60 * 60)
+    return (history || [])
+        .map(record => {
+            const players = record.players
+                .map(player => {
+                    const games = player.games.filter(game => (
+                        Number.isFinite(game.detectedAt)
+                        && game.detectedAt >= cutoff
+                        && game.detectedAt <= now
+                    ))
+                    if (games.length === 0) return null
+                    return {
+                        ...player,
+                        games,
+                        matchEarlyResignations: games.length,
+                    }
+                })
+                .filter(Boolean)
+            if (players.length === 0) return null
+
+            const latestDetectedAt = Math.max(
+                ...players.flatMap(player => player.games.map(game => game.detectedAt || 0)),
+                0
+            ) || null
+            return {
+                ...record,
+                players,
+                latestDetectedAt,
+                totalGames: players.reduce((sum, player) => sum + player.games.length, 0),
+            }
+        })
+        .filter(Boolean)
+        .sort((left, right) => (right.latestDetectedAt || 0) - (left.latestDetectedAt || 0)
+            || left.leagueName.localeCompare(right.leagueName)
+            || left.subLeagueName.localeCompare(right.subLeagueName)
+            || left.name.localeCompare(right.name))
+}
+
+export function buildEarlyResignationPlayers(history) {
+    const playersByUsername = {}
+
+    ; (history || []).forEach(record => {
+        record.players.forEach(player => {
+            const key = player.username.toLowerCase()
+            if (!playersByUsername[key]) {
+                playersByUsername[key] = {
+                    username: player.username,
+                    totalGames: 0,
+                    latestDetectedAt: 0,
+                    matches: [],
+                }
+            }
+
+            const playerHistory = playersByUsername[key]
+            const latestDetectedAt = Math.max(...player.games.map(game => game.detectedAt || 0), 0) || null
+            playerHistory.totalGames += player.games.length
+            playerHistory.latestDetectedAt = Math.max(playerHistory.latestDetectedAt, latestDetectedAt || 0)
+            playerHistory.matches.push({
+                matchUrl: record.matchUrl,
+                matchWebUrl: record.matchWebUrl,
+                leagueName: record.leagueName,
+                subLeagueName: record.subLeagueName,
+                name: record.name,
+                status: record.status,
+                startTime: record.startTime,
+                endTime: record.endTime,
+                activityTime: record.activityTime,
+                latestDetectedAt,
+                games: player.games,
+                totalGames: player.games.length,
+            })
+        })
+    })
+
+    const players = Object.values(playersByUsername)
+        .map(player => ({
+            ...player,
+            matches: player.matches.sort((left, right) => (right.latestDetectedAt || 0) - (left.latestDetectedAt || 0)
+                || left.name.localeCompare(right.name)),
+        }))
+        .sort((left, right) => right.totalGames - left.totalGames
+            || right.latestDetectedAt - left.latestDetectedAt
+            || left.username.localeCompare(right.username))
+
+    return {
+        players,
+        totalGames: players.reduce((sum, player) => sum + player.totalGames, 0),
+    }
+}
+
 export function getRecentEarlyResignations(history, days = 7, now = Date.now() / 1000) {
-    const cutoff = now - (days * 24 * 60 * 60)
-    return history.filter(record => (
-        Number.isFinite(record.activityTime)
-        && record.activityTime >= cutoff
-        && record.activityTime <= now
-    ))
+    return filterEarlyResignationHistory(history, days, now)
 }

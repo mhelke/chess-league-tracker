@@ -96,6 +96,101 @@ export function buildTimeoutHistory(data) {
     }
 }
 
+function timeoutHistoryMatchKey(match) {
+    return `${match.matchId || match.matchUrl || match.name}|${match.subLeagueName || ''}`
+}
+
+/**
+ * Restrict timeout history to timeout events recorded within a rolling date
+ * range. Aggregate match statistics remain available for the all-time view,
+ * while finite ranges use the durable timeout ledger as their source of truth.
+ */
+export function filterTimeoutHistory(history, timeoutHistory, days, now = Date.now() / 1000) {
+    const rangeDays = Number(days)
+    if (!Number.isFinite(rangeDays) || rangeDays <= 0) return history
+
+    const cutoff = now - (rangeDays * 24 * 60 * 60)
+    const sourceMatchesByUrl = new Map((history?.matches || []).map(match => [
+        String(match.matchUrl || match.matchId || '').trim(),
+        match,
+    ]))
+    const recordedTimeouts = new Map()
+
+    ; (timeoutHistory?.events || []).forEach(event => {
+        const occurredAt = detectedTime(event)
+        if (occurredAt < cutoff || occurredAt > now) return
+
+        const sourceMatch = sourceMatchesByUrl.get(String(event?.matchUrl || '').trim())
+        const username = String(event?.username || '').trim().toLowerCase()
+        if (!sourceMatch || !username) return
+
+        const key = `${timeoutHistoryMatchKey(sourceMatch)}|${username}`
+        const current = recordedTimeouts.get(key) || { count: 0, lastDetectedAt: 0 }
+        current.count += 1
+        current.lastDetectedAt = Math.max(current.lastDetectedAt, occurredAt)
+        recordedTimeouts.set(key, current)
+    })
+
+    const matches = (history?.matches || [])
+        .map(match => {
+            const matchKey = timeoutHistoryMatchKey(match)
+            const timeoutPlayers = [...recordedTimeouts.entries()]
+                .filter(([key]) => key.startsWith(`${matchKey}|`))
+                .map(([key, recorded]) => ({
+                    username: key.slice(`${matchKey}|`.length),
+                    count: recorded.count,
+                }))
+            if (timeoutPlayers.length === 0) return null
+
+            return {
+                ...match,
+                totalTimeouts: timeoutPlayers.reduce((sum, player) => sum + player.count, 0),
+                timeoutPlayers,
+                recordedAt: Math.max(...timeoutPlayers.map(player =>
+                    recordedTimeouts.get(`${matchKey}|${player.username}`).lastDetectedAt
+                )),
+            }
+        })
+        .filter(Boolean)
+        .sort((left, right) => right.recordedAt - left.recordedAt || sortByRecent(left, right))
+    const matchKeys = new Set(matches.map(timeoutHistoryMatchKey))
+    const players = (history?.players || [])
+        .map(player => {
+            const playerMatches = player.matches
+                .map(match => {
+                    const matchKey = timeoutHistoryMatchKey(match)
+                    if (!matchKeys.has(matchKey)) return null
+
+                    const recorded = recordedTimeouts.get(`${matchKey}|${player.username.toLowerCase()}`)
+                    if (!recorded) return null
+
+                    return {
+                        ...match,
+                        timeouts: recorded.count,
+                        detectedAt: recorded.lastDetectedAt,
+                    }
+                })
+                .filter(Boolean)
+                .sort((left, right) => right.detectedAt - left.detectedAt || sortByRecent(left, right))
+            return {
+                ...player,
+                totalTimeouts: playerMatches.reduce((sum, match) => sum + match.timeouts, 0),
+                latestActivityTime: Math.max(...playerMatches.map(match => match.detectedAt), 0),
+                matches: playerMatches,
+            }
+        })
+        .filter(player => player.matches.length > 0)
+        .sort((left, right) => right.totalTimeouts - left.totalTimeouts
+            || right.latestActivityTime - left.latestActivityTime
+            || left.username.localeCompare(right.username))
+
+    return {
+        matches,
+        players,
+        totalTimeouts: matches.reduce((sum, match) => sum + match.totalTimeouts, 0),
+    }
+}
+
 function detectedTime(event) {
     const value = event?.detectedAt
     const numericValue = Number(value)

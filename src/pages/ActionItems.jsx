@@ -33,7 +33,7 @@ function loadActionItemsDefaultFilters() {
 }
 
 function actionItemFiltersEqual(left, right) {
-    if (left.league !== right.league || left.date !== right.date || left.from !== right.from || left.to !== right.to || left.urgency !== right.urgency) {
+    if (left.league !== right.league || left.date !== right.date || left.urgency !== right.urgency) {
         return false
     }
     const leftIssues = [...left.issues].sort()
@@ -337,25 +337,16 @@ function ActionItems() {
         [matchesWithWarnings]
     )
 
-    const customDateRangeInvalid = filters.date === 'custom'
-        && filters.from
-        && filters.to
-        && filters.from > filters.to
-
     const filtersActive = Boolean(
         filters.league
         || filters.date !== 'all'
-        || filters.from
-        || filters.to
         || filters.issues.length !== ACTION_ITEM_ISSUE_VALUES.length
         || filters.urgency
     )
 
     const activeFilterSummary = [
         filters.league,
-        filters.date !== 'all' && (filters.date === 'custom'
-            ? [filters.from, filters.to].filter(Boolean).join(' – ') || 'Custom dates'
-            : ACTION_ITEM_DATE_WINDOWS.find(window => window.value === filters.date)?.label),
+        filters.date !== 'all' && ACTION_ITEM_DATE_WINDOWS.find(window => window.value === filters.date)?.label,
         filters.issues.length === ACTION_ITEM_ISSUE_VALUES.length
             ? ''
             : filters.issues.length === 0
@@ -544,33 +535,6 @@ function ActionItems() {
                     </fieldset>
                 </div>
 
-                {filters.date === 'custom' && (
-                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <label className="text-sm font-medium text-gray-700">
-                            From
-                            <input
-                                type="date"
-                                value={filters.from}
-                                onChange={event => updateFilters({ from: event.target.value })}
-                                max={filters.to || undefined}
-                                className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-normal focus:border-transparent focus:outline-none focus:ring-2 focus:ring-chess-green"
-                            />
-                        </label>
-                        <label className="text-sm font-medium text-gray-700">
-                            To
-                            <input
-                                type="date"
-                                value={filters.to}
-                                onChange={event => updateFilters({ to: event.target.value })}
-                                min={filters.from || undefined}
-                                className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-normal focus:border-transparent focus:outline-none focus:ring-2 focus:ring-chess-green"
-                            />
-                        </label>
-                        {customDateRangeInvalid && (
-                            <p className="text-xs font-medium text-red-700 sm:col-span-2">The start date must be on or before the end date.</p>
-                        )}
-                    </div>
-                )}
             </section>
             )}
 

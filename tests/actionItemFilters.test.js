@@ -45,7 +45,7 @@ test('league filtering limits matches to the selected league', () => {
     assert.deepEqual(filterActionItems(matches, { league: 'League B' }, NOW).map(match => match.matchId), ['league-b'])
 })
 
-test('date windows use local calendar boundaries and custom dates are inclusive', () => {
+test('date windows use local calendar boundaries', () => {
     const dateMatches = [
         item('past', { startTime: localDate('2026-01-14') }),
         item('today', { startTime: localDate('2026-01-15', 1) }),
@@ -54,11 +54,8 @@ test('date windows use local calendar boundaries and custom dates are inclusive'
         item('no-date', { startTime: null }),
     ]
 
-    assert.deepEqual(filterActionItems(dateMatches, { date: 'past-due' }, NOW).map(match => match.matchId), ['past', 'today'])
     assert.deepEqual(filterActionItems(dateMatches, { date: 'next-7' }, NOW).map(match => match.matchId), ['today', 'day-seven'])
     assert.deepEqual(filterActionItems(dateMatches, { date: 'next-14' }, NOW).map(match => match.matchId), ['today', 'day-seven', 'day-eight'])
-    assert.deepEqual(filterActionItems(dateMatches, { date: 'custom', from: '2026-01-15', to: '2026-01-21' }, NOW).map(match => match.matchId), ['today', 'day-seven'])
-    assert.deepEqual(filterActionItems(dateMatches, { date: 'custom', from: '2026-01-20' }, NOW).map(match => match.matchId), ['day-seven', 'day-eight'])
     assert.deepEqual(filterActionItems(dateMatches, DEFAULT_ACTION_ITEM_FILTERS, NOW).map(match => match.matchId), ['past', 'today', 'day-seven', 'day-eight', 'no-date'])
 })
 
@@ -100,17 +97,15 @@ test('no filters return every match, including matches without a date', () => {
 })
 
 test('invalid filter values fail safely without throwing', () => {
-    const parsed = parseActionItemFilters('date=not-a-window&from=bad-date&issue=unknown&urgency=critical')
+    const parsed = parseActionItemFilters('date=past-due&from=2026-01-15&to=2026-01-21&issue=unknown&urgency=critical')
     assert.deepEqual(parsed, DEFAULT_ACTION_ITEM_FILTERS)
-    assert.deepEqual(filterActionItems(matches, { date: 'custom', from: '2026-01-22', to: '2026-01-15' }, NOW), [])
+    assert.deepEqual(filterActionItems(matches, { date: 'past-due' }, NOW), matches)
 })
 
 test('filter query parameters round-trip and preserve unrelated parameters', () => {
     const filters = {
         league: 'League A',
-        date: 'custom',
-        from: '2026-01-15',
-        to: '2026-01-21',
+        date: 'next-14',
         issues: ['timeout', 'board-gap'],
         urgency: 'urgent',
     }

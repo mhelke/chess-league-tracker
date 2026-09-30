@@ -4,7 +4,7 @@ import StatusBadge from '../components/StatusBadge'
 import AuditLogModal from '../components/AuditLogModal'
 import { normalizeMatchId } from '../utils/actionItemUtils'
 import { buildEarlyResignationHistory, getRecentEarlyResignations } from '../utils/earlyResignUtils'
-import { buildTimeoutHistory, getRecentDetectedTimeoutPlayers } from '../utils/timeoutHistoryUtils'
+import { buildTimeoutHistory, filterTimeoutHistory, getRecentDetectedTimeoutPlayers } from '../utils/timeoutHistoryUtils'
 import { DASHBOARD_ACTION_ITEM_FILTERS, filterDashboardActionItems } from '../utils/dashboardActionItems'
 import { useDashboardData } from '../context/DashboardDataContext'
 
@@ -389,9 +389,17 @@ function Home() {
         () => getRecentEarlyResignations(earlyResignationHistory),
         [earlyResignationHistory]
     )
+    const earlyResignationsPast90Days = useMemo(
+        () => getRecentEarlyResignations(earlyResignationHistory, 90),
+        [earlyResignationHistory]
+    )
     const timeoutHistory = useMemo(() => buildTimeoutHistory(data), [data])
     const recentTimeoutPlayers = useMemo(
         () => getRecentDetectedTimeoutPlayers(timeoutHistory, timeoutHistoryData, 7),
+        [timeoutHistory, timeoutHistoryData]
+    )
+    const timeoutHistoryPast90Days = useMemo(
+        () => filterTimeoutHistory(timeoutHistory, timeoutHistoryData, 90),
         [timeoutHistory, timeoutHistoryData]
     )
     const recentTimeoutCount = recentTimeoutPlayers.reduce((sum, player) => sum + player.totalTimeouts, 0)
@@ -845,10 +853,10 @@ function Home() {
                         </div>
                     )}
 
-                    {earlyResignationHistory.length > 0 && (
+                    {earlyResignationsPast90Days.length > 0 && (
                         <div className="mt-4 border-t border-gray-200 pt-3 text-right">
                             <Link to="/early-resignations" className="text-sm font-medium text-chess-green hover:underline">
-                                View full history ({earlyResignationHistory.length} matches)
+                                View all {earlyResignationsPast90Days.length} matches in past 90 days
                             </Link>
                         </div>
                     )}
@@ -889,10 +897,10 @@ function Home() {
                         </div>
                     )}
 
-                    {timeoutHistory.players.length > 0 && (
+                    {timeoutHistoryPast90Days.players.length > 0 && (
                         <div className="mt-4 border-t border-gray-200 pt-3 text-right">
                             <Link to="/timeouts" className="text-sm font-medium text-chess-green hover:underline">
-                                View full timeout history ({timeoutHistory.players.length} players)
+                                View all {timeoutHistoryPast90Days.players.length} players in past 90 days
                             </Link>
                         </div>
                     )}

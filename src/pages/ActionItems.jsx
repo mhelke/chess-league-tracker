@@ -17,6 +17,7 @@ import {
     serializeActionItemFilters,
 } from '../utils/actionItemUtils'
 import SuggestedRecruitsModal from '../components/SuggestedRecruitsModal'
+import MatchDetails from '../components/MatchDetails'
 
 export { analyzeTimeoutRemoval, getMatchStatusLevel, getSurgeRecruitmentStatus } from '../utils/actionItemUtils'
 
@@ -256,6 +257,7 @@ function ActionItems() {
     const [clubIcons, setClubIcons] = useState({})
     const [loading, setLoading] = useState(true)
     const [recruitsModalMatch, setRecruitsModalMatch] = useState(null)
+    const [matchDetails, setMatchDetails] = useState(null)
     const [expandedMatches, setExpandedMatches] = useState(() => new Set())
     const [highlightedMatchKey, setHighlightedMatchKey] = useState(null)
     const [searchParams, setSearchParams] = useSearchParams()
@@ -572,6 +574,9 @@ function ActionItems() {
                                     const hasRecruitment = recruitmentEnabled
                                         && match.warnings.showRecruitmentRecommendations
                                         && match.warnings.recruitmentSuggestions.length > 0
+                                    const hasRatingContext = match.registrationData?.type === 'roster'
+                                        && (match.registrationData.ourRoster || []).some(player => numericRating(player?.rating) !== null)
+                                        && (match.registrationData.oppRoster || []).some(player => numericRating(player?.rating) !== null)
 
                                     return (
                                         <div
@@ -713,6 +718,18 @@ function ActionItems() {
                                                                 </div>
                                                             </div>
                                                         )}
+
+                                                        {hasRatingContext && (
+                                                            <div className="flex justify-end border-t border-gray-100 pt-2">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setMatchDetails(match)}
+                                                                    className="inline-flex items-center gap-1 text-xs font-medium text-gray-600 hover:text-chess-green hover:underline"
+                                                                >
+                                                                    Rating distribution <span aria-hidden="true">→</span>
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 
@@ -754,6 +771,34 @@ function ActionItems() {
                 tiers={recruitsModalMatch ? [...new Set(recruitsModalMatch.warnings.recruitmentSuggestions.flatMap(s => s.cohorts))] : []}
                 existingUsernames={(recruitsModalMatch?.registrationData?.ourRoster || []).map(p => p.username).filter(Boolean)}
             />
+
+            {matchDetails && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setMatchDetails(null)} />
+                    <div
+                        className="relative max-h-[85vh] w-full max-w-4xl overflow-auto rounded-xl bg-white p-4 shadow-2xl"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="action-item-match-details-title"
+                    >
+                        <div className="mb-3 flex items-start justify-between">
+                            <div>
+                                <h3 id="action-item-match-details-title" className="text-xl font-bold">Match Details</h3>
+                                <p className="mt-1 text-xs text-gray-500">Rating averages, matched boards, and strength distribution</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setMatchDetails(null)}
+                                className="text-2xl font-bold leading-none text-gray-500 hover:text-gray-900"
+                                aria-label="Close match details"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <MatchDetails round={matchDetails} />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

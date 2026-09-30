@@ -349,6 +349,8 @@ function AllMatches() {
                             </div>
                             <Link
                                 to={`/action-items?matchId=${encodeURIComponent(normalizeMatchId(match.matchId))}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="shrink-0 text-xs font-semibold text-red-700 hover:text-red-900 hover:underline whitespace-nowrap"
                             >
                                 View Action Items →

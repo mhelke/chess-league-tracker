@@ -15,6 +15,189 @@ export function normalizeMatchId(matchId) {
     return apiMatch ? apiMatch[1] : value
 }
 
+export const ACTION_ITEM_ISSUE_TYPES = [
+    { value: 'minimum-roster', label: 'Minimum roster' },
+    { value: 'needs-players', label: 'Needs players' },
+    { value: 'board-gap', label: 'Board gap' },
+    { value: 'timeout', label: 'Timeout' },
+    { value: 'opponent-surge', label: 'Opponent surge' },
+]
+export const ACTION_ITEM_ISSUE_VALUES = ACTION_ITEM_ISSUE_TYPES.map(issue => issue.value)
+
+export const ACTION_ITEM_DATE_WINDOWS = [
+    { value: 'all', label: 'All dates' },
+    { value: 'past-due', label: 'Past due' },
+    { value: 'next-7', label: 'Next 7 days' },
+    { value: 'next-14', label: 'Next 14 days' },
+    { value: 'next-30', label: 'Next 30 days' },
+    { value: 'custom', label: 'Custom dates' },
+]
+
+export const ACTION_ITEM_URGENCY_LEVELS = [
+    { value: 'urgent', label: 'Urgent' },
+    { value: 'advisory', label: 'Advisory' },
+]
+
+export const DEFAULT_ACTION_ITEM_FILTERS = {
+    league: '',
+    date: 'all',
+    from: '',
+    to: '',
+    issues: [...ACTION_ITEM_ISSUE_VALUES],
+    urgency: '',
+}
+
+const ACTION_ITEM_FILTER_PARAMS = ['league', 'date', 'from', 'to', 'issue', 'urgency']
+const VALID_ACTION_ITEM_ISSUES = new Set(ACTION_ITEM_ISSUE_VALUES)
+const VALID_ACTION_ITEM_DATES = new Set(ACTION_ITEM_DATE_WINDOWS.map(window => window.value))
+const VALID_ACTION_ITEM_URGENCY = new Set(ACTION_ITEM_URGENCY_LEVELS.map(level => level.value))
+
+function isValidDateInput(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return false
+    const [year, month, day] = String(value).split('-').map(Number)
+    const parsed = new Date(year, month - 1, day)
+    return parsed.getFullYear() === year
+        && parsed.getMonth() === month - 1
+        && parsed.getDate() === day
+}
+
+function localDateStartSeconds(dateInput) {
+    if (!isValidDateInput(dateInput)) return null
+    const [year, month, day] = String(dateInput).split('-').map(Number)
+    return new Date(year, month - 1, day).getTime() / 1000
+}
+
+function localDayStartSeconds(timestampSeconds) {
+    const date = new Date(timestampSeconds * 1000)
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000
+}
+
+function addLocalDays(timestampSeconds, days) {
+    const date = new Date(timestampSeconds * 1000)
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days).getTime() / 1000
+}
+
+function normalizeActionItemFilters(filters = {}) {
+    const rawIssues = Array.isArray(filters.issues) ? filters.issues : null
+    const validIssues = rawIssues === null
+        ? [...ACTION_ITEM_ISSUE_VALUES]
+        : Array.from(new Set(rawIssues.filter(issue => VALID_ACTION_ITEM_ISSUES.has(issue))))
+    const issues = rawIssues && rawIssues.length > 0 && validIssues.length === 0
+        ? [...ACTION_ITEM_ISSUE_VALUES]
+        : validIssues
+    const date = VALID_ACTION_ITEM_DATES.has(filters.date) ? filters.date : 'all'
+    return {
+        league: typeof filters.league === 'string' ? filters.league : '',
+        date,
+        from: date === 'custom' && isValidDateInput(filters.from) ? filters.from : '',
+        to: date === 'custom' && isValidDateInput(filters.to) ? filters.to : '',
+        issues,
+        urgency: VALID_ACTION_ITEM_URGENCY.has(filters.urgency) ? filters.urgency : '',
+    }
+}
+
+export function parseActionItemFilters(searchParams) {
+    const params = searchParams instanceof URLSearchParams
+        ? searchParams
+        : new URLSearchParams(searchParams || '')
+    return normalizeActionItemFilters({
+        league: params.get('league') || '',
+        date: params.get('date') || 'all',
+        from: params.get('from') || '',
+        to: params.get('to') || '',
+        issues: (() => {
+            const issueParams = params.getAll('issue')
+            if (issueParams.includes('none')) return []
+            return issueParams.length > 0 ? issueParams : [...ACTION_ITEM_ISSUE_VALUES]
+        })(),
+        urgency: params.get('urgency') || '',
+    })
+}
+
+export function hasActionItemFilterParams(searchParams) {
+    const params = searchParams instanceof URLSearchParams
+        ? searchParams
+        : new URLSearchParams(searchParams || '')
+    return ACTION_ITEM_FILTER_PARAMS.some(param => params.has(param))
+}
+
+export function serializeActionItemFilters(filters = DEFAULT_ACTION_ITEM_FILTERS, existingSearchParams = '', options = {}) {
+    const { includeDefaults = false } = options
+    const params = existingSearchParams instanceof URLSearchParams
+        ? new URLSearchParams(existingSearchParams)
+        : new URLSearchParams(existingSearchParams || '')
+    ACTION_ITEM_FILTER_PARAMS.forEach(param => params.delete(param))
+
+    const normalized = normalizeActionItemFilters(filters)
+    if (normalized.league) params.set('league', normalized.league)
+    if (normalized.date !== 'all' || includeDefaults) params.set('date', normalized.date)
+    if (normalized.date === 'custom') {
+        if (normalized.from) params.set('from', normalized.from)
+        if (normalized.to) params.set('to', normalized.to)
+    }
+    if (normalized.issues.length === 0) {
+        if (includeDefaults) params.append('issue', 'none')
+    } else if (normalized.issues.length !== ACTION_ITEM_ISSUE_VALUES.length) {
+        normalized.issues.forEach(issue => params.append('issue', issue))
+    }
+    if (normalized.urgency) params.set('urgency', normalized.urgency)
+    return params
+}
+
+function matchesActionItemIssue(match, issue) {
+    const warnings = match?.warnings || {}
+    const ourPlayers = Number(match?.registeredPlayers?.our || 0)
+    const opponentPlayers = Number(match?.registeredPlayers?.opponent || 0)
+    switch (issue) {
+        case 'minimum-roster':
+            return warnings.minNotMet === true
+        case 'needs-players':
+            return opponentPlayers > ourPlayers
+        case 'board-gap':
+            return Number(warnings.mismatchedBoardCount) > 0
+        case 'timeout':
+            return warnings.hasTimeoutWarning === true
+        case 'opponent-surge':
+            return warnings.surgeRecruitment === true
+        default:
+            return false
+    }
+}
+
+function matchesActionItemDate(match, filters, nowSeconds) {
+    if (filters.date === 'all') return true
+    const startTime = Number(match?.startTime)
+    if (!Number.isFinite(startTime) || startTime <= 0) return false
+
+    if (filters.date === 'past-due') return startTime < nowSeconds
+
+    if (filters.date === 'custom') {
+        const from = localDateStartSeconds(filters.from)
+        const to = localDateStartSeconds(filters.to)
+        if (from !== null && startTime < from) return false
+        if (to !== null && startTime >= addLocalDays(to, 1)) return false
+        return from === null && to === null ? true : from === null || to === null || from <= to
+    }
+
+    const dayCount = Number(filters.date.replace('next-', ''))
+    if (!Number.isFinite(dayCount)) return true
+    const today = localDayStartSeconds(nowSeconds)
+    return startTime >= today && startTime < addLocalDays(today, dayCount)
+}
+
+export function filterActionItems(matches = [], filters = DEFAULT_ACTION_ITEM_FILTERS, nowSeconds = Date.now() / 1000) {
+    const normalized = normalizeActionItemFilters(filters)
+    return matches.filter(match => {
+        if (normalized.league && match.leagueName !== normalized.league) return false
+        if (normalized.urgency && match.warnings?.status?.level !== normalized.urgency) return false
+        if (!matchesActionItemDate(match, normalized, nowSeconds)) return false
+        if (normalized.issues.length === 0) return false
+        if (normalized.issues.length !== ACTION_ITEM_ISSUE_VALUES.length
+            && !normalized.issues.some(issue => matchesActionItemIssue(match, issue))) return false
+        return true
+    })
+}
+
 const MATCH_STATUS_META = {
     urgent: {
         icon: '🔴',

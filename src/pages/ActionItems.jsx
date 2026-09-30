@@ -1,10 +1,45 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { findRecruitmentSolutions } from '../utils/recruitmentSolutions'
-import { BALANCE_THRESHOLD, collectActionItems, normalizeMatchId, numericRating } from '../utils/actionItemUtils'
+import {
+    ACTION_ITEM_DATE_WINDOWS,
+    ACTION_ITEM_ISSUE_TYPES,
+    ACTION_ITEM_ISSUE_VALUES,
+    ACTION_ITEM_URGENCY_LEVELS,
+    BALANCE_THRESHOLD,
+    collectActionItems,
+    DEFAULT_ACTION_ITEM_FILTERS,
+    filterActionItems,
+    hasActionItemFilterParams,
+    normalizeMatchId,
+    numericRating,
+    parseActionItemFilters,
+    serializeActionItemFilters,
+} from '../utils/actionItemUtils'
 import SuggestedRecruitsModal from '../components/SuggestedRecruitsModal'
 
 export { analyzeTimeoutRemoval, getMatchStatusLevel, getSurgeRecruitmentStatus } from '../utils/actionItemUtils'
+
+const ACTION_ITEMS_DEFAULT_STORAGE_KEY = `action-items-default-filters:${__SITE_KEY__}`
+
+function loadActionItemsDefaultFilters() {
+    try {
+        const saved = JSON.parse(window.localStorage.getItem(ACTION_ITEMS_DEFAULT_STORAGE_KEY) || 'null')
+        if (!saved) return { ...DEFAULT_ACTION_ITEM_FILTERS, issues: [...ACTION_ITEM_ISSUE_VALUES] }
+        return parseActionItemFilters(serializeActionItemFilters(saved, '', { includeDefaults: true }))
+    } catch {
+        return { ...DEFAULT_ACTION_ITEM_FILTERS, issues: [...ACTION_ITEM_ISSUE_VALUES] }
+    }
+}
+
+function actionItemFiltersEqual(left, right) {
+    if (left.league !== right.league || left.date !== right.date || left.from !== right.from || left.to !== right.to || left.urgency !== right.urgency) {
+        return false
+    }
+    const leftIssues = [...left.issues].sort()
+    const rightIssues = [...right.issues].sort()
+    return leftIssues.length === rightIssues.length && leftIssues.every((issue, index) => issue === rightIssues[index])
+}
 
 function groupOpponentAdditionsByRating(additions = []) {
     const groups = new Map()
@@ -223,9 +258,46 @@ function ActionItems() {
     const [recruitsModalMatch, setRecruitsModalMatch] = useState(null)
     const [expandedMatches, setExpandedMatches] = useState(() => new Set())
     const [highlightedMatchKey, setHighlightedMatchKey] = useState(null)
-    const [searchParams] = useSearchParams()
+    const [searchParams, setSearchParams] = useSearchParams()
+    const [savedDefaultFilters, setSavedDefaultFilters] = useState(loadActionItemsDefaultFilters)
+    const [filtersOpen, setFiltersOpen] = useState(() => hasActionItemFilterParams(searchParams))
+    const issueSelectAllRef = useRef(null)
     const targetMatchId = normalizeMatchId(searchParams.get('matchId'))
     const recruitmentEnabled = playerRatings?.recruitmentEnabled === true
+    const hasExplicitFilters = useMemo(() => hasActionItemFilterParams(searchParams), [searchParams])
+    const filters = useMemo(() => {
+        if (hasExplicitFilters) return parseActionItemFilters(searchParams)
+        if (targetMatchId) return { ...DEFAULT_ACTION_ITEM_FILTERS, issues: [...ACTION_ITEM_ISSUE_VALUES] }
+        return savedDefaultFilters
+    }, [hasExplicitFilters, savedDefaultFilters, searchParams, targetMatchId])
+
+    const updateFilters = updates => {
+        const nextFilters = { ...filters, ...updates }
+        setSearchParams(serializeActionItemFilters(nextFilters, searchParams, { includeDefaults: true }), { replace: true })
+    }
+
+    const clearFilters = () => {
+        setSearchParams(serializeActionItemFilters(DEFAULT_ACTION_ITEM_FILTERS, searchParams, { includeDefaults: true }), { replace: true })
+    }
+
+    const saveAsDefault = () => {
+        try {
+            window.localStorage.setItem(ACTION_ITEMS_DEFAULT_STORAGE_KEY, JSON.stringify(filters))
+            setSavedDefaultFilters({ ...filters, issues: [...filters.issues] })
+        } catch {
+            // Keep the temporary URL filters working when storage is unavailable.
+        }
+    }
+
+    useEffect(() => {
+        if (hasExplicitFilters) setFiltersOpen(true)
+    }, [hasExplicitFilters])
+
+    useEffect(() => {
+        if (!issueSelectAllRef.current) return
+        issueSelectAllRef.current.indeterminate = filters.issues.length > 0
+            && filters.issues.length < ACTION_ITEM_ISSUE_VALUES.length
+    }, [filters.issues])
 
     useEffect(() => {
         Promise.all([
@@ -253,22 +325,58 @@ function ActionItems() {
             recruitmentEnabled,
             buildRecruitmentSuggestions,
         })
-
-        // Sort by startTime ascending
-        matches.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
-        return matches
     }, [data, timeoutData, recruitmentEnabled])
+
+    const filteredMatches = useMemo(
+        () => filterActionItems(matchesWithWarnings, filters),
+        [matchesWithWarnings, filters]
+    )
+
+    const leagueOptions = useMemo(
+        () => [...new Set(matchesWithWarnings.map(match => match.leagueName).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+        [matchesWithWarnings]
+    )
+
+    const customDateRangeInvalid = filters.date === 'custom'
+        && filters.from
+        && filters.to
+        && filters.from > filters.to
+
+    const filtersActive = Boolean(
+        filters.league
+        || filters.date !== 'all'
+        || filters.from
+        || filters.to
+        || filters.issues.length !== ACTION_ITEM_ISSUE_VALUES.length
+        || filters.urgency
+    )
+
+    const activeFilterSummary = [
+        filters.league,
+        filters.date !== 'all' && (filters.date === 'custom'
+            ? [filters.from, filters.to].filter(Boolean).join(' – ') || 'Custom dates'
+            : ACTION_ITEM_DATE_WINDOWS.find(window => window.value === filters.date)?.label),
+        filters.issues.length === ACTION_ITEM_ISSUE_VALUES.length
+            ? ''
+            : filters.issues.length === 0
+                ? 'No issue types'
+                : filters.issues.length === 1
+                    ? ACTION_ITEM_ISSUE_TYPES.find(issue => issue.value === filters.issues[0])?.label
+                    : `${filters.issues.length} issue types`,
+        filters.urgency && ACTION_ITEM_URGENCY_LEVELS.find(level => level.value === filters.urgency)?.label,
+    ].filter(Boolean).join(' · ')
+    const defaultIsSaved = actionItemFiltersEqual(filters, savedDefaultFilters)
 
     // Group by date
     const matchesByDate = useMemo(() => {
         const groups = {}
-        matchesWithWarnings.forEach(match => {
+        filteredMatches.forEach(match => {
             const dateKey = match.startTime ? new Date(match.startTime * 1000).toLocaleDateString() : 'No Date'
             if (!groups[dateKey]) groups[dateKey] = []
             groups[dateKey].push(match)
         })
         return groups
-    }, [matchesWithWarnings])
+    }, [filteredMatches])
 
     useEffect(() => {
         if (!targetMatchId || matchesWithWarnings.length === 0) return undefined
@@ -315,13 +423,171 @@ function ActionItems() {
             <div className="mb-8">
                 <h2 className="text-4xl font-bold text-chess-dark mb-2">Action Items</h2>
                 <p className="text-gray-600">
-                    Open matches requiring attention ({matchesWithWarnings.length})
+                    Open matches requiring attention ({filteredMatches.length} of {matchesWithWarnings.length})
                 </p>
             </div>
+
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex min-w-0 flex-wrap items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => setFiltersOpen(open => !open)}
+                        aria-expanded={filtersOpen}
+                        aria-controls="action-item-filter-panel"
+                        className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+                    >
+                        <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M6 12h12m-8 7h4" />
+                        </svg>
+                        <span>{filtersOpen ? 'Hide filters' : 'Filters'}</span>
+                    </button>
+                    <span className="truncate text-sm text-gray-600" title={activeFilterSummary || 'All action items'}>
+                        {activeFilterSummary || 'All action items'}
+                    </span>
+                </div>
+            </div>
+
+            {filtersOpen && (
+            <section id="action-item-filter-panel" className="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-4" aria-label="Action item filters">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="text-sm font-bold text-gray-800">Filter action items</h3>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={saveAsDefault}
+                            disabled={defaultIsSaved}
+                            className="text-sm font-medium text-chess-green hover:underline disabled:cursor-default disabled:no-underline disabled:opacity-60"
+                        >
+                            {defaultIsSaved ? 'Saved as default' : 'Save as default'}
+                        </button>
+                        {filtersActive && (
+                            <button
+                                type="button"
+                                onClick={clearFilters}
+                                className="text-sm font-medium text-chess-green hover:underline"
+                            >
+                                Clear filters
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <label className="text-sm font-medium text-gray-700">
+                        League
+                        <select
+                            value={filters.league}
+                            onChange={event => updateFilters({ league: event.target.value })}
+                            className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-normal focus:border-transparent focus:outline-none focus:ring-2 focus:ring-chess-green"
+                        >
+                            <option value="">All leagues</option>
+                            {leagueOptions.map(league => <option key={league} value={league}>{league}</option>)}
+                        </select>
+                    </label>
+
+                    <label className="text-sm font-medium text-gray-700">
+                        Date window
+                        <select
+                            value={filters.date}
+                            onChange={event => updateFilters({ date: event.target.value })}
+                            className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-normal focus:border-transparent focus:outline-none focus:ring-2 focus:ring-chess-green"
+                        >
+                            {ACTION_ITEM_DATE_WINDOWS.map(window => <option key={window.value} value={window.value}>{window.label}</option>)}
+                        </select>
+                    </label>
+
+                    <label className="text-sm font-medium text-gray-700">
+                        Urgency
+                        <select
+                            value={filters.urgency}
+                            onChange={event => updateFilters({ urgency: event.target.value })}
+                            className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-normal focus:border-transparent focus:outline-none focus:ring-2 focus:ring-chess-green"
+                        >
+                            <option value="">All urgency levels</option>
+                            {ACTION_ITEM_URGENCY_LEVELS.map(level => <option key={level.value} value={level.value}>{level.label}</option>)}
+                        </select>
+                    </label>
+
+                    <fieldset className="text-sm font-medium text-gray-700">
+                        <legend>Issue type</legend>
+                        <div className="mt-1 grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-1">
+                            <label className="inline-flex items-center gap-2 border-b border-gray-200 pb-1.5 font-semibold text-gray-800 sm:col-span-2 lg:col-span-1">
+                                <input
+                                    ref={issueSelectAllRef}
+                                    type="checkbox"
+                                    checked={filters.issues.length === ACTION_ITEM_ISSUE_VALUES.length}
+                                    onChange={() => updateFilters({
+                                        issues: filters.issues.length === ACTION_ITEM_ISSUE_VALUES.length
+                                            ? []
+                                            : [...ACTION_ITEM_ISSUE_VALUES],
+                                    })}
+                                    className="rounded border-gray-300 text-chess-green focus:ring-chess-green"
+                                />
+                                All issue types
+                            </label>
+                            {ACTION_ITEM_ISSUE_TYPES.map(issue => (
+                                <label key={issue.value} className="inline-flex items-center gap-2 font-normal text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={filters.issues.includes(issue.value)}
+                                        onChange={() => updateFilters({
+                                            issues: filters.issues.includes(issue.value)
+                                                ? filters.issues.filter(selected => selected !== issue.value)
+                                                : [...filters.issues, issue.value],
+                                        })}
+                                        className="rounded border-gray-300 text-chess-green focus:ring-chess-green"
+                                    />
+                                    {issue.label}
+                                </label>
+                            ))}
+                        </div>
+                    </fieldset>
+                </div>
+
+                {filters.date === 'custom' && (
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <label className="text-sm font-medium text-gray-700">
+                            From
+                            <input
+                                type="date"
+                                value={filters.from}
+                                onChange={event => updateFilters({ from: event.target.value })}
+                                max={filters.to || undefined}
+                                className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-normal focus:border-transparent focus:outline-none focus:ring-2 focus:ring-chess-green"
+                            />
+                        </label>
+                        <label className="text-sm font-medium text-gray-700">
+                            To
+                            <input
+                                type="date"
+                                value={filters.to}
+                                onChange={event => updateFilters({ to: event.target.value })}
+                                min={filters.from || undefined}
+                                className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-normal focus:border-transparent focus:outline-none focus:ring-2 focus:ring-chess-green"
+                            />
+                        </label>
+                        {customDateRangeInvalid && (
+                            <p className="text-xs font-medium text-red-700 sm:col-span-2">The start date must be on or before the end date.</p>
+                        )}
+                    </div>
+                )}
+            </section>
+            )}
 
             {matchesWithWarnings.length === 0 ? (
                 <div className="card text-center py-12 text-gray-500">
                     <p className="text-lg">✓ No action items! All open matches are set.</p>
+                </div>
+            ) : filteredMatches.length === 0 ? (
+                <div className="card text-center py-12 text-gray-500">
+                    <p className="text-lg">No action items match the current filters.</p>
+                    <button
+                        type="button"
+                        onClick={clearFilters}
+                        className="mt-4 rounded-lg bg-chess-green px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                    >
+                        Clear filters
+                    </button>
                 </div>
             ) : (
                 <div className="space-y-6">

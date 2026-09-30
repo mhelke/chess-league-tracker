@@ -5,6 +5,7 @@ import AuditLogModal from '../components/AuditLogModal'
 import { normalizeMatchId } from '../utils/actionItemUtils'
 import { buildEarlyResignationHistory, getRecentEarlyResignations } from '../utils/earlyResignUtils'
 import { buildTimeoutHistory, getRecentDetectedTimeoutPlayers } from '../utils/timeoutHistoryUtils'
+import { DASHBOARD_ACTION_ITEM_FILTERS, filterDashboardActionItems } from '../utils/dashboardActionItems'
 import { useDashboardData } from '../context/DashboardDataContext'
 
 const UPCOMING_MATCH_LIMIT = 5
@@ -34,7 +35,11 @@ const DASHBOARD_TILES = [
 ]
 
 function getDefaultDashboardPreferences() {
-    return { order: [...DEFAULT_DASHBOARD_ORDER], hidden: [] }
+    return {
+        order: [...DEFAULT_DASHBOARD_ORDER],
+        hidden: [],
+        actionItemsFilter: DASHBOARD_ACTION_ITEM_FILTERS.ALL,
+    }
 }
 
 function loadDashboardPreferences() {
@@ -52,7 +57,13 @@ function loadDashboardPreferences() {
             ? saved.hidden.filter(id => DEFAULT_DASHBOARD_ORDER.includes(id))
             : []
 
-        return { order, hidden: [...new Set(hidden)] }
+        return {
+            order,
+            hidden: [...new Set(hidden)],
+            actionItemsFilter: saved.actionItemsFilter === DASHBOARD_ACTION_ITEM_FILTERS.URGENT
+                ? DASHBOARD_ACTION_ITEM_FILTERS.URGENT
+                : DASHBOARD_ACTION_ITEM_FILTERS.ALL,
+        }
     } catch {
         return fallback
     }
@@ -198,9 +209,11 @@ function Home() {
     const [auditLogMatch, setAuditLogMatch] = useState(null)
     const [dashboardPreferences, setDashboardPreferences] = useState(loadDashboardPreferences)
     const [showDashboardSettings, setShowDashboardSettings] = useState(false)
+    const [showActionItemsSettings, setShowActionItemsSettings] = useState(false)
     const [draggedDashboardTile, setDraggedDashboardTile] = useState(null)
     const [dragOverDashboardTile, setDragOverDashboardTile] = useState(null)
     const dashboardPointerDrag = useRef(null)
+    const actionItemsSettingsRef = useRef(null)
     const [supplementalLoading, setSupplementalLoading] = useState(true)
     const [supplementalError, setSupplementalError] = useState(null)
 
@@ -211,6 +224,26 @@ function Home() {
             // Preferences still work for the current session when storage is unavailable.
         }
     }, [dashboardPreferences])
+
+    useEffect(() => {
+        if (!showActionItemsSettings) return undefined
+
+        const handlePointerDown = event => {
+            if (!actionItemsSettingsRef.current?.contains(event.target)) {
+                setShowActionItemsSettings(false)
+            }
+        }
+        const handleKeyDown = event => {
+            if (event.key === 'Escape') setShowActionItemsSettings(false)
+        }
+
+        document.addEventListener('pointerdown', handlePointerDown)
+        document.addEventListener('keydown', handleKeyDown)
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown)
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [showActionItemsSettings])
 
     const hiddenDashboardTiles = useMemo(() => new Set(dashboardPreferences.hidden), [dashboardPreferences.hidden])
     const dashboardTileStyle = tileId => ({ order: dashboardPreferences.order.indexOf(tileId) })
@@ -344,6 +377,10 @@ function Home() {
             return Number.isFinite(startTime) && startTime >= now && startTime <= nextWeek
         })
     }, [actionItems])
+    const filteredPressingActionItems = useMemo(
+        () => filterDashboardActionItems(pressingActionItems, dashboardPreferences.actionItemsFilter),
+        [pressingActionItems, dashboardPreferences.actionItemsFilter]
+    )
     const earlyResignationHistory = useMemo(
         () => buildEarlyResignationHistory(earlyResignData, data),
         [earlyResignData, data]
@@ -446,14 +483,71 @@ function Home() {
                             Last updated: {new Date(data.lastUpdated).toLocaleString()}
                         </p>
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => setShowDashboardSettings(previous => !previous)}
-                        aria-expanded={showDashboardSettings}
-                        className="shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-chess-green hover:text-chess-green"
-                    >
-                        Customize
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {false && <div className="hidden">
+                            <button
+                                type="button"
+                                onClick={() => setShowActionItemsSettings(previous => !previous)}
+                                aria-label="Action Items settings"
+                                aria-expanded={showActionItemsSettings}
+                                aria-controls="action-items-settings"
+                                title="Action Items settings"
+                                className="rounded-lg border border-gray-300 bg-white p-2 text-gray-700 shadow-sm transition-colors hover:border-chess-green hover:text-chess-green"
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                                <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
+                                    <path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.02-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.37-.31-.6-.22l-2.49 1a7.4 7.4 0 0 0-1.69-.98L14.5 2.42A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.5.42L9.12 5.07c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.08-.48 0-.6.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.08.65-.08.98s.03.66.08.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.37.31.6.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.61-.25 1.17-.58 1.69-.98l2.49 1c.23.08.48 0 .6-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
+                                </svg>
+                            </button>
+                            {showActionItemsSettings && (
+                                <div
+                                    id="action-items-settings"
+                                    role="dialog"
+                                    aria-label="Action Items display settings"
+                                    className="absolute right-0 top-11 z-20 w-60 rounded-lg border border-gray-200 bg-white p-4 text-left shadow-lg"
+                                >
+                                    <fieldset>
+                                        <legend className="text-sm font-semibold text-gray-900">Show action items</legend>
+                                        <div className="mt-3 space-y-3">
+                                            <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                                <input
+                                                    type="radio"
+                                                    name="action-items-filter"
+                                                    value={DASHBOARD_ACTION_ITEM_FILTERS.ALL}
+                                                    checked={dashboardPreferences.actionItemsFilter === DASHBOARD_ACTION_ITEM_FILTERS.ALL}
+                                                    onChange={event => setDashboardPreferences(previous => ({ ...previous, actionItemsFilter: event.target.value }))}
+                                                    className="h-4 w-4 border-gray-300 text-chess-green focus:ring-chess-green"
+                                                />
+                                                All action items
+                                            </label>
+                                            <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                                <input
+                                                    type="radio"
+                                                    name="action-items-filter"
+                                                    value={DASHBOARD_ACTION_ITEM_FILTERS.URGENT}
+                                                    checked={dashboardPreferences.actionItemsFilter === DASHBOARD_ACTION_ITEM_FILTERS.URGENT}
+                                                    onChange={event => setDashboardPreferences(previous => ({ ...previous, actionItemsFilter: event.target.value }))}
+                                                    className="h-4 w-4 border-gray-300 text-chess-green focus:ring-chess-green"
+                                                />
+                                                Urgent only
+                                            </label>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            )}
+                        </div>}
+                        <button
+                            type="button"
+                            onClick={() => setShowDashboardSettings(previous => !previous)}
+                            aria-expanded={showDashboardSettings}
+                            className="shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-chess-green hover:text-chess-green"
+                        >
+                            Customize
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -468,7 +562,10 @@ function Home() {
                         </div>
                         <button
                             type="button"
-                            onClick={() => setDashboardPreferences(getDefaultDashboardPreferences())}
+                            onClick={() => setDashboardPreferences(previous => ({
+                                ...getDefaultDashboardPreferences(),
+                                actionItemsFilter: previous.actionItemsFilter,
+                            }))}
                             className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
                         >
                             Reset layout
@@ -543,14 +640,73 @@ function Home() {
                     className={dashboardTileClass('actionItems', 'card')}
                     style={dashboardTileStyle('actionItems')}
                 >
-                    <div className="mb-4">
+                    <div className="mb-4 flex items-start justify-between gap-3">
                         <div>
                             <h3 className="text-2xl font-bold text-gray-900">Action Items</h3>
                             <p className="mt-1 text-sm text-gray-600">
-                                {actionItems.length > 0
-                                    ? `${actionItems.length} match${actionItems.length === 1 ? '' : 'es'} need review`
-                                    : 'No open matches currently need attention'}
+                                {actionItems.length === 0
+                                    ? 'No open matches currently need attention'
+                                    : filteredPressingActionItems.length > 0
+                                        ? `${filteredPressingActionItems.length}${dashboardPreferences.actionItemsFilter === DASHBOARD_ACTION_ITEM_FILTERS.URGENT ? ' urgent' : ''} match${filteredPressingActionItems.length === 1 ? '' : 'es'} need review`
+                                        : dashboardPreferences.actionItemsFilter === DASHBOARD_ACTION_ITEM_FILTERS.URGENT
+                                            ? 'No urgent action items are due in the next 7 days.'
+                                            : 'No action items are due in the next 7 days.'}
                             </p>
+                        </div>
+                        <div className="relative shrink-0" ref={actionItemsSettingsRef}>
+                            <button
+                                type="button"
+                                onClick={() => setShowActionItemsSettings(previous => !previous)}
+                                aria-label="Action Items settings"
+                                aria-expanded={showActionItemsSettings}
+                                aria-controls="action-items-card-settings"
+                                title="Action Items settings"
+                                className="rounded p-1 text-gray-600 hover:text-gray-900"
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="hidden" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756.426-1.756 2.924 0 3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543-.826-3.31-2.37-2.37.996.608 2.296.07 2.572-1.065Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                                <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
+                                    <path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.02-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.37-.31-.6-.22l-2.49 1a7.4 7.4 0 0 0-1.69-.98L14.5 2.42A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.5.42L9.12 5.07c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.08-.48 0-.6.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.08.65-.08.98s.03.66.08.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.37.31.6.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.61-.25 1.17-.58 1.69-.98l2.49 1c.23.08.48 0 .6-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
+                                </svg>
+                            </button>
+                            {showActionItemsSettings && (
+                                <div
+                                    id="action-items-card-settings"
+                                    role="dialog"
+                                    aria-label="Action Items display settings"
+                                    className="absolute right-0 top-11 z-20 w-60 rounded-lg border border-gray-200 bg-white p-4 text-left shadow-lg"
+                                >
+                                    <fieldset>
+                                        <legend className="text-sm font-semibold text-gray-900">Show action items</legend>
+                                        <div className="mt-3 space-y-3">
+                                            <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                                <input
+                                                    type="radio"
+                                                    name="action-items-filter-card"
+                                                    value={DASHBOARD_ACTION_ITEM_FILTERS.ALL}
+                                                    checked={dashboardPreferences.actionItemsFilter === DASHBOARD_ACTION_ITEM_FILTERS.ALL}
+                                                    onChange={event => setDashboardPreferences(previous => ({ ...previous, actionItemsFilter: event.target.value }))}
+                                                    className="h-4 w-4 border-gray-300 text-chess-green focus:ring-chess-green"
+                                                />
+                                                All action items
+                                            </label>
+                                            <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                                <input
+                                                    type="radio"
+                                                    name="action-items-filter-card"
+                                                    value={DASHBOARD_ACTION_ITEM_FILTERS.URGENT}
+                                                    checked={dashboardPreferences.actionItemsFilter === DASHBOARD_ACTION_ITEM_FILTERS.URGENT}
+                                                    onChange={event => setDashboardPreferences(previous => ({ ...previous, actionItemsFilter: event.target.value }))}
+                                                    className="h-4 w-4 border-gray-300 text-chess-green focus:ring-chess-green"
+                                                />
+                                                Urgent only
+                                            </label>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -558,13 +714,15 @@ function Home() {
                         <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
                             All open matches are currently set up without a flagged issue.
                         </div>
-                    ) : pressingActionItems.length === 0 ? (
+                    ) : filteredPressingActionItems.length === 0 ? (
                         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-                            No action items are due in the next 7 days.
+                            {dashboardPreferences.actionItemsFilter === DASHBOARD_ACTION_ITEM_FILTERS.URGENT
+                                ? 'No urgent action items are due in the next 7 days.'
+                                : 'No action items are due in the next 7 days.'}
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {pressingActionItems.slice(0, 4).map(match => {
+                            {filteredPressingActionItems.slice(0, 4).map(match => {
                                 const matchId = normalizeMatchId(match.matchId)
                                 const actionItemHref = matchId
                                     ? `/action-items?matchId=${encodeURIComponent(matchId)}`

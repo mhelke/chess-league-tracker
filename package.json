@@ -18,7 +18,7 @@
     "build:1dpmc": "vite build --mode 1dpmc",
     "build:teamusa": "vite build --mode teamusa",
     "build:mn": "vite build --mode mn",
-    "test": "node tests/timeoutHistoryUtils.test.js && node tests/actionItemsFeed.test.js",
+    "test": "node tests/timeoutHistoryUtils.test.js && node tests/actionItemsFeed.test.js && node tests/actionItemFilters.test.js && node tests/dashboardActionItems.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-03T23:55:22Z",
+  "lastUpdated": "2026-10-04T23:15:41Z",
   "clubId": "team-minnesota",
   "leagues": {
     "USTCL": {
@@ -12427,7 +12427,7 @@
               ],
               "matchResult": {
                 "ourScore": 38.5,
-                "opponentScore": 66.5,
+                "opponentScore": 67.5,
                 "result": "unknown"
               },
               "playerStats": {
@@ -12711,6 +12711,12 @@
                   "wins": 0,
                   "draws": 0,
                   "losses": 2
+                },
+                "shuesh": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1
                 },
                 "stmcewen": {
                   "games": 2,
@@ -13523,8 +13529,8 @@
                 }
               ],
               "matchResult": {
-                "ourScore": 15,
-                "opponentScore": 10,
+                "ourScore": 16,
+                "opponentScore": 11,
                 "result": "unknown"
               },
               "playerStats": {
@@ -13533,6 +13539,13 @@
                   "wins": 1,
                   "draws": 0,
                   "losses": 0
+                },
+                "antiperception": {
+                  "games": 1,
+                  "wins": 0,
+                  "draws": 0,
+                  "losses": 1,
+                  "timeouts": 1
                 },
                 "bpd161": {
                   "games": 1,
@@ -13571,8 +13584,8 @@
                   "losses": 0
                 },
                 "ontheinkline": {
-                  "games": 1,
-                  "wins": 1,
+                  "games": 2,
+                  "wins": 2,
                   "draws": 0,
                   "losses": 0
                 },
@@ -13940,7 +13953,12 @@
                   },
                   {
                     "username": "zanbato17",
-                    "rating": 1704,
+                    "rating": 1706,
+                    "timeoutPercent": 0
+                  },
+                  {
+                    "username": "beanycrocker",
+                    "rating": 1675,
                     "timeoutPercent": 0
                   },
                   {
@@ -13950,7 +13968,7 @@
                   },
                   {
                     "username": "neilkoz",
-                    "rating": 1596,
+                    "rating": 1582,
                     "timeoutPercent": 0
                   },
                   {
@@ -14010,12 +14028,17 @@
                   },
                   {
                     "username": "ontheinkline",
-                    "rating": 1268,
+                    "rating": 1294,
                     "timeoutPercent": 0
                   },
                   {
                     "username": "notjeffatwork",
                     "rating": 1188,
+                    "timeoutPercent": 0
+                  },
+                  {
+                    "username": "zanefshhh",
+                    "rating": 1120,
                     "timeoutPercent": 0
                   },
                   {
@@ -14082,7 +14105,7 @@
                   },
                   {
                     "username": "ggm5",
-                    "rating": 1668,
+                    "rating": 1677,
                     "timeoutPercent": 0
                   },
                   {
@@ -14112,7 +14135,7 @@
                   },
                   {
                     "username": "andreakis",
-                    "rating": 1367,
+                    "rating": 1380,
                     "timeoutPercent": 0
                   },
                   {
@@ -14193,7 +14216,7 @@
                 ]
               },
               "registeredPlayers": {
-                "our": 30,
+                "our": 32,
                 "opponent": 23
               },
               "registrationHistory": [
@@ -14434,6 +14457,26 @@
                     ],
                     "removed": []
                   }
+                },
+                {
+                  "ts": "2026-10-04T23:15:37Z",
+                  "our": {
+                    "added": [
+                      {
+                        "username": "beanycrocker",
+                        "rating": 1675
+                      },
+                      {
+                        "username": "zanefshhh",
+                        "rating": 1120
+                      }
+                    ],
+                    "removed": []
+                  },
+                  "opp": {
+                    "added": [],
+                    "removed": []
+                  }
                 }
               ]
             }
@@ -14608,6 +14651,14 @@
               "points": 2.0
             },
             {
+              "username": "ontheinkline",
+              "games": 2,
+              "wins": 2,
+              "draws": 0,
+              "losses": 0,
+              "points": 2.0
+            },
+            {
               "username": "bpd161",
               "games": 3,
               "wins": 2,
@@ -14673,14 +14724,6 @@
             },
             {
               "username": "uncleluke305",
-              "games": 1,
-              "wins": 1,
-              "draws": 0,
-              "losses": 0,
-              "points": 1.0
-            },
-            {
-              "username": "ontheinkline",
               "games": 1,
               "wins": 1,
               "draws": 0,
@@ -14793,6 +14836,14 @@
             },
             {
               "username": "gorgonops",
+              "games": 1,
+              "wins": 0,
+              "draws": 0,
+              "losses": 1,
+              "points": 0.0
+            },
+            {
+              "username": "shuesh",
               "games": 1,
               "wins": 0,
               "draws": 0,
@@ -14960,7 +15011,7 @@
               "points": 0.0
             },
             {
-              "username": "antiperception",
+              "username": "wildchild63",
               "games": 3,
               "wins": 0,
               "draws": 0,
@@ -14968,11 +15019,11 @@
               "points": 0.0
             },
             {
-              "username": "wildchild63",
-              "games": 3,
+              "username": "antiperception",
+              "games": 4,
               "wins": 0,
               "draws": 0,
-              "losses": 3,
+              "losses": 4,
               "points": 0.0
             },
             {
@@ -18602,15 +18653,15 @@
       "points": 8.0
     },
     {
-      "username": "antiperception",
-      "games": 11,
+      "username": "rocgg",
+      "games": 12,
       "wins": 8,
       "draws": 0,
-      "losses": 3,
+      "losses": 4,
       "points": 8.0
     },
     {
-      "username": "rocgg",
+      "username": "antiperception",
       "games": 12,
       "wins": 8,
       "draws": 0,
@@ -19402,6 +19453,14 @@
       "points": 2.0
     },
     {
+      "username": "ontheinkline",
+      "games": 2,
+      "wins": 2,
+      "draws": 0,
+      "losses": 0,
+      "points": 2.0
+    },
+    {
       "username": "mwmarkland",
       "games": 2,
       "wins": 2,
@@ -19699,14 +19758,6 @@
     },
     {
       "username": "book",
-      "games": 1,
-      "wins": 1,
-      "draws": 0,
-      "losses": 0,
-      "points": 1.0
-    },
-    {
-      "username": "ontheinkline",
       "games": 1,
       "wins": 1,
       "draws": 0,
@@ -20040,6 +20091,14 @@
       "draws": 1,
       "losses": 7,
       "points": 0.5
+    },
+    {
+      "username": "shuesh",
+      "games": 1,
+      "wins": 0,
+      "draws": 0,
+      "losses": 1,
+      "points": 0.0
     },
     {
       "username": "strabizmus",

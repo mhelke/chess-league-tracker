@@ -1,6 +1,48 @@
 {
   "schemaVersion": 1,
   "siteKey": "teamusa",
-  "generatedAt": "2026-10-04T23:15:36.748Z",
-  "actionItems": []
+  "generatedAt": "2026-10-05T23:17:04.759Z",
+  "actionItems": [
+    {
+      "id": "teamusa:2008400",
+      "siteKey": "teamusa",
+      "matchId": "2008400",
+      "matchName": "WCGC II 2026-27 R2: Team USA vs Team England",
+      "leagueName": "WCGC",
+      "subLeagueName": "II 2026-27",
+      "startTime": 1792051200,
+      "endTime": null,
+      "matchWebUrl": "https://www.chess.com/club/matches/2008400",
+      "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=2008400",
+      "warnings": {
+        "minNotMet": false,
+        "needPlayers": -145,
+        "playerDeficit": true,
+        "playerDeficitCount": 130,
+        "playerDeficitThreshold": 3,
+        "surgeRecruitment": false,
+        "opponentPlayersAdded24h": 291,
+        "matchStartsInDays": 10,
+        "activeBoardCount": 161,
+        "ratingDisadvantage": true,
+        "avgDiff": -219,
+        "mismatchedBoardCount": 160,
+        "mismatchedBoards": "2-161",
+        "recruitmentSuggestions": [],
+        "showRecruitmentRecommendations": true,
+        "hasTrappedHighRiskTimeout": false,
+        "hasSafeHighRiskTimeoutRemoval": true,
+        "playersWithHighTimeout": 3,
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "urgent",
+          "label": "URGENT: Action Required",
+          "reasons": [
+            "Player-count and rating deficit",
+            "More than half of boards mismatched"
+          ]
+        }
+      }
+    }
+  ]
 }

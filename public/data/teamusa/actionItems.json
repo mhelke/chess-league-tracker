@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "siteKey": "teamusa",
-  "generatedAt": "2026-10-05T23:17:04.759Z",
+  "generatedAt": "2026-10-06T23:17:47.766Z",
   "actionItems": [
     {
       "id": "teamusa:2008400",
@@ -16,23 +16,23 @@
       "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=2008400",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -145,
+        "needPlayers": -191,
         "playerDeficit": true,
-        "playerDeficitCount": 130,
+        "playerDeficitCount": 153,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": false,
-        "opponentPlayersAdded24h": 291,
-        "matchStartsInDays": 10,
-        "activeBoardCount": 161,
+        "opponentPlayersAdded24h": 69,
+        "matchStartsInDays": 9,
+        "activeBoardCount": 207,
         "ratingDisadvantage": true,
-        "avgDiff": -219,
-        "mismatchedBoardCount": 160,
-        "mismatchedBoards": "2-161",
+        "avgDiff": -179,
+        "mismatchedBoardCount": 193,
+        "mismatchedBoards": "6-16, 21, 23-24, 29-207",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
         "hasSafeHighRiskTimeoutRemoval": true,
-        "playersWithHighTimeout": 3,
+        "playersWithHighTimeout": 4,
         "hasTimeoutWarning": true,
         "status": {
           "level": "urgent",
@@ -40,6 +40,46 @@
           "reasons": [
             "Player-count and rating deficit",
             "More than half of boards mismatched"
+          ]
+        }
+      }
+    },
+    {
+      "id": "teamusa:2008452",
+      "siteKey": "teamusa",
+      "matchId": "2008452",
+      "matchName": "WCGC U21 2026-27 R2: Team USA vs Team Brazil",
+      "leagueName": "WCGC",
+      "subLeagueName": "U21 2026-27",
+      "startTime": 1792051200,
+      "endTime": null,
+      "matchWebUrl": "https://www.chess.com/club/matches/2008452",
+      "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=2008452",
+      "warnings": {
+        "minNotMet": false,
+        "needPlayers": -184,
+        "playerDeficit": false,
+        "playerDeficitCount": -165,
+        "playerDeficitThreshold": 3,
+        "surgeRecruitment": false,
+        "opponentPlayersAdded24h": 9,
+        "matchStartsInDays": 9,
+        "activeBoardCount": 27,
+        "ratingDisadvantage": false,
+        "avgDiff": 223,
+        "mismatchedBoardCount": 0,
+        "mismatchedBoards": "none",
+        "recruitmentSuggestions": [],
+        "showRecruitmentRecommendations": false,
+        "hasTrappedHighRiskTimeout": false,
+        "hasSafeHighRiskTimeoutRemoval": true,
+        "playersWithHighTimeout": 1,
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "High-risk player can be removed safely"
           ]
         }
       }

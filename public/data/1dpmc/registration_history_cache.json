@@ -1205,114 +1205,6 @@
         }
       ]
     },
-    "https://api.chess.com/pub/match/1958714": {
-      "snapshot": {
-        "our": [
-          "221953gf",
-          "adevese",
-          "calq78",
-          "devgupta40",
-          "eggsareliquidchicken",
-          "langtrys",
-          "lone_wolf_2006",
-          "paul60035"
-        ],
-        "opp": [
-          "andreas_1955",
-          "jugger29",
-          "kg4mate",
-          "marcusedwards725"
-        ]
-      },
-      "history": [
-        {
-          "ts": "2026-06-05T03:18:25Z",
-          "our": {
-            "added": [
-              "langtrys"
-            ],
-            "removed": []
-          },
-          "opp": {
-            "added": [
-              "kg4mate",
-              "marcusedwards725"
-            ],
-            "removed": []
-          }
-        },
-        {
-          "ts": "2026-06-06T03:15:29Z",
-          "our": {
-            "added": [
-              "calq78"
-            ],
-            "removed": []
-          },
-          "opp": {
-            "added": [
-              "andreas_1955"
-            ],
-            "removed": []
-          }
-        },
-        {
-          "ts": "2026-06-07T03:18:39Z",
-          "our": {
-            "added": [],
-            "removed": []
-          },
-          "opp": {
-            "added": [
-              "jugger29"
-            ],
-            "removed": []
-          }
-        },
-        {
-          "ts": "2026-06-10T03:17:02Z",
-          "our": {
-            "added": [
-              "paul60035"
-            ],
-            "removed": []
-          },
-          "opp": {
-            "added": [],
-            "removed": []
-          }
-        },
-        {
-          "ts": "2026-06-19T03:19:25Z",
-          "our": {
-            "added": [
-              "adevese",
-              "devgupta40",
-              "eggsareliquidchicken",
-              "lone_wolf_2006"
-            ],
-            "removed": []
-          },
-          "opp": {
-            "added": [],
-            "removed": []
-          }
-        },
-        {
-          "ts": "2026-06-21T03:19:23Z",
-          "our": {
-            "added": [
-              "221953gf"
-            ],
-            "removed": []
-          },
-          "opp": {
-            "added": [],
-            "removed": []
-          }
-        }
-      ]
-    },
     "https://api.chess.com/pub/match/1958944": {
       "snapshot": {
         "our": [
@@ -17080,20 +16972,21 @@
     "https://api.chess.com/pub/match/2003246": {
       "snapshot": {
         "our": {
+          "lightningtea": 1399,
           "mikesexton21": 1386,
-          "benej_6": 1375,
-          "lightningtea": 1364,
-          "bigcatanddog": 1319,
-          "plamen196565": 1255,
+          "bahlai": 1312,
+          "bigcatanddog": 1273,
+          "plamen196565": 1260,
           "nasadusthead": 1240,
-          "netnazgul": 1231
+          "netnazgul": 1229,
+          "benej_6": null
         },
         "opp": {
           "bcfitzg": 1363,
-          "dsheaf": 1363,
-          "pollakandras": 1321,
-          "cussbuss": 1301,
-          "krwilson115": 1285,
+          "dsheaf": 1361,
+          "pollakandras": 1290,
+          "cussbuss": 1284,
+          "krwilson115": 1271,
           "shrikeatb4": 1269,
           "anaxamenes": 1262,
           "redr0c": 1223,
@@ -17310,27 +17203,46 @@
             "added": [],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "bahlai",
+                "rating": 1312
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2003468": {
       "snapshot": {
         "our": {
-          "mikesexton21": 1396,
-          "lokocabral": 1366,
-          "josejesus3340": 1331,
-          "wyattwinter8": 1319,
-          "netnazgul": 1250,
-          "giampiero111": 1246,
+          "mikesexton21": 1386,
+          "lokocabral": 1384,
+          "josejesus3340": 1340,
+          "wyattwinter8": 1315,
+          "bahlai": 1312,
+          "battaglia-horacio": 1273,
+          "giampiero111": 1240,
+          "netnazgul": 1229,
           "memo_fkm": null
         },
         "opp": {
-          "alfonsodelreal": 1383,
-          "adr3118": 1344,
-          "senan013": 1334,
+          "alfonsodelreal": 1377,
+          "adr3118": 1332,
+          "senan013": 1330,
           "hummel31": 1301,
-          "daddycool19": 1269,
-          "swiip180": 1221
+          "daddycool19": 1280,
+          "swiip180": 1225,
+          "luke8193": 1205
         }
       },
       "history": [
@@ -17432,6 +17344,31 @@
           },
           "opp": {
             "added": [],
+            "removed": []
+          }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "bahlai",
+                "rating": 1312
+              },
+              {
+                "username": "battaglia-horacio",
+                "rating": 1273
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "luke8193",
+                "rating": 1205
+              }
+            ],
             "removed": []
           }
         }
@@ -17577,21 +17514,22 @@
     "https://api.chess.com/pub/match/2004008": {
       "snapshot": {
         "our": {
-          "benej_6": 1396,
-          "mikesexton21": 1396,
-          "plamen196565": 1253,
-          "netnazgul": 1250,
-          "giampiero111": 1246,
-          "nasadusthead": 1227,
+          "mikesexton21": 1386,
+          "bahlai": 1312,
+          "plamen196565": 1260,
+          "giampiero111": 1240,
+          "nasadusthead": 1240,
+          "newbmewb": 1236,
+          "netnazgul": 1229,
           "jraq00": 1215,
-          "newbmewb": 1214
+          "benej_6": null
         },
         "opp": {
-          "horsechessnut": 1378,
-          "cypherblack": 1303,
-          "prom1theus": 1298,
-          "memeid": 1235,
-          "blaze-87": 1234
+          "horsechessnut": 1344,
+          "prom1theus": 1300,
+          "cypherblack": 1294,
+          "memeid": 1227,
+          "blaze-87": 1212
         }
       },
       "history": [
@@ -17695,6 +17633,22 @@
             "added": [],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "bahlai",
+                "rating": 1312
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
         }
       ]
     },
@@ -17704,40 +17658,45 @@
           "mazmeister64": 2079,
           "ivan_ferreiro": 1928,
           "chelouk_pavek": 1874,
+          "thewoodman11": 1842,
+          "jalanopi": 1829,
+          "lavendermojito": 1825,
           "chabeldecaissa": 1822,
-          "lavendermojito": 1815,
-          "84sagar": 1802,
-          "bekensho": 1802,
-          "lezama1972": 1794,
+          "bekensho": 1807,
+          "84sagar": 1798,
+          "lezama1972": 1795,
           "masterdean00": 1770,
-          "alfazerozero": 1762,
-          "andy67123": 1745,
+          "alfazerozero": 1758,
+          "andy67123": 1746,
           "lampshadow": 1700,
+          "belgianking98": 1691,
+          "kingonastring": 1632,
+          "mastermatthew52": 1632,
           "elefant82": 1631,
-          "mastermatthew52": 1628,
-          "kingonastring": 1627,
-          "buchidele": 1614,
-          "ninburg": 1608,
-          "kyljys": 1607,
-          "fdo73": 1598,
+          "buchidele": 1625,
+          "ninburg": 1609,
+          "fdo73": 1602,
+          "kyljys": 1577,
           "rxmarxmallow": 1501,
           "seikoq": 1490,
           "lepiter": 1457,
-          "arni2808h": 1451,
-          "persepolis46": 1447,
-          "toniq": 1435,
+          "arni2808h": 1455,
+          "persepolis46": 1449,
+          "toniq": 1436,
           "markusmaurer": 1413,
-          "benej_6": 1395,
+          "benej_6": 1402,
           "sirbabalot": 1393,
           "mikesexton21": 1386,
+          "andychess4321": 1377,
           "sawa-yan": 1348,
           "fisch-brasil": 1315,
-          "zeerobs": 1310,
+          "zeerobs": 1256,
           "nasadusthead": 1240,
-          "kikifov": 1160,
-          "teck611": 1126,
-          "cssandrea": 968,
-          "alangoode108": 939,
+          "kikifov": 1164,
+          "teck611": 1118,
+          "pawngrabber1204": 1089,
+          "cssandrea": 974,
+          "alangoode108": 936,
           "gogsy1999": 932,
           "nooksack": 924
         },
@@ -17746,9 +17705,11 @@
           "ajedrezlord": 2025,
           "aqdes": 1968,
           "mitul": 1922,
-          "pondamnagan1": 1841,
-          "number1dailyplayer": 1823,
-          "joelamhicap": 1816,
+          "number1dailyplayer": 1859,
+          "nuclear-viking": 1842,
+          "pondamnagan1": 1842,
+          "narekhovhannisyan2009": 1831,
+          "joelamhicap": 1819,
           "deweynaught": 1815,
           "rocknmetalforever45": 1772,
           "thangavel_33": 1771,
@@ -17758,17 +17719,18 @@
           "aninomus77894": 1676,
           "thanhtikesoe57": 1651,
           "kangaroo-rules": 1600,
-          "sergeyzykov": 1559,
-          "0velsegjormester": 1534,
-          "refaatalhosami": 1524,
+          "sergeyzykov": 1573,
+          "0velsegjormester": 1540,
+          "refaatalhosami": 1535,
           "taarushgoel": 1511,
-          "pawelshylko-shablowski": 1479,
+          "pawelshylko-shablowski": 1495,
           "brianchesscake": 1455,
-          "lesmok15": 1401,
+          "lesmok15": 1404,
+          "justachesscat11": 1362,
           "pikalong88": 1301,
           "darkelfxxx": 1297,
-          "carameloderegaliz": 1269,
-          "kohlithebest": 1237,
+          "carameloderegaliz": 1277,
+          "kohlithebest": 1240,
           "prajgtr10": 868
         }
       },
@@ -18253,37 +18215,85 @@
             ],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "andychess4321",
+                "rating": 1377
+              },
+              {
+                "username": "belgianking98",
+                "rating": 1691
+              },
+              {
+                "username": "jalanopi",
+                "rating": 1829
+              },
+              {
+                "username": "pawngrabber1204",
+                "rating": 1089
+              },
+              {
+                "username": "thewoodman11",
+                "rating": 1842
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "justachesscat11",
+                "rating": 1362
+              },
+              {
+                "username": "narekhovhannisyan2009",
+                "rating": 1831
+              },
+              {
+                "username": "nuclear-viking",
+                "rating": 1842
+              }
+            ],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2004238": {
       "snapshot": {
         "our": {
-          "lezama1972": 1729,
-          "vystress": 1555,
-          "persepolis46": 1549,
-          "mastermatthew52": 1536,
-          "kyljys": 1514,
+          "lezama1972": 1735,
+          "persepolis46": 1557,
+          "vystress": 1552,
+          "mastermatthew52": 1537,
+          "kyljys": 1517,
+          "atos077": 1513,
+          "pawngrabber1204": 1440,
           "ninburg": 1417,
-          "benej_6": 1228,
+          "benej_6": 1243,
+          "buchidele": 1212,
           "sirbabalot": 1207,
-          "buchidele": 1193,
-          "lightningtea": 1181,
-          "makar0504": 1100,
-          "plamen196565": 1094,
-          "arni2808h": 1016,
+          "lightningtea": 1166,
+          "plamen196565": 1093,
+          "makar0504": 1071,
+          "arni2808h": 1001,
           "fisch-brasil": 843,
           "alangoode108": 660
         },
         "opp": {
           "grandmasterbit": 1571,
           "fraygerundio": 1441,
-          "trotsky77": 1346,
+          "trotsky77": 1354,
           "davood5541": 1172,
-          "mujason34": 1114,
+          "mujason34": 1116,
           "sasapaunovic": 1029,
           "nick59349": 1024,
-          "iuriiiemelianov": 885
+          "iuriiiemelianov": 881,
+          "bekmop_x": 724
         }
       },
       "history": [
@@ -18454,6 +18464,31 @@
             ],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "atos077",
+                "rating": 1513
+              },
+              {
+                "username": "pawngrabber1204",
+                "rating": 1440
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "bekmop_x",
+                "rating": 724
+              }
+            ],
+            "removed": []
+          }
         }
       ]
     },
@@ -18603,22 +18638,24 @@
     "https://api.chess.com/pub/match/2004376": {
       "snapshot": {
         "our": {
-          "benej_6": 1396,
-          "mikesexton21": 1396,
-          "fisch-brasil": 1328,
-          "wyattwinter8": 1319,
-          "plamen196565": 1253,
-          "nasadusthead": 1227,
+          "mikesexton21": 1386,
+          "andychess4321": 1377,
+          "fisch-brasil": 1315,
+          "wyattwinter8": 1315,
+          "bahlai": 1312,
+          "plamen196565": 1260,
+          "nasadusthead": 1240,
+          "newbmewb": 1236,
           "jraq00": 1215,
-          "newbmewb": 1214
+          "benej_6": null
         },
         "opp": {
+          "ivan_titan": 1366,
           "antinkarp": 1346,
-          "ivan_titan": 1346,
           "savitch333": 1333,
           "consum7aliis7inserviendo": 1307,
-          "zhucher": 1260,
-          "a_anton18": 1256
+          "a_anton18": 1282,
+          "zhucher": 1247
         }
       },
       "history": [
@@ -18718,6 +18755,26 @@
               {
                 "username": "mikesexton21",
                 "rating": 1396
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "andychess4321",
+                "rating": 1377
+              },
+              {
+                "username": "bahlai",
+                "rating": 1312
               }
             ],
             "removed": []
@@ -19480,26 +19537,29 @@
     "https://api.chess.com/pub/match/2006246": {
       "snapshot": {
         "our": {
-          "chesskingcasa": 1680,
-          "iscanderabdullah": 1591,
+          "the1863": 2045,
+          "chesskingcasa": 1691,
+          "iscanderabdullah": 1602,
           "arnav880": 1570,
-          "vystress": 1544,
+          "vystress": 1552,
           "mastermatthew52": 1537,
           "lepiter": 1528,
-          "kyljys": 1506,
+          "kyljys": 1517,
+          "pawngrabber1204": 1440,
+          "circustent": 1434,
           "ninburg": 1417,
           "stol10berg": 1415
         },
         "opp": {
-          "danilocuellar": 1915,
-          "zwischenzuegle": 1842,
+          "danilocuellar": 1884,
+          "zwischenzuegle": 1829,
           "papillian": 1782,
-          "universalisnl": 1600,
+          "universalisnl": 1603,
           "gazpachito": 1589,
           "mattisian": 1484,
           "cyrille85": 1464,
           "admarc": 1409,
-          "martin_08": 1401
+          "martin_08": null
         }
       },
       "history": [
@@ -19624,6 +19684,30 @@
             "added": [],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "circustent",
+                "rating": 1434
+              },
+              {
+                "username": "pawngrabber1204",
+                "rating": 1440
+              },
+              {
+                "username": "the1863",
+                "rating": 2045
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
         }
       ]
     },
@@ -19631,16 +19715,17 @@
       "snapshot": {
         "our": {
           "acrach": 1786,
-          "lezama1972": 1730,
-          "chesskingcasa": 1680,
+          "lezama1972": 1735,
+          "chesskingcasa": 1691,
+          "jalanopi": 1591,
           "lepiter": 1528,
-          "kyljys": 1506,
+          "kyljys": 1517,
           "ninburg": 1417,
           "stol10berg": 1415
         },
         "opp": {
           "mls9al": 1927,
-          "jesuliqui": 1756,
+          "jesuliqui": 1757,
           "cfernandezdepablo": 1693,
           "eltorzon": 1635,
           "sandroziarecki": 1572,
@@ -19764,24 +19849,41 @@
             ],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "jalanopi",
+                "rating": 1591
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2006460": {
       "snapshot": {
         "our": {
-          "lezama1972": 1728,
-          "mastermatthew52": 1536,
+          "lezama1972": 1735,
+          "mastermatthew52": 1537,
           "lepiter": 1528,
-          "kyljys": 1514,
+          "kyljys": 1517,
+          "pawngrabber1204": 1440,
           "ninburg": 1417,
           "stol10berg": 1415
         },
         "opp": {
           "yriikudryashov": 1741,
           "bogdan20122": 1644,
-          "holosenin": 1598,
-          "chayka": 1541
+          "holosenin": 1600,
+          "chayka": 1543
         }
       },
       "history": [
@@ -19849,16 +19951,33 @@
             "added": [],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "pawngrabber1204",
+                "rating": 1440
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2006844": {
       "snapshot": {
         "our": {
-          "lezama1972": 1728,
-          "mastermatthew52": 1536,
+          "lezama1972": 1735,
+          "mastermatthew52": 1537,
           "lepiter": 1528,
-          "kyljys": 1514,
+          "kyljys": 1517,
+          "pawngrabber1204": 1440,
           "ninburg": 1417
         },
         "opp": {}
@@ -19919,36 +20038,54 @@
             "added": [],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "pawngrabber1204",
+                "rating": 1440
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2007354": {
       "snapshot": {
         "our": {
-          "lezama1972": 1730,
+          "lezama1972": 1735,
           "arnav880": 1570,
           "mastermatthew52": 1537,
-          "kyljys": 1514,
+          "kyljys": 1517,
+          "pawngrabber1204": 1440,
           "ninburg": 1417,
-          "mpbmusic": 1247,
-          "benej_6": 1228,
+          "mpbmusic": 1295,
+          "benej_6": 1243,
+          "jonhanu": 1195,
           "meep7_up": 1175,
-          "jonhanu": 1126,
           "giridharka07": 1083,
           "mrcahoon": 1078,
           "russdomingo": 1040,
           "dchapman196": 1024,
           "18032013dung": 1009,
-          "marcel795": 722,
+          "marcel795": 741,
           "alangoode108": 660,
           "graybeard206": 400
         },
         "opp": {
           "biyangdo": 1881,
-          "leitzwolf": 1715,
-          "orval84": 1438,
+          "leitzwolf": 1722,
+          "orval84": 1448,
           "sumand": 1432,
-          "tournamentix": 1251,
+          "fitil": 1305,
+          "tournamentix": 1268,
           "ruband": 970
         }
       },
@@ -20094,45 +20231,68 @@
             "added": [],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "pawngrabber1204",
+                "rating": 1440
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "fitil",
+                "rating": 1305
+              }
+            ],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2007406": {
       "snapshot": {
         "our": {
-          "lezama1972": 1794,
+          "lezama1972": 1795,
+          "belgianking98": 1691,
           "bursey01": 1682,
-          "mastermatthew52": 1631,
-          "ninburg": 1607,
-          "kyljys": 1598,
-          "jonhanu": 1595,
-          "elpadrinoaa": 1552,
-          "samotgg": 1497,
-          "badlandrew646": 1463,
-          "arni2808h": 1451,
-          "russdomingo": 1402,
-          "benej_6": 1389,
+          "mastermatthew52": 1632,
+          "ninburg": 1609,
+          "jonhanu": 1586,
+          "kyljys": 1577,
+          "elpadrinoaa": 1543,
+          "samotgg": 1499,
+          "arni2808h": 1455,
+          "badlandrew646": 1455,
+          "benej_6": 1402,
+          "russdomingo": 1378,
           "antonarts": 1317,
-          "bahlai": 1305,
-          "mrcahoon": 1261,
-          "plamen196565": 1254,
-          "netnazgul": 1226,
-          "kikifov": 1170,
-          "atcuba": 1160,
-          "teck611": 1126,
-          "adevese": 1029,
-          "sasaycudasay": 976,
-          "cssandrea": 971,
-          "alangoode108": 937,
-          "precious837": 856,
+          "bahlai": 1312,
+          "mrcahoon": 1284,
+          "plamen196565": 1260,
+          "netnazgul": 1229,
+          "kikifov": 1164,
+          "atcuba": 1152,
+          "teck611": 1118,
+          "pawngrabber1204": 1089,
+          "adevese": 1013,
+          "cssandrea": 974,
+          "alangoode108": 936,
+          "sasaycudasay": 931,
+          "precious837": 875,
           "bekensho": null
         },
         "opp": {
-          "mbiu": 1658,
-          "rossi6699": 1589,
-          "edwardlaskerjr": 1409,
-          "zatoichi1": 1275,
-          "kikiok": 1165
+          "mbiu": 1675,
+          "rossi6699": 1583,
+          "edwardlaskerjr": 1410,
+          "zatoichi1": 1266,
+          "kikiok": 1164
         }
       },
       "history": [
@@ -20330,19 +20490,42 @@
             "added": [],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "belgianking98",
+                "rating": 1691
+              },
+              {
+                "username": "pawngrabber1204",
+                "rating": 1089
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2008344": {
       "snapshot": {
         "our": {
-          "iraj6544": 1312,
+          "ballashawtcalla": 1380,
+          "iraj6544": 1320,
+          "gigikekeluk": 1267,
           "benej_6": 1243,
           "buchidele": 1212,
-          "bahlai": 1180,
-          "lightningtea": 1173,
-          "plamen196565": 1092,
-          "arni2808h": 1017,
+          "emiliocba": 1200,
+          "bahlai": 1182,
+          "lightningtea": 1166,
+          "plamen196565": 1093,
+          "arni2808h": 1001,
           "kikifov": 921,
           "fisch-brasil": 843,
           "nooksack": 811,
@@ -20355,9 +20538,10 @@
           "peter48500": 1377,
           "alfonsodelreal": 1305,
           "starlias": 1285,
-          "swiip180": 924,
+          "swiip180": 1136,
           "chouchoupi": 833,
           "landersletigre9": 813,
+          "tdmtdm": 792,
           "ankh-sun-tet": 770,
           "jagstag": 592,
           "j-021": 482,
@@ -20519,6 +20703,35 @@
             ],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "ballashawtcalla",
+                "rating": 1380
+              },
+              {
+                "username": "emiliocba",
+                "rating": 1200
+              },
+              {
+                "username": "gigikekeluk",
+                "rating": 1267
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "tdmtdm",
+                "rating": 792
+              }
+            ],
+            "removed": []
+          }
         }
       ]
     },
@@ -20526,30 +20739,34 @@
       "snapshot": {
         "our": {
           "iraj6544": 1312,
+          "gigikekeluk": 1267,
           "buchidele": 1212,
-          "lightningtea": 1181,
+          "emiliocba": 1200,
+          "bahlai": 1182,
+          "lightningtea": 1166,
           "ra1vor": 1147,
-          "plamen196565": 1094,
+          "plamen196565": 1093,
           "mrcahoon": 1078,
-          "arni2808h": 1016,
+          "dchapman196": 1024,
+          "arni2808h": 1001,
           "wiedenbrcker": 959,
           "evgenyi1420": 919,
           "nooksack": 811,
           "alangoode108": 660
         },
         "opp": {
-          "sergeyzykov": 1334,
+          "sergeyzykov": 1277,
           "refaatalhosami": 1265,
           "amadeus": 1222,
           "hario3": 1204,
           "dokolicar": 1102,
-          "hoffmasta": 1019,
+          "hoffmasta": 1047,
           "wvbowler300": 1000,
           "keeganmaynard": 936,
           "mpalyvoda": 930,
           "nadjim13": 921,
-          "yashwant1972": 895,
-          "aarcaro": 889,
+          "aarcaro": 916,
+          "yashwant1972": 885,
           "marlo-stans": 773,
           "emtybrain": 599,
           "bonebox368": 483,
@@ -20698,22 +20915,54 @@
             ],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "bahlai",
+                "rating": 1182
+              },
+              {
+                "username": "dchapman196",
+                "rating": 1024
+              },
+              {
+                "username": "emiliocba",
+                "rating": 1200
+              },
+              {
+                "username": "gigikekeluk",
+                "rating": 1267
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2008964": {
       "snapshot": {
         "our": {
-          "iraj6544": 1312,
-          "benej_6": 1228,
+          "iraj6544": 1320,
+          "gigikekeluk": 1267,
+          "benej_6": 1243,
           "buchidele": 1212,
+          "emiliocba": 1200,
           "meep7_up": 1175,
-          "arni2808h": 1016,
+          "dchapman196": 1024,
           "18032013dung": 1009,
+          "arni2808h": 1001,
           "evgenyi1420": 919,
-          "marcel795": 719,
+          "marcel795": 741,
           "alangoode108": 660,
           "mikasa171": 651,
+          "snappypawn": 630,
           "nunut-keso": 400
         },
         "opp": {
@@ -20831,26 +21080,57 @@
             ],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "dchapman196",
+                "rating": 1024
+              },
+              {
+                "username": "emiliocba",
+                "rating": 1200
+              },
+              {
+                "username": "gigikekeluk",
+                "rating": 1267
+              },
+              {
+                "username": "snappypawn",
+                "rating": 630
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2009462": {
       "snapshot": {
         "our": {
-          "mastermatthew52": 1628,
-          "buchidele": 1614,
-          "ninburg": 1611,
-          "fdo73": 1598,
+          "lezama1972": 1795,
+          "belgianking98": 1691,
+          "mastermatthew52": 1632,
+          "buchidele": 1625,
+          "ninburg": 1609,
+          "fdo73": 1602,
           "jonhanu": 1586,
-          "badlandrew646": 1459,
-          "bahlai": 1309,
-          "battaglia-horacio": 1307
+          "badlandrew646": 1455,
+          "bahlai": 1312,
+          "battaglia-horacio": 1273
         },
         "opp": {
-          "dicualexandruion": 1596,
+          "dicualexandruion": 1602,
           "lvali40": 1431,
-          "lordonny": 1153,
-          "alexn628": 1114
+          "herghe": 1199,
+          "lordonny": 1139,
+          "alexn628": 1119
         }
       },
       "history": [
@@ -20914,24 +21194,51 @@
             ],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "belgianking98",
+                "rating": 1691
+              },
+              {
+                "username": "lezama1972",
+                "rating": 1795
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "herghe",
+                "rating": 1199
+              }
+            ],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2009466": {
       "snapshot": {
         "our": {
+          "lezama1972": 1735,
           "mastermatthew52": 1537,
-          "kyljys": 1506,
+          "kyljys": 1517,
           "ninburg": 1417,
           "buchidele": 1212,
           "jonhanu": 1195,
-          "bahlai": 1180,
+          "bahlai": 1182,
           "russdomingo": 1040,
-          "arni2808h": 1017,
+          "arni2808h": 1001,
           "alangoode108": 660
         },
         "opp": {
           "lvali40": 1283,
+          "herghe": 1150,
           "mihaimib": 1056,
           "alexn628": 969
         }
@@ -20997,45 +21304,71 @@
             ],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "lezama1972",
+                "rating": 1735
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "herghe",
+                "rating": 1150
+              }
+            ],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2009468": {
       "snapshot": {
         "our": {
-          "bekensho": 1802,
+          "bekensho": 1807,
+          "lezama1972": 1795,
           "hasankalla": 1739,
+          "belgianking98": 1691,
           "bursey01": 1682,
-          "mastermatthew52": 1628,
-          "buchidele": 1614,
-          "ninburg": 1608,
-          "kyljys": 1607,
+          "mastermatthew52": 1632,
+          "idklever": 1629,
+          "buchidele": 1626,
+          "ninburg": 1606,
           "jonhanu": 1586,
-          "badlandrew646": 1459,
+          "kyljys": 1577,
+          "arni2808h": 1455,
           "nepster": 1454,
-          "arni2808h": 1451,
-          "persepolis46": 1447,
-          "russdomingo": 1375,
-          "bahlai": 1309,
-          "battaglia-horacio": 1290,
+          "badlandrew646": 1453,
+          "persepolis46": 1449,
+          "zeth444": 1431,
+          "russdomingo": 1378,
+          "bahlai": 1312,
+          "battaglia-horacio": 1282,
           "plamen196565": 1260,
           "nasadusthead": 1240,
           "qais64r": 1238,
-          "kikifov": 1160,
-          "teck611": 1126,
+          "kikifov": 1164,
+          "teck611": 1118,
           "adevese": 1013,
-          "sasaycudasay": 969,
-          "alangoode108": 939,
+          "sasaycudasay": 955,
+          "alangoode108": 934,
           "marcel795": 872
         },
         "opp": {
-          "dicualexandruion": 1596,
+          "dicualexandruion": 1602,
           "lvali40": 1431,
           "raducioban": 1315,
           "mihaimib": 1255,
-          "kapablanca63": 1198,
+          "herghe": 1199,
+          "kapablanca63": 1187,
           "crischiriac": 1160,
-          "lordonny": 1153,
+          "lordonny": 1139,
           "alexn628": 1119
         }
       },
@@ -21180,29 +21513,70 @@
             ],
             "removed": []
           }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "belgianking98",
+                "rating": 1691
+              },
+              {
+                "username": "idklever",
+                "rating": 1629
+              },
+              {
+                "username": "lezama1972",
+                "rating": 1795
+              },
+              {
+                "username": "zeth444",
+                "rating": 1431
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "herghe",
+                "rating": 1199
+              }
+            ],
+            "removed": []
+          }
         }
       ]
     },
     "https://api.chess.com/pub/match/2009694": {
       "snapshot": {
         "our": {
+          "css373": 1305,
+          "mpbmusic": 1295,
           "jakecook4": 1274,
           "benej_6": 1243,
           "atcuba": 1222,
           "aparton": 1200,
+          "emiliocba": 1200,
           "jonhanu": 1195,
-          "bahlai": 1180,
-          "plamen196565": 1092,
-          "makar0504": 1075,
+          "bahlai": 1182,
+          "plamen196565": 1093,
+          "makar0504": 1071,
+          "russdomingo": 1040,
           "dchapman196": 1024,
-          "arni2808h": 1017,
+          "arni2808h": 1001,
+          "nasadusthead": 1000,
           "alekhinekrish": 976,
           "fisch-brasil": 843,
+          "zeth444": 800,
           "marcel795": 741,
+          "alangoode108": 660,
           "mikasa171": 651,
           "killerdentist": 400
         },
         "opp": {
+          "takestock": 1359,
           "vaclav_rozsypal": 1327,
           "mobijoe": 1298,
           "goodsaint": 1233,
@@ -21211,9 +21585,12 @@
           "nomadcreeker": 1166,
           "coeurdelyon": 1143,
           "coffee-pot": 1082,
+          "aleck_7": 1030,
           "mrw59": 1020,
+          "buttonc": 994,
           "mad_dancer": 979,
-          "marcseerup": 970
+          "marcseerup": 970,
+          "uu321": 938
         }
       },
       "history": [
@@ -21329,6 +21706,598 @@
               {
                 "username": "vaclav_rozsypal",
                 "rating": 1327
+              }
+            ],
+            "removed": []
+          }
+        },
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "alangoode108",
+                "rating": 660
+              },
+              {
+                "username": "css373",
+                "rating": 1305
+              },
+              {
+                "username": "emiliocba",
+                "rating": 1200
+              },
+              {
+                "username": "mpbmusic",
+                "rating": 1295
+              },
+              {
+                "username": "nasadusthead",
+                "rating": 1000
+              },
+              {
+                "username": "russdomingo",
+                "rating": 1040
+              },
+              {
+                "username": "zeth444",
+                "rating": 800
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "aleck_7",
+                "rating": 1030
+              },
+              {
+                "username": "buttonc",
+                "rating": 994
+              },
+              {
+                "username": "takestock",
+                "rating": 1359
+              },
+              {
+                "username": "uu321",
+                "rating": 938
+              }
+            ],
+            "removed": []
+          }
+        }
+      ]
+    },
+    "https://api.chess.com/pub/match/2010114": {
+      "snapshot": {
+        "our": {
+          "mpbmusic": 1295,
+          "gigikekeluk": 1267,
+          "benej_6": 1243,
+          "emiliocba": 1200,
+          "bahlai": 1182,
+          "arni2808h": 1001
+        },
+        "opp": {
+          "filipski73": 1104,
+          "donanza": 981
+        }
+      },
+      "history": [
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "arni2808h",
+                "rating": 1001
+              },
+              {
+                "username": "bahlai",
+                "rating": 1182
+              },
+              {
+                "username": "benej_6",
+                "rating": 1243
+              },
+              {
+                "username": "emiliocba",
+                "rating": 1200
+              },
+              {
+                "username": "gigikekeluk",
+                "rating": 1267
+              },
+              {
+                "username": "mpbmusic",
+                "rating": 1295
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "donanza",
+                "rating": 981
+              },
+              {
+                "username": "filipski73",
+                "rating": 1104
+              }
+            ],
+            "removed": []
+          }
+        }
+      ]
+    },
+    "https://api.chess.com/pub/match/2010116": {
+      "snapshot": {
+        "our": {},
+        "opp": {
+          "buukky": 1183,
+          "dragonn2024": 1154,
+          "philip744547": 1148,
+          "lockmasterni": 1139,
+          "haashiraama_senju": 1131,
+          "hugo-s-alvarez": 1131,
+          "olafstop": 1113,
+          "to296": 1063,
+          "noss_feratu": 1060,
+          "yashwant1972": 980,
+          "luck66": 978,
+          "spm2023": 879,
+          "jamesrock7": 878,
+          "himahigazi": 838,
+          "real_quetzalcoatl": 802,
+          "kerri-jo": null
+        }
+      },
+      "history": [
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "buukky",
+                "rating": 1183
+              },
+              {
+                "username": "dragonn2024",
+                "rating": 1154
+              },
+              {
+                "username": "haashiraama_senju",
+                "rating": 1131
+              },
+              {
+                "username": "himahigazi",
+                "rating": 838
+              },
+              {
+                "username": "hugo-s-alvarez",
+                "rating": 1131
+              },
+              {
+                "username": "jamesrock7",
+                "rating": 878
+              },
+              {
+                "username": "kerri-jo",
+                "rating": null
+              },
+              {
+                "username": "lockmasterni",
+                "rating": 1139
+              },
+              {
+                "username": "luck66",
+                "rating": 978
+              },
+              {
+                "username": "noss_feratu",
+                "rating": 1060
+              },
+              {
+                "username": "olafstop",
+                "rating": 1113
+              },
+              {
+                "username": "philip744547",
+                "rating": 1148
+              },
+              {
+                "username": "real_quetzalcoatl",
+                "rating": 802
+              },
+              {
+                "username": "spm2023",
+                "rating": 879
+              },
+              {
+                "username": "to296",
+                "rating": 1063
+              },
+              {
+                "username": "yashwant1972",
+                "rating": 980
+              }
+            ],
+            "removed": []
+          }
+        }
+      ]
+    },
+    "https://api.chess.com/pub/match/2010118": {
+      "snapshot": {
+        "our": {
+          "andy67123": 1746,
+          "mastermatthew52": 1632,
+          "ninburg": 1609,
+          "kyljys": 1577,
+          "killerdentist": 1508,
+          "arni2808h": 1455,
+          "badlandrew646": 1455,
+          "persepolis46": 1449,
+          "benej_6": 1402,
+          "bahlai": 1312,
+          "nasadusthead": 1240,
+          "qais64r": 1238,
+          "chesstonkutch": 1047,
+          "adevese": 1013,
+          "sasaycudasay": 931,
+          "langtrys": 904,
+          "marcel795": 872
+        },
+        "opp": {
+          "marians57": 1551,
+          "predadan79": 1460,
+          "sadbat1122": 1446,
+          "gigel_bastan": 1423,
+          "raducioban": 1315,
+          "filipski73": 1231,
+          "i-was-playing-fair": 1224,
+          "kapablanca63": 1190,
+          "emiliann": 1027,
+          "danibuia": 959
+        }
+      },
+      "history": [
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "adevese",
+                "rating": 1013
+              },
+              {
+                "username": "andy67123",
+                "rating": 1746
+              },
+              {
+                "username": "arni2808h",
+                "rating": 1455
+              },
+              {
+                "username": "badlandrew646",
+                "rating": 1455
+              },
+              {
+                "username": "bahlai",
+                "rating": 1312
+              },
+              {
+                "username": "benej_6",
+                "rating": 1402
+              },
+              {
+                "username": "chesstonkutch",
+                "rating": 1047
+              },
+              {
+                "username": "killerdentist",
+                "rating": 1508
+              },
+              {
+                "username": "kyljys",
+                "rating": 1577
+              },
+              {
+                "username": "langtrys",
+                "rating": 904
+              },
+              {
+                "username": "marcel795",
+                "rating": 872
+              },
+              {
+                "username": "mastermatthew52",
+                "rating": 1632
+              },
+              {
+                "username": "nasadusthead",
+                "rating": 1240
+              },
+              {
+                "username": "ninburg",
+                "rating": 1609
+              },
+              {
+                "username": "persepolis46",
+                "rating": 1449
+              },
+              {
+                "username": "qais64r",
+                "rating": 1238
+              },
+              {
+                "username": "sasaycudasay",
+                "rating": 931
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "danibuia",
+                "rating": 959
+              },
+              {
+                "username": "emiliann",
+                "rating": 1027
+              },
+              {
+                "username": "filipski73",
+                "rating": 1231
+              },
+              {
+                "username": "gigel_bastan",
+                "rating": 1423
+              },
+              {
+                "username": "i-was-playing-fair",
+                "rating": 1224
+              },
+              {
+                "username": "kapablanca63",
+                "rating": 1190
+              },
+              {
+                "username": "marians57",
+                "rating": 1551
+              },
+              {
+                "username": "predadan79",
+                "rating": 1460
+              },
+              {
+                "username": "raducioban",
+                "rating": 1315
+              },
+              {
+                "username": "sadbat1122",
+                "rating": 1446
+              }
+            ],
+            "removed": []
+          }
+        }
+      ]
+    },
+    "https://api.chess.com/pub/match/2010238": {
+      "snapshot": {
+        "our": {
+          "neilbuckeye": 1548,
+          "elpadrinoaa": 1543,
+          "giuseppesessanta": 1521,
+          "killerdentist": 1508,
+          "seikoq": 1490,
+          "arni2808h": 1455,
+          "persepolis46": 1449,
+          "mpbmusic": 1432,
+          "benej_6": 1402,
+          "josejesus3340": 1340,
+          "bahlai": 1312,
+          "plamen196565": 1260,
+          "nasadusthead": 1240,
+          "kikifov": 1164,
+          "congmark": 1152,
+          "chesstonkutch": 1047,
+          "snappypawn": 928,
+          "marcel795": 872,
+          "mikasa171": 851
+        },
+        "opp": {
+          "silasa22": 1596,
+          "anatoliytapizer": 1569,
+          "karolkiss": 1442,
+          "benjaminbeaty": 1382,
+          "siepeli": 1292,
+          "clyk": 1284,
+          "jerrea": 1242,
+          "janekm85": 1233,
+          "r3chessm1": 1194,
+          "alligator13": 1160,
+          "chispayepi": 1127,
+          "andreasguster": 1098,
+          "pdzchess": 1071,
+          "michischmid": 1056,
+          "loe00998": 1036,
+          "inu89": 965,
+          "ladko": 958,
+          "tim20017": 904,
+          "quasarator": 878
+        }
+      },
+      "history": [
+        {
+          "ts": "2026-10-09T23:13:46Z",
+          "our": {
+            "added": [
+              {
+                "username": "arni2808h",
+                "rating": 1455
+              },
+              {
+                "username": "bahlai",
+                "rating": 1312
+              },
+              {
+                "username": "benej_6",
+                "rating": 1402
+              },
+              {
+                "username": "chesstonkutch",
+                "rating": 1047
+              },
+              {
+                "username": "congmark",
+                "rating": 1152
+              },
+              {
+                "username": "elpadrinoaa",
+                "rating": 1543
+              },
+              {
+                "username": "giuseppesessanta",
+                "rating": 1521
+              },
+              {
+                "username": "josejesus3340",
+                "rating": 1340
+              },
+              {
+                "username": "kikifov",
+                "rating": 1164
+              },
+              {
+                "username": "killerdentist",
+                "rating": 1508
+              },
+              {
+                "username": "marcel795",
+                "rating": 872
+              },
+              {
+                "username": "mikasa171",
+                "rating": 851
+              },
+              {
+                "username": "mpbmusic",
+                "rating": 1432
+              },
+              {
+                "username": "nasadusthead",
+                "rating": 1240
+              },
+              {
+                "username": "neilbuckeye",
+                "rating": 1548
+              },
+              {
+                "username": "persepolis46",
+                "rating": 1449
+              },
+              {
+                "username": "plamen196565",
+                "rating": 1260
+              },
+              {
+                "username": "seikoq",
+                "rating": 1490
+              },
+              {
+                "username": "snappypawn",
+                "rating": 928
+              }
+            ],
+            "removed": []
+          },
+          "opp": {
+            "added": [
+              {
+                "username": "alligator13",
+                "rating": 1160
+              },
+              {
+                "username": "anatoliytapizer",
+                "rating": 1569
+              },
+              {
+                "username": "andreasguster",
+                "rating": 1098
+              },
+              {
+                "username": "benjaminbeaty",
+                "rating": 1382
+              },
+              {
+                "username": "chispayepi",
+                "rating": 1127
+              },
+              {
+                "username": "clyk",
+                "rating": 1284
+              },
+              {
+                "username": "inu89",
+                "rating": 965
+              },
+              {
+                "username": "janekm85",
+                "rating": 1233
+              },
+              {
+                "username": "jerrea",
+                "rating": 1242
+              },
+              {
+                "username": "karolkiss",
+                "rating": 1442
+              },
+              {
+                "username": "ladko",
+                "rating": 958
+              },
+              {
+                "username": "loe00998",
+                "rating": 1036
+              },
+              {
+                "username": "michischmid",
+                "rating": 1056
+              },
+              {
+                "username": "pdzchess",
+                "rating": 1071
+              },
+              {
+                "username": "quasarator",
+                "rating": 878
+              },
+              {
+                "username": "r3chessm1",
+                "rating": 1194
+              },
+              {
+                "username": "siepeli",
+                "rating": 1292
+              },
+              {
+                "username": "silasa22",
+                "rating": 1596
+              },
+              {
+                "username": "tim20017",
+                "rating": 904
               }
             ],
             "removed": []

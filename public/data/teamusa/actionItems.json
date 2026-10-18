@@ -1,6 +1,88 @@
 {
   "schemaVersion": 1,
   "siteKey": "teamusa",
-  "generatedAt": "2026-10-17T23:13:45.126Z",
-  "actionItems": []
+  "generatedAt": "2026-10-18T23:14:37.643Z",
+  "actionItems": [
+    {
+      "id": "teamusa:2013346",
+      "siteKey": "teamusa",
+      "matchId": "2013346",
+      "matchName": "WCGC 2026/2027 R3: Team Italia contro Team  USA",
+      "leagueName": "WCGC",
+      "subLeagueName": "2026/2027",
+      "startTime": 1793516400,
+      "endTime": null,
+      "matchWebUrl": "https://www.chess.com/club/matches/2013346",
+      "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=2013346",
+      "warnings": {
+        "minNotMet": false,
+        "needPlayers": -190,
+        "playerDeficit": false,
+        "playerDeficitCount": -148,
+        "playerDeficitThreshold": 3,
+        "surgeRecruitment": false,
+        "opponentPlayersAdded24h": 58,
+        "matchStartsInDays": 14,
+        "activeBoardCount": 58,
+        "ratingDisadvantage": false,
+        "avgDiff": 484,
+        "mismatchedBoardCount": 0,
+        "mismatchedBoards": "none",
+        "recruitmentSuggestions": [],
+        "showRecruitmentRecommendations": false,
+        "hasTrappedHighRiskTimeout": false,
+        "hasSafeHighRiskTimeoutRemoval": true,
+        "playersWithHighTimeout": 1,
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "High-risk player can be removed safely"
+          ]
+        }
+      }
+    },
+    {
+      "id": "teamusa:2013344",
+      "siteKey": "teamusa",
+      "matchId": "2013344",
+      "matchName": "WCGC U21 2026-27 R3: Chess Team Holland v.s. Team  USA",
+      "leagueName": "WCGC",
+      "subLeagueName": "U21 2026-27",
+      "startTime": 1793520000,
+      "endTime": null,
+      "matchWebUrl": "https://www.chess.com/club/matches/2013344",
+      "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=2013344",
+      "warnings": {
+        "minNotMet": false,
+        "needPlayers": -47,
+        "playerDeficit": true,
+        "playerDeficitCount": 58,
+        "playerDeficitThreshold": 3,
+        "surgeRecruitment": false,
+        "opponentPlayersAdded24h": 113,
+        "matchStartsInDays": 14,
+        "activeBoardCount": 55,
+        "ratingDisadvantage": true,
+        "avgDiff": -168,
+        "mismatchedBoardCount": 43,
+        "mismatchedBoards": "13-55",
+        "recruitmentSuggestions": [],
+        "showRecruitmentRecommendations": true,
+        "hasTrappedHighRiskTimeout": false,
+        "hasSafeHighRiskTimeoutRemoval": true,
+        "playersWithHighTimeout": 1,
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "urgent",
+          "label": "URGENT: Action Required",
+          "reasons": [
+            "Player-count and rating deficit",
+            "More than half of boards mismatched"
+          ]
+        }
+      }
+    }
+  ]
 }

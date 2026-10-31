@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-31T16:12:18Z",
+  "generatedAt": "2026-10-31T23:11:17Z",
   "riskThresholdPercent": 25.0,
   "riskConfig": {
     "highTimeoutPct": 50.0,
@@ -3008,10 +3008,10 @@
       "memberServiceTimeoutPercent": 42.0,
       "dailyRating": 1616,
       "rating960": 1545,
-      "totalLeagueTimeouts90Days": 1,
+      "totalLeagueTimeouts90Days": 2,
       "subLeagueTimeouts": {
         "WL": {
-          "2026": 3,
+          "2026": 4,
           "Chess960 2026": 4
         }
       },
@@ -3025,13 +3025,13 @@
           "lastTimeoutDate": null
         },
         "3day": {
-          "count": 1,
+          "count": 3,
           "lastTimeoutDate": "2026-10-31"
         }
       },
       "riskFlag": true,
       "riskLevel": "MEDIUM",
-      "riskReason": "Medium risk: timeout ratio 46%, 7 sub-league timeout(s), 1 recent daily timeout(s)."
+      "riskReason": "Medium risk: timeout ratio 46%, 8 sub-league timeout(s), 3 recent daily timeout(s)."
     },
     "el13andido": {
       "timeoutPercent": 0.0,

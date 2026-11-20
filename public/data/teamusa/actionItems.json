@@ -1,6 +1,128 @@
 {
   "schemaVersion": 1,
   "siteKey": "teamusa",
-  "generatedAt": "2026-11-19T23:10:40.199Z",
-  "actionItems": []
+  "generatedAt": "2026-11-20T23:11:21.746Z",
+  "actionItems": [
+    {
+      "id": "teamusa:5002066",
+      "siteKey": "teamusa",
+      "matchId": "5002066",
+      "matchName": "1WL 2027 U1200 16+ R1a: Team USA vs Team Scotland",
+      "leagueName": "1WL",
+      "subLeagueName": "2027 U1200 16+ R1a",
+      "startTime": 1795939200,
+      "endTime": null,
+      "matchWebUrl": "https://www.chess.com/club/matches/5002066",
+      "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=5002066",
+      "warnings": {
+        "minNotMet": false,
+        "needPlayers": -62,
+        "playerDeficit": false,
+        "playerDeficitCount": -47,
+        "playerDeficitThreshold": 3,
+        "surgeRecruitment": false,
+        "opponentPlayersAdded24h": 0,
+        "matchStartsInDays": 9,
+        "activeBoardCount": 31,
+        "ratingDisadvantage": false,
+        "avgDiff": 127,
+        "mismatchedBoardCount": 0,
+        "mismatchedBoards": "none",
+        "recruitmentSuggestions": [],
+        "showRecruitmentRecommendations": false,
+        "hasTrappedHighRiskTimeout": false,
+        "hasSafeHighRiskTimeoutRemoval": true,
+        "playersWithHighTimeout": 1,
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "High-risk player can be removed safely"
+          ]
+        }
+      }
+    },
+    {
+      "id": "teamusa:5004064",
+      "siteKey": "teamusa",
+      "matchId": "5004064",
+      "matchName": "WCGC II 2026-27 R5: Team USA vs Team Argentina",
+      "leagueName": "WCGC",
+      "subLeagueName": "II 2026-27",
+      "startTime": 1796112000,
+      "endTime": null,
+      "matchWebUrl": "https://www.chess.com/club/matches/5004064",
+      "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=5004064",
+      "warnings": {
+        "minNotMet": false,
+        "needPlayers": -148,
+        "playerDeficit": false,
+        "playerDeficitCount": -124,
+        "playerDeficitThreshold": 3,
+        "surgeRecruitment": false,
+        "opponentPlayersAdded24h": 40,
+        "matchStartsInDays": 11,
+        "activeBoardCount": 40,
+        "ratingDisadvantage": false,
+        "avgDiff": 217,
+        "mismatchedBoardCount": 0,
+        "mismatchedBoards": "none",
+        "recruitmentSuggestions": [],
+        "showRecruitmentRecommendations": false,
+        "hasTrappedHighRiskTimeout": false,
+        "hasSafeHighRiskTimeoutRemoval": true,
+        "playersWithHighTimeout": 2,
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "High-risk player can be removed safely"
+          ]
+        }
+      }
+    },
+    {
+      "id": "teamusa:5003972",
+      "siteKey": "teamusa",
+      "matchId": "5003972",
+      "matchName": "WCGC U21 2026-27 R5: Team USA vs Team England",
+      "leagueName": "WCGC",
+      "subLeagueName": "U21 2026-27",
+      "startTime": 1796112000,
+      "endTime": null,
+      "matchWebUrl": "https://www.chess.com/club/matches/5003972",
+      "actionItemUrl": "https://teamusa.chessteamdata.com/action-items?matchId=5003972",
+      "warnings": {
+        "minNotMet": false,
+        "needPlayers": -62,
+        "playerDeficit": true,
+        "playerDeficitCount": 126,
+        "playerDeficitThreshold": 3,
+        "surgeRecruitment": false,
+        "opponentPlayersAdded24h": 196,
+        "matchStartsInDays": 11,
+        "activeBoardCount": 70,
+        "ratingDisadvantage": true,
+        "avgDiff": -231,
+        "mismatchedBoardCount": 61,
+        "mismatchedBoards": "7, 11-70",
+        "recruitmentSuggestions": [],
+        "showRecruitmentRecommendations": true,
+        "hasTrappedHighRiskTimeout": false,
+        "hasSafeHighRiskTimeoutRemoval": true,
+        "playersWithHighTimeout": 2,
+        "hasTimeoutWarning": true,
+        "status": {
+          "level": "urgent",
+          "label": "URGENT: Action Required",
+          "reasons": [
+            "Player-count and rating deficit",
+            "More than half of boards mismatched"
+          ]
+        }
+      }
+    }
+  ]
 }

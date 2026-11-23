@@ -1,48 +1,8 @@
 {
   "schemaVersion": 1,
   "siteKey": "1dpmc",
-  "generatedAt": "2026-11-22T23:10:04.057Z",
+  "generatedAt": "2026-11-23T23:11:01.161Z",
   "actionItems": [
-    {
-      "id": "1dpmc:2019942",
-      "siteKey": "1dpmc",
-      "matchId": "2019942",
-      "matchName": "PCL Fire and Ashes S2 GA R4 960: 1 day per move club vs Chess Bombers",
-      "leagueName": "PCL",
-      "subLeagueName": "Fire and Ashes S2 GA",
-      "startTime": 1795510800,
-      "endTime": null,
-      "matchWebUrl": "https://www.chess.com/club/matches/2019942",
-      "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=2019942",
-      "warnings": {
-        "minNotMet": true,
-        "needPlayers": 2,
-        "playerDeficit": false,
-        "playerDeficitCount": -4,
-        "playerDeficitThreshold": 3,
-        "surgeRecruitment": false,
-        "opponentPlayersAdded24h": 1,
-        "matchStartsInDays": 2,
-        "activeBoardCount": 4,
-        "ratingDisadvantage": false,
-        "avgDiff": 153,
-        "mismatchedBoardCount": 0,
-        "mismatchedBoards": "none",
-        "recruitmentSuggestions": [],
-        "showRecruitmentRecommendations": false,
-        "hasTrappedHighRiskTimeout": false,
-        "hasSafeHighRiskTimeoutRemoval": false,
-        "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false,
-        "status": {
-          "level": "urgent",
-          "label": "URGENT: Action Required",
-          "reasons": [
-            "Minimum roster unmet"
-          ]
-        }
-      }
-    },
     {
       "id": "1dpmc:5000244",
       "siteKey": "1dpmc",
@@ -56,18 +16,18 @@
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5000244",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -3,
+        "needPlayers": -4,
         "playerDeficit": false,
         "playerDeficitCount": 1,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": false,
-        "opponentPlayersAdded24h": 0,
-        "matchStartsInDays": 4,
-        "activeBoardCount": 13,
+        "opponentPlayersAdded24h": 1,
+        "matchStartsInDays": 3,
+        "activeBoardCount": 14,
         "ratingDisadvantage": true,
-        "avgDiff": -64,
-        "mismatchedBoardCount": 4,
-        "mismatchedBoards": "2-4, 12",
+        "avgDiff": -73,
+        "mismatchedBoardCount": 5,
+        "mismatchedBoards": "2-6",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
@@ -96,18 +56,18 @@
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5001014",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -11,
+        "needPlayers": -13,
         "playerDeficit": false,
-        "playerDeficitCount": 1,
+        "playerDeficitCount": -1,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": false,
-        "opponentPlayersAdded24h": 1,
-        "matchStartsInDays": 5,
-        "activeBoardCount": 21,
+        "opponentPlayersAdded24h": 0,
+        "matchStartsInDays": 4,
+        "activeBoardCount": 22,
         "ratingDisadvantage": true,
-        "avgDiff": -95,
-        "mismatchedBoardCount": 18,
-        "mismatchedBoards": "1-12, 14, 17-21",
+        "avgDiff": -25,
+        "mismatchedBoardCount": 9,
+        "mismatchedBoards": "2, 4-6, 8-12",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
@@ -115,11 +75,10 @@
         "playersWithHighTimeout": 0,
         "hasTimeoutWarning": false,
         "status": {
-          "level": "urgent",
-          "label": "URGENT: Action Required",
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
           "reasons": [
-            "Player-count and rating deficit",
-            "More than half of boards mismatched"
+            "9 boards need monitoring"
           ]
         }
       }
@@ -137,18 +96,18 @@
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5000828",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -10,
+        "needPlayers": -11,
         "playerDeficit": false,
-        "playerDeficitCount": 1,
+        "playerDeficitCount": 0,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": false,
         "opponentPlayersAdded24h": 0,
-        "matchStartsInDays": 7,
+        "matchStartsInDays": 6,
         "activeBoardCount": 20,
         "ratingDisadvantage": true,
-        "avgDiff": -51,
-        "mismatchedBoardCount": 9,
-        "mismatchedBoards": "2-7, 9-10, 20",
+        "avgDiff": -38,
+        "mismatchedBoardCount": 6,
+        "mismatchedBoards": "2-7",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
@@ -156,10 +115,10 @@
         "playersWithHighTimeout": 0,
         "hasTimeoutWarning": false,
         "status": {
-          "level": "urgent",
-          "label": "URGENT: Action Required",
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
           "reasons": [
-            "Player-count and rating deficit"
+            "6 boards need monitoring"
           ]
         }
       }

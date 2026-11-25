@@ -1,48 +1,8 @@
 {
   "schemaVersion": 1,
   "siteKey": "1dpmc",
-  "generatedAt": "2026-11-24T23:09:49.954Z",
+  "generatedAt": "2026-11-25T23:10:18.776Z",
   "actionItems": [
-    {
-      "id": "1dpmc:5000244",
-      "siteKey": "1dpmc",
-      "matchId": "5000244",
-      "matchName": "TCMAC GLADIATOR PLAYOFF R3 Squadron Commandos vs 1 day per move club",
-      "leagueName": "TCMAC",
-      "subLeagueName": "Gladiator Playoff",
-      "startTime": 1795690800,
-      "endTime": null,
-      "matchWebUrl": "https://www.chess.com/club/matches/5000244",
-      "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5000244",
-      "warnings": {
-        "minNotMet": false,
-        "needPlayers": -4,
-        "playerDeficit": false,
-        "playerDeficitCount": 1,
-        "playerDeficitThreshold": 3,
-        "surgeRecruitment": false,
-        "opponentPlayersAdded24h": 0,
-        "matchStartsInDays": 2,
-        "activeBoardCount": 14,
-        "ratingDisadvantage": true,
-        "avgDiff": -76,
-        "mismatchedBoardCount": 7,
-        "mismatchedBoards": "2-6, 9-10",
-        "recruitmentSuggestions": [],
-        "showRecruitmentRecommendations": true,
-        "hasTrappedHighRiskTimeout": false,
-        "hasSafeHighRiskTimeoutRemoval": false,
-        "playersWithHighTimeout": 0,
-        "hasTimeoutWarning": false,
-        "status": {
-          "level": "urgent",
-          "label": "URGENT: Action Required",
-          "reasons": [
-            "Player-count and rating deficit"
-          ]
-        }
-      }
-    },
     {
       "id": "1dpmc:5001014",
       "siteKey": "1dpmc",
@@ -56,18 +16,18 @@
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5001014",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -13,
+        "needPlayers": -14,
         "playerDeficit": false,
         "playerDeficitCount": 0,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": false,
         "opponentPlayersAdded24h": 1,
-        "matchStartsInDays": 3,
-        "activeBoardCount": 23,
+        "matchStartsInDays": 2,
+        "activeBoardCount": 24,
         "ratingDisadvantage": true,
-        "avgDiff": -48,
-        "mismatchedBoardCount": 13,
-        "mismatchedBoards": "2, 4-5, 8-15, 19-20",
+        "avgDiff": -73,
+        "mismatchedBoardCount": 18,
+        "mismatchedBoards": "2-16, 20-21, 23",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
@@ -98,16 +58,16 @@
         "minNotMet": false,
         "needPlayers": -35,
         "playerDeficit": true,
-        "playerDeficitCount": 4,
+        "playerDeficitCount": 8,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": true,
-        "opponentPlayersAdded24h": 5,
-        "matchStartsInDays": 3,
+        "opponentPlayersAdded24h": 4,
+        "matchStartsInDays": 2,
         "activeBoardCount": 45,
         "ratingDisadvantage": true,
-        "avgDiff": -19,
-        "mismatchedBoardCount": 11,
-        "mismatchedBoards": "1-4, 24, 37, 40-44",
+        "avgDiff": -52,
+        "mismatchedBoardCount": 24,
+        "mismatchedBoards": "1, 3-4, 24-28, 30-45",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
@@ -119,6 +79,7 @@
           "label": "URGENT: Action Required",
           "reasons": [
             "Player-count and rating deficit",
+            "More than half of boards mismatched",
             "Surge compounds a roster or rating deficit"
           ]
         }
@@ -137,18 +98,58 @@
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5000828",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -11,
+        "needPlayers": -12,
         "playerDeficit": false,
-        "playerDeficitCount": 1,
+        "playerDeficitCount": 0,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": false,
-        "opponentPlayersAdded24h": 1,
-        "matchStartsInDays": 5,
+        "opponentPlayersAdded24h": 0,
+        "matchStartsInDays": 4,
         "activeBoardCount": 20,
         "ratingDisadvantage": true,
-        "avgDiff": -72,
+        "avgDiff": -67,
         "mismatchedBoardCount": 8,
-        "mismatchedBoards": "1-7, 20",
+        "mismatchedBoards": "1-8",
+        "recruitmentSuggestions": [],
+        "showRecruitmentRecommendations": true,
+        "hasTrappedHighRiskTimeout": false,
+        "hasSafeHighRiskTimeoutRemoval": false,
+        "playersWithHighTimeout": 0,
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "8 boards need monitoring"
+          ]
+        }
+      }
+    },
+    {
+      "id": "1dpmc:5003890",
+      "siteKey": "1dpmc",
+      "matchId": "5003890",
+      "matchName": "1WL 2027 World Cup Candidates 15+ R1: Chess Bombers vs 1 day per move club",
+      "leagueName": "1WL",
+      "subLeagueName": "2027 World Cup Candidates 15+",
+      "startTime": 1796544000,
+      "endTime": null,
+      "matchWebUrl": "https://www.chess.com/club/matches/5003890",
+      "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5003890",
+      "warnings": {
+        "minNotMet": false,
+        "needPlayers": -6,
+        "playerDeficit": false,
+        "playerDeficitCount": -10,
+        "playerDeficitThreshold": 3,
+        "surgeRecruitment": false,
+        "opponentPlayersAdded24h": 2,
+        "matchStartsInDays": 11,
+        "activeBoardCount": 11,
+        "ratingDisadvantage": true,
+        "avgDiff": -48,
+        "mismatchedBoardCount": 7,
+        "mismatchedBoards": "1-2, 6-10",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
@@ -159,7 +160,7 @@
           "level": "urgent",
           "label": "URGENT: Action Required",
           "reasons": [
-            "Player-count and rating deficit"
+            "More than half of boards mismatched"
           ]
         }
       }

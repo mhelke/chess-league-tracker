@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "siteKey": "1dpmc",
-  "generatedAt": "2026-11-25T23:10:18.776Z",
+  "generatedAt": "2026-11-26T23:10:24.571Z",
   "actionItems": [
     {
       "id": "1dpmc:5001014",
@@ -16,18 +16,18 @@
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5001014",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -14,
+        "needPlayers": -29,
         "playerDeficit": false,
-        "playerDeficitCount": 0,
+        "playerDeficitCount": -6,
         "playerDeficitThreshold": 3,
-        "surgeRecruitment": false,
-        "opponentPlayersAdded24h": 1,
-        "matchStartsInDays": 2,
-        "activeBoardCount": 24,
+        "surgeRecruitment": true,
+        "opponentPlayersAdded24h": 9,
+        "matchStartsInDays": 1,
+        "activeBoardCount": 33,
         "ratingDisadvantage": true,
-        "avgDiff": -73,
-        "mismatchedBoardCount": 18,
-        "mismatchedBoards": "2-16, 20-21, 23",
+        "avgDiff": -15,
+        "mismatchedBoardCount": 13,
+        "mismatchedBoards": "2, 4-7, 12, 16-22",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
@@ -38,7 +38,7 @@
           "level": "urgent",
           "label": "URGENT: Action Required",
           "reasons": [
-            "More than half of boards mismatched"
+            "Surge compounds a roster or rating deficit"
           ]
         }
       }
@@ -56,18 +56,18 @@
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5000586",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -35,
-        "playerDeficit": true,
-        "playerDeficitCount": 8,
+        "needPlayers": -56,
+        "playerDeficit": false,
+        "playerDeficitCount": 1,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": true,
-        "opponentPlayersAdded24h": 4,
-        "matchStartsInDays": 2,
-        "activeBoardCount": 45,
-        "ratingDisadvantage": true,
-        "avgDiff": -52,
-        "mismatchedBoardCount": 24,
-        "mismatchedBoards": "1, 3-4, 24-28, 30-45",
+        "opponentPlayersAdded24h": 14,
+        "matchStartsInDays": 1,
+        "activeBoardCount": 66,
+        "ratingDisadvantage": false,
+        "avgDiff": 147,
+        "mismatchedBoardCount": 0,
+        "mismatchedBoards": "none",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
@@ -75,12 +75,10 @@
         "playersWithHighTimeout": 0,
         "hasTimeoutWarning": false,
         "status": {
-          "level": "urgent",
-          "label": "URGENT: Action Required",
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
           "reasons": [
-            "Player-count and rating deficit",
-            "More than half of boards mismatched",
-            "Surge compounds a roster or rating deficit"
+            "Opponent leads in players; we lead in rating"
           ]
         }
       }
@@ -98,18 +96,18 @@
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5000828",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -12,
+        "needPlayers": -20,
         "playerDeficit": false,
-        "playerDeficitCount": 0,
+        "playerDeficitCount": -8,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": false,
         "opponentPlayersAdded24h": 0,
-        "matchStartsInDays": 4,
+        "matchStartsInDays": 3,
         "activeBoardCount": 20,
         "ratingDisadvantage": true,
-        "avgDiff": -67,
-        "mismatchedBoardCount": 8,
-        "mismatchedBoards": "1-8",
+        "avgDiff": 2,
+        "mismatchedBoardCount": 6,
+        "mismatchedBoards": "1-4, 6-7",
         "recruitmentSuggestions": [],
         "showRecruitmentRecommendations": true,
         "hasTrappedHighRiskTimeout": false,
@@ -120,7 +118,47 @@
           "level": "advisory",
           "label": "ADVISORY: Match Monitoring",
           "reasons": [
-            "8 boards need monitoring"
+            "6 boards need monitoring"
+          ]
+        }
+      }
+    },
+    {
+      "id": "1dpmc:5004090",
+      "siteKey": "1dpmc",
+      "matchId": "5004090",
+      "matchName": "TCMAC PRAETORIAN 960 R2 Vedic Warriors vs 1 day per move club",
+      "leagueName": "TCMAC",
+      "subLeagueName": "Chess960 PRAETORIAN [unassigned https://api.chess.com/pub/match/5004090]",
+      "startTime": 1796382000,
+      "endTime": null,
+      "matchWebUrl": "https://www.chess.com/club/matches/5004090",
+      "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5004090",
+      "warnings": {
+        "minNotMet": false,
+        "needPlayers": -5,
+        "playerDeficit": false,
+        "playerDeficitCount": -7,
+        "playerDeficitThreshold": 3,
+        "surgeRecruitment": false,
+        "opponentPlayersAdded24h": 1,
+        "matchStartsInDays": 8,
+        "activeBoardCount": 8,
+        "ratingDisadvantage": true,
+        "avgDiff": 363,
+        "mismatchedBoardCount": 1,
+        "mismatchedBoards": "1",
+        "recruitmentSuggestions": [],
+        "showRecruitmentRecommendations": true,
+        "hasTrappedHighRiskTimeout": false,
+        "hasSafeHighRiskTimeoutRemoval": false,
+        "playersWithHighTimeout": 0,
+        "hasTimeoutWarning": false,
+        "status": {
+          "level": "advisory",
+          "label": "ADVISORY: Match Monitoring",
+          "reasons": [
+            "1 board need monitoring"
           ]
         }
       }
@@ -138,16 +176,16 @@
       "actionItemUrl": "https://1dpmc.chessteamdata.com/action-items?matchId=5003890",
       "warnings": {
         "minNotMet": false,
-        "needPlayers": -6,
+        "needPlayers": -7,
         "playerDeficit": false,
-        "playerDeficitCount": -10,
+        "playerDeficitCount": -11,
         "playerDeficitThreshold": 3,
         "surgeRecruitment": false,
-        "opponentPlayersAdded24h": 2,
-        "matchStartsInDays": 11,
+        "opponentPlayersAdded24h": 0,
+        "matchStartsInDays": 10,
         "activeBoardCount": 11,
         "ratingDisadvantage": true,
-        "avgDiff": -48,
+        "avgDiff": -35,
         "mismatchedBoardCount": 7,
         "mismatchedBoards": "1-2, 6-10",
         "recruitmentSuggestions": [],
